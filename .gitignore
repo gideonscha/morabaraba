@@ -5,6 +5,9 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+# .env.production is intentionally committed: it holds the public
+# VITE_SUPABASE_URL and the *publishable* anon key, which are designed
+# for client-side use and protected by RLS.
 *.log
 .vite
 coverage
