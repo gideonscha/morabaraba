@@ -1,27 +1,27 @@
 import { useState } from 'react';
 import { useProfileStore } from '../store/profileStore';
-import { AvatarPicker, PrimaryButton } from '../components/ui/Primitives';
+import { PhoneFrame, PatternStrip, PrimaryButton, AvatarPicker } from '../components/ui/Primitives';
 import { ensureAuthAndProfile, upsertProfile } from '../lib/profile';
 
 interface Props {
   onDone: () => void;
 }
+
 export function OnboardingScreen({ onDone }: Props) {
   const setProfile = useProfileStore((s) => s.setProfile);
-  const [username, setUsername] = useState('');
-  const [avatarId, setAvatarId] = useState(1);
+  const [name, setName] = useState('');
+  const [avatarId, setAvatarId] = useState(0);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const canSubmit = username.trim().length >= 3 && username.trim().length <= 15;
+  const canSubmit = name.trim().length >= 2 && avatarId > 0;
 
   const handleSubmit = async () => {
     if (!canSubmit || busy) return;
-    setBusy(true);
-    setErr(null);
-    const cleanUsername = username.trim();
+    setBusy(true); setErr(null);
+    const cleanName = name.trim();
     const local = {
-      username: cleanUsername,
+      username: cleanName,
       avatar_id: avatarId,
       region: 'ZA',
       coins: 0,
@@ -47,31 +47,48 @@ export function OnboardingScreen({ onDone }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-10">
-      <h1 className="display-font text-3xl text-gold text-center mb-1">Welcome</h1>
-      <p className="text-cream/80 text-center text-sm mb-8">Choose a name and an avatar to begin.</p>
+    <PhoneFrame>
+      <div className="screen onboarding"
+           style={{ padding: '76px 24px 36px', flex: 1, alignItems: 'stretch', justifyContent: 'flex-start' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1 className="h-display" style={{ fontSize: 28, letterSpacing: '0.14em', textShadow: '0 2px 8px rgba(0,0,0,.4)' }}>
+            Welcome Warrior
+          </h1>
+          <p style={{ margin: '10px 0 0', color: 'var(--sand)', fontSize: 14, letterSpacing: '0.02em' }}>
+            Choose your name and avatar
+          </p>
+        </div>
 
-      <label className="text-cream/80 text-xs uppercase tracking-wider mb-1">Username</label>
-      <input
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        maxLength={15}
-        placeholder="3-15 characters"
-        className="w-full bg-black/30 border border-gold/50 rounded-xl px-3 py-3 text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold"
-      />
+        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 24, flex: 1 }}>
+          <div>
+            <label className="field-label" htmlFor="warrior-name">Your Name</label>
+            <input
+              id="warrior-name"
+              className="text-input"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={18}
+              autoComplete="off"
+              placeholder="Enter your warrior name"
+            />
+          </div>
 
-      <div className="mt-6">
-        <p className="text-cream/80 text-xs uppercase tracking-wider mb-2">Avatar</p>
-        <AvatarPicker value={avatarId} onChange={setAvatarId} />
+          <div>
+            <span className="field-label">Choose Avatar</span>
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
+          </div>
+
+          {err && <p style={{ color: '#FF6450', fontSize: 13, textAlign: 'center' }}>{err}</p>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, paddingTop: 16 }}>
+          <PatternStrip opacity={0.18} />
+          <PrimaryButton onClick={handleSubmit} disabled={!canSubmit || busy}>
+            {busy ? 'Setting up…' : 'Begin Your Journey'}
+          </PrimaryButton>
+        </div>
       </div>
-
-      {err && <p className="text-red-300 text-sm mt-4">{err}</p>}
-
-      <div className="mt-auto pt-8">
-        <PrimaryButton onClick={handleSubmit} disabled={!canSubmit || busy}>
-          {busy ? 'Setting up…' : 'Start playing'}
-        </PrimaryButton>
-      </div>
-    </div>
+    </PhoneFrame>
   );
 }

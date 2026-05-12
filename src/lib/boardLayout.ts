@@ -1,43 +1,35 @@
-// Board geometry: 24 node positions on a 600x600 viewBox.
-// Three concentric squares. NO diagonals.
+// Board geometry — node positions on a 327×327 viewBox, sourced
+// pixel-perfect from the Claude Design handoff (Morabaraba.html L1864–1890).
+// Three concentric squares + midpoint connectors. NO diagonals.
 
-export const VIEW_SIZE = 600;
-const CENTER = VIEW_SIZE / 2;
+export const VIEW_SIZE = 327;
 
-// Square half-sizes for outer, middle, inner
-const HALVES = [260, 175, 90];
-
-function squareNodes(half: number): { x: number; y: number }[] {
-  // Order: tl, tm, tr, rm, br, bm, bl, lm
-  return [
-    { x: CENTER - half, y: CENTER - half }, // 0 / 8 / 16 - top-left
-    { x: CENTER,        y: CENTER - half }, // 1 / 9 / 17 - top-mid
-    { x: CENTER + half, y: CENTER - half }, // 2 / 10 / 18 - top-right
-    { x: CENTER + half, y: CENTER        }, // 3 / 11 / 19 - right-mid
-    { x: CENTER + half, y: CENTER + half }, // 4 / 12 / 20 - bottom-right
-    { x: CENTER,        y: CENTER + half }, // 5 / 13 / 21 - bottom-mid
-    { x: CENTER - half, y: CENTER + half }, // 6 / 14 / 22 - bottom-left
-    { x: CENTER - half, y: CENTER        }, // 7 / 15 / 23 - left-mid
-  ];
-}
-
+// Engine indices 0..23 mapped to handoff coordinates.
+// Outer 0..7 (corners + midpoints, clockwise from top-left).
+// Middle 8..15. Inner 16..23.
 export const NODE_POSITIONS: { x: number; y: number }[] = [
-  ...squareNodes(HALVES[0]),
-  ...squareNodes(HALVES[1]),
-  ...squareNodes(HALVES[2]),
-];
-
-// Edges (lines) to render on the board — pairs of node indices
-export const EDGES: [number, number][] = [
-  // Outer square
-  [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 0],
-  // Middle square
-  [8, 9], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14], [14, 15], [15, 8],
-  // Inner square
-  [16, 17], [17, 18], [18, 19], [19, 20], [20, 21], [21, 22], [22, 23], [23, 16],
-  // Midpoint connectors (only between squares — NO diagonals)
-  [1, 9], [9, 17],
-  [3, 11], [11, 19],
-  [5, 13], [13, 21],
-  [7, 15], [15, 23],
+  { x: 32,    y: 32    }, // 0  outer TL
+  { x: 163.5, y: 32    }, // 1  outer TM
+  { x: 295,   y: 32    }, // 2  outer TR
+  { x: 295,   y: 163.5 }, // 3  outer RM
+  { x: 295,   y: 295   }, // 4  outer BR
+  { x: 163.5, y: 295   }, // 5  outer BM
+  { x: 32,    y: 295   }, // 6  outer BL
+  { x: 32,    y: 163.5 }, // 7  outer LM
+  { x: 76,    y: 76    }, // 8  middle TL
+  { x: 163.5, y: 76    }, // 9  middle TM
+  { x: 251,   y: 76    }, // 10 middle TR
+  { x: 251,   y: 163.5 }, // 11 middle RM
+  { x: 251,   y: 251   }, // 12 middle BR
+  { x: 163.5, y: 251   }, // 13 middle BM
+  { x: 76,    y: 251   }, // 14 middle BL
+  { x: 76,    y: 163.5 }, // 15 middle LM
+  { x: 120,   y: 120   }, // 16 inner TL
+  { x: 163.5, y: 120   }, // 17 inner TM
+  { x: 207,   y: 120   }, // 18 inner TR
+  { x: 207,   y: 163.5 }, // 19 inner RM
+  { x: 207,   y: 207   }, // 20 inner BR
+  { x: 163.5, y: 207   }, // 21 inner BM
+  { x: 120,   y: 207   }, // 22 inner BL
+  { x: 120,   y: 163.5 }, // 23 inner LM
 ];

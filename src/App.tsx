@@ -76,7 +76,7 @@ export default function App() {
   if (route === 'ai-pick') return <AiDifficultyScreen onBack={home} onStart={() => setRoute('game')} />;
   if (route === 'game') return <GameScreen onExit={home} />;
   if (route === 'leaderboard') return <LeaderboardScreen onBack={home} />;
-  if (route === 'profile') return <ProfileScreen onBack={home} />;
+  if (route === 'profile') return <ProfileScreen onBack={home} onRewards={() => setRoute('rewards')} />;
   if (route === 'rewards') return <RewardsScreen onBack={home} />;
   if (route === 'settings') return <SettingsScreen onBack={home} onTutorial={() => setRoute('tutorial')} />;
   if (route === 'tutorial') return <TutorialScreen onBack={home} />;

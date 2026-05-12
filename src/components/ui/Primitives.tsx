@@ -1,137 +1,256 @@
 import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import { AvatarIcon, AVATAR_DEFS } from './AvatarIcons';
 
-export function TokenP1({ size = 32, animated = false }: { size?: number; animated?: boolean }) {
+/* ============================================================
+   Phone frame — wraps every screen, gives the iOS-style chrome
+   on desktop and goes full-bleed on mobile.
+   ============================================================ */
+export function PhoneFrame({ children }: { children: ReactNode }) {
   return (
-    <span
-      className={`inline-block rounded-full token-p1 ${animated ? 'animate-token-place' : ''}`}
-      style={{ width: size, height: size }}
-      aria-label="Player 1 token"
-    />
-  );
-}
-
-export function TokenP2({ size = 32, animated = false }: { size?: number; animated?: boolean }) {
-  return (
-    <span
-      className={`inline-block rounded-full token-p2 ${animated ? 'animate-token-place' : ''}`}
-      style={{ width: size, height: size }}
-      aria-label="Player 2 token"
-    />
-  );
-}
-
-export function PhasePill({ children, tone = 'gold' }: { children: ReactNode; tone?: 'gold' | 'red' | 'silver' }) {
-  const toneClass =
-    tone === 'red' ? 'border-red-400 text-red-200' :
-    tone === 'silver' ? 'border-silver text-silver-light' :
-    'border-gold text-gold';
-  return <span className={`phase-pill ${toneClass}`}>{children}</span>;
-}
-
-export function CoinBar({ coins }: { coins: number }) {
-  return (
-    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/35 border border-gold/50">
-      <span className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-200 to-amber-600 inline-block shadow-inner" />
-      <span className="text-cream font-semibold text-sm tabular-nums">{coins.toLocaleString()}</span>
+    <div className="phone">
+      <div className="notch" />
+      <StatusBar />
+      {children}
     </div>
   );
 }
 
+function StatusBar() {
+  return (
+    <div className="status-bar">
+      <span>9:41</span>
+      <span className="right">
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor">
+          <rect x="0" y="7" width="3" height="4" rx="1"/>
+          <rect x="4.5" y="5" width="3" height="6" rx="1"/>
+          <rect x="9" y="2.5" width="3" height="8.5" rx="1"/>
+          <rect x="13.5" y="0" width="3" height="11" rx="1"/>
+        </svg>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor">
+          <path d="M7.5 1C4.5 1 1.9 2.1 0 3.8l1.4 1.4C2.9 3.9 5.1 3 7.5 3s4.6.9 6.1 2.2L15 3.8C13.1 2.1 10.5 1 7.5 1zm0 3.5c-1.9 0-3.6.7-4.9 1.8L4 7.7c1-.8 2.2-1.2 3.5-1.2s2.5.5 3.5 1.2l1.4-1.4c-1.3-1.1-3-1.8-4.9-1.8zm0 3.5c-.9 0-1.7.4-2.3 1l2.3 2 2.3-2c-.6-.6-1.4-1-2.3-1z"/>
+        </svg>
+        <svg width="27" height="11" viewBox="0 0 27 11" fill="none">
+          <rect x="0.5" y="0.5" width="22" height="10" rx="2.5" stroke="currentColor"/>
+          <rect x="2" y="2" width="19" height="7" rx="1" fill="currentColor"/>
+          <rect x="23.5" y="3.5" width="2" height="4" rx="1" fill="currentColor"/>
+        </svg>
+      </span>
+    </div>
+  );
+}
+
+/* ============================================================
+   Tokens (board piece visuals — small, for UI surfaces)
+   ============================================================ */
+export function TokenP1({ size = 36 }: { size?: number }) {
+  return <span className="player-token dark" style={{ width: size, height: size }} aria-hidden />;
+}
+export function TokenP2({ size = 36 }: { size?: number }) {
+  return <span className="player-token light" style={{ width: size, height: size }} aria-hidden />;
+}
+
+/* ============================================================
+   Coin icon
+   ============================================================ */
+export function CoinIcon({ size }: { size?: number }) {
+  const style = size ? { width: size, height: size } : undefined;
+  return <span className="coin-icon" style={style} aria-hidden />;
+}
+
+/* ============================================================
+   Tier badge — Free / Bronze / Silver / Gold / Platinum
+   ============================================================ */
 export function TierBadge({ tier }: { tier: string }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    free: { label: 'Free', cls: 'border-cream/40 text-cream/80' },
-    silver: { label: 'Silver', cls: 'border-silver text-silver-light' },
-    gold: { label: 'Gold', cls: 'border-gold text-gold' },
-    platinum: { label: 'Platinum', cls: 'border-platinum text-platinum' },
-  };
-  const t = map[tier] ?? map.free;
-  return (
-    <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border ${t.cls}`}>
-      {t.label}
-    </span>
-  );
+  const cls = {
+    free: 'tier-free',
+    bronze: 'tier-bronze',
+    silver: 'tier-silver',
+    gold: 'tier-gold',
+    platinum: 'tier-platinum',
+  }[tier] ?? 'tier-free';
+  const label = (tier[0]?.toUpperCase() ?? '') + tier.slice(1);
+  return <span className={`tier-badge ${cls}`}>{label}</span>;
 }
 
-export function PrimaryButton({ children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
+/* ============================================================
+   Buttons
+   ============================================================ */
+type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode };
+export function PrimaryButton({ children, className = '', ...rest }: BtnProps) {
+  return <button className={`btn btn-primary ${className}`} {...rest}>{children}</button>;
+}
+export function SecondaryButton({ children, className = '', ...rest }: BtnProps) {
+  return <button className={`btn btn-secondary ${className}`} {...rest}>{children}</button>;
+}
+export function IconButton({ children, ...rest }: BtnProps) {
+  return <button className="icon-btn" {...rest}>{children}</button>;
+}
+export function BackArrow(props: { onClick?: () => void; label?: string }) {
   return (
-    <button className="btn-primary w-full text-base" {...rest}>
-      {children}
+    <button className="back-arrow" onClick={props.onClick} aria-label={props.label ?? 'Back'}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
     </button>
   );
 }
 
-export function SecondaryButton({ children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) {
-  return (
-    <button className="btn-secondary w-full text-base" {...rest}>
-      {children}
-    </button>
-  );
-}
-
-export function ActionPrompt({ children }: { children: ReactNode }) {
-  return (
-    <div className="text-center text-cream/95 text-sm font-medium px-4 py-2">
-      {children}
-    </div>
-  );
-}
-
-export function Avatar({ id, size = 56 }: { id: number; size?: number }) {
-  const palettes = [
-    'from-amber-400 to-orange-700',
-    'from-rose-400 to-rose-800',
-    'from-emerald-400 to-emerald-800',
-    'from-sky-400 to-sky-800',
-    'from-fuchsia-400 to-fuchsia-800',
-    'from-yellow-300 to-amber-700',
-    'from-cyan-400 to-cyan-800',
-    'from-violet-400 to-violet-800',
-  ];
-  const idx = Math.max(0, Math.min(7, id - 1));
+/* ============================================================
+   Coin bar (large)
+   ============================================================ */
+export function CoinBarLarge({
+  coins, progressPct = 62, onClick,
+}: { coins: number; progressPct?: number; onClick?: () => void }) {
   return (
     <div
-      className={`bg-gradient-to-br ${palettes[idx]} rounded-full border-2 border-gold/70 flex items-center justify-center text-cream font-bold display-font`}
-      style={{ width: size, height: size, fontSize: size * 0.45 }}
-      aria-label={`Avatar ${id}`}
+      className="coin-bar-large"
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      style={onClick ? { cursor: 'pointer' } : undefined}
     >
-      {String.fromCharCode(64 + id)}
+      <CoinIcon size={26} />
+      <span className="num">{coins.toLocaleString()}</span>
+      <span className="progress"><span style={{ width: `${progressPct}%` }} /></span>
     </div>
   );
 }
 
+/* ============================================================
+   Top bar (used on home / leaderboard / profile / rewards / settings)
+   ============================================================ */
+export function TopBar({
+  back,
+  username,
+  tier = 'free',
+  coins = 0,
+}: { back?: () => void; username: string; tier?: string; coins?: number }) {
+  return (
+    <div className="home-topbar">
+      {back ? <BackArrow onClick={back} /> : null}
+      <span className="username">{username.startsWith('@') ? username : `@${username}`}</span>
+      <TierBadge tier={tier} />
+      <span className="topbar-coins">
+        <CoinIcon />
+        <span>{coins.toLocaleString()}</span>
+      </span>
+    </div>
+  );
+}
+
+/* ============================================================
+   Pattern strip
+   ============================================================ */
+export function PatternStrip({ opacity, className = '' }: { opacity?: number; className?: string }) {
+  return (
+    <div
+      className={`pattern-strip ${className}`}
+      style={opacity !== undefined ? { opacity } : undefined}
+      aria-hidden
+    />
+  );
+}
+
+/* ============================================================
+   Avatar picker
+   ============================================================ */
 export function AvatarPicker({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (id: number) => void;
-}) {
+  value, onChange,
+}: { value: number; onChange: (id: number) => void }) {
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((id) => (
-        <button
-          key={id}
-          onClick={() => onChange(id)}
-          className={`p-1 rounded-full transition ${value === id ? 'ring-2 ring-gold scale-105' : 'opacity-80'}`}
-          aria-pressed={value === id}
-        >
-          <Avatar id={id} size={56} />
-        </button>
-      ))}
+    <div className="grid grid-cols-4 gap-x-[6px] gap-y-[10px]" role="radiogroup" aria-label="Avatar">
+      {AVATAR_DEFS.map((a) => {
+        const selected = value === a.id;
+        return (
+          <button
+            key={a.id}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(a.id)}
+            className="flex flex-col items-center gap-1.5 bg-transparent border-0 p-0 cursor-pointer focus:outline-none"
+          >
+            <span
+              className="avatar-circle"
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 30%, #c08049 0%, var(--bronze) 60%, #5e3b22 100%)',
+                border: `1.5px solid ${selected ? 'var(--gold)' : 'var(--gold-dark)'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: selected ? 'var(--gold-bright)' : 'var(--gold)',
+                boxShadow: selected
+                  ? 'inset 0 1px 0 rgba(255,255,255,.18), 0 0 0 3px rgba(232,160,32,.95), 0 0 18px 4px rgba(232,160,32,.55), 0 4px 8px rgba(0,0,0,.45)'
+                  : 'inset 0 1px 0 rgba(255,255,255,.18), 0 4px 8px rgba(0,0,0,.45)',
+                transition: 'box-shadow .15s ease, border-color .15s ease, transform .15s ease',
+                position: 'relative',
+              }}
+            >
+              <AvatarIcon id={a.id} size={30} />
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 8, left: 12,
+                  width: 14, height: 8,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 70%)',
+                  pointerEvents: 'none',
+                }}
+              />
+            </span>
+            <span
+              style={{
+                fontSize: 10.5,
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: selected ? 'var(--gold)' : 'var(--sand)',
+                transition: 'color .15s ease',
+              }}
+            >
+              {a.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-export function ScreenHeader({ title, onBack }: { title: string; onBack?: () => void }) {
+/* ============================================================
+   Single avatar display (used in profile / leaderboard / game strip)
+   ============================================================ */
+export function AvatarDisplay({
+  id, size = 64,
+  initial,
+}: { id?: number; size?: number; initial?: string }) {
+  const showInitial = !id;
   return (
-    <header className="flex items-center justify-between px-4 py-3">
-      {onBack ? (
-        <button onClick={onBack} className="text-cream/90 text-2xl px-2 py-1" aria-label="Back">
-          ‹
-        </button>
-      ) : <span className="w-8" />}
-      <h1 className="display-font text-xl text-gold">{title}</h1>
-      <span className="w-8" />
-    </header>
+    <span
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle at 35% 30%, #6B3E18 0%, #2A1A0E 80%)',
+        border: '2px solid var(--gold)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--gold-bright)',
+        fontFamily: 'Poppins, sans-serif',
+        fontWeight: 900,
+        fontSize: size * 0.45,
+        boxShadow: size >= 80
+          ? '0 0 24px rgba(232,160,32,.3), inset 0 -4px 12px rgba(0,0,0,.4)'
+          : 'inset 0 -2px 6px rgba(0,0,0,.4)',
+      }}
+      aria-hidden
+    >
+      {showInitial ? (initial ?? '?') : <AvatarIcon id={id!} size={Math.round(size * 0.55)} />}
+    </span>
   );
 }

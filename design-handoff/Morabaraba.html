@@ -1,0 +1,3121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Morabaraba — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  /* ---- Screen container inside the phone ---- */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen[data-active="false"] { display: none; }
+  .screen[data-active="true"]  {
+    animation: screen-in 380ms cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes screen-in {
+    0%   { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* =========================================================
+     SCREEN 1 — SPLASH
+     ========================================================= */
+  .splash {
+    align-items: center;
+    justify-content: space-between;
+    padding: 96px 24px 56px;
+    text-align: center;
+    position: relative;
+  }
+  .splash-bg-pattern {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .splash-bg-pattern .strip {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    opacity: 0.08;
+  }
+  .splash-bg-pattern .s1 { top: 14%; }
+  .splash-bg-pattern .s2 { top: 86%; }
+
+  .logo-placeholder {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(232,160,32,.18) 0%, transparent 60%),
+      radial-gradient(circle at 50% 50%, var(--wood-1) 0%, var(--wood-2) 100%);
+    border: 2.5px solid var(--gold);
+    box-shadow:
+      inset 0 0 0 6px rgba(0,0,0,.18),
+      inset 0 0 0 8px rgba(232,160,32,.5),
+      0 0 60px rgba(232,160,32,.35),
+      0 20px 40px rgba(0,0,0,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .logo-mark {
+    /* Schematic Morabaraba board — three nested squares with connectors. Gold on wood. */
+    width: 168px;
+    height: 168px;
+    color: var(--gold);
+  }
+  .logo-wordmark {
+    margin-top: 24px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  }
+  .tagline {
+    margin-top: 14px;
+    font-family: "Poppins", sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+    opacity: 0.92;
+  }
+
+  .loader-wrap {
+    width: 240px;
+    text-align: center;
+  }
+  .loader-track {
+    width: 240px;
+    height: 8px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid var(--gold-dark);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .loader-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--gold);
+    background-image:
+      linear-gradient(135deg, rgba(255,255,255,.22) 25%, transparent 25%),
+      linear-gradient(225deg, rgba(255,255,255,.22) 25%, transparent 25%),
+      linear-gradient(315deg, rgba(0,0,0,.18) 25%, transparent 25%),
+      linear-gradient(45deg, rgba(0,0,0,.18) 25%, transparent 25%);
+    background-size: 10px 10px;
+    background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+    box-shadow: 0 0 8px rgba(232,160,32,.6);
+    animation: loader-fill 2000ms ease-out forwards, loader-shimmer 1.6s linear infinite;
+  }
+  @keyframes loader-fill {
+    0%   { width: 0%; }
+    100% { width: 100%; }
+  }
+  @keyframes loader-shimmer {
+    0%   { background-position: 0 0, 0 5px, 5px -5px, -5px 0; }
+    100% { background-position: 20px 0, 20px 5px, 25px -5px, 15px 0; }
+  }
+  .loader-label {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--sand);
+    opacity: 0.85;
+  }
+
+  /* Splash entrance */
+  .splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: splash-rise 900ms cubic-bezier(.2,.7,.2,1) both;
+  }
+  @keyframes splash-rise {
+    0%   { opacity: 0; transform: translateY(14px) scale(.96); }
+    60%  { opacity: 1; }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .logo-placeholder { animation: logo-pulse 4.5s ease-in-out infinite; }
+  @keyframes logo-pulse {
+    0%, 100% { box-shadow: inset 0 0 0 6px rgba(0,0,0,.18), inset 0 0 0 8px rgba(232,160,32,.5), 0 0 60px rgba(232,160,32,.35), 0 20px 40px rgba(0,0,0,.5); }
+    50%      { box-shadow: inset 0 0 0 6px rgba(0,0,0,.18), inset 0 0 0 8px rgba(232,160,32,.7), 0 0 80px rgba(232,160,32,.55), 0 20px 40px rgba(0,0,0,.5); }
+  }
+
+  /* =========================================================
+     SCREEN 2 — ONBOARDING
+     ========================================================= */
+  .onboarding {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 76px 24px 36px;
+  }
+  .ob-header { text-align: center; }
+  .ob-header h1 {
+    font-size: 28px;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .ob-sub {
+    margin: 10px 0 0;
+    color: var(--sand);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .ob-body {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .text-input {
+    width: 100%;
+    height: 52px;
+    background: rgba(0,0,0,.18);
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-card);
+    padding: 0 16px;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--cream);
+    letter-spacing: 0.01em;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .text-input::placeholder { color: rgba(213,170,106,.7); font-style: italic; font-weight: 400; }
+  .text-input:focus {
+    border-color: var(--gold-bright);
+    background: rgba(0,0,0,.28);
+    box-shadow: 0 0 0 3px rgba(232,160,32,.18), 0 0 14px rgba(232,160,32,.25);
+  }
+
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--sand);
+    margin-bottom: 8px;
+  }
+
+  /* Avatar grid 4×2 */
+  .avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 6px;
+  }
+  .avatar-tile {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+    font-family: "Poppins", sans-serif;
+  }
+  .avatar-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #c08049 0%, var(--bronze) 60%, #5e3b22 100%);
+    border: 1.5px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 8px rgba(0,0,0,.45);
+    transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    position: relative;
+  }
+  .avatar-circle::after {
+    /* highlight spot */
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    width: 14px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.35) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+  }
+  .avatar-tile:hover .avatar-circle { transform: translateY(-1px); border-color: var(--gold); }
+  .avatar-tile.selected .avatar-circle {
+    border-color: var(--gold);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      0 0 0 3px rgba(232,160,32,.95),
+      0 0 18px 4px rgba(232,160,32,.55),
+      0 4px 8px rgba(0,0,0,.45);
+    color: var(--gold-bright);
+  }
+  .avatar-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sand);
+    transition: color .15s ease;
+  }
+  .avatar-tile.selected .avatar-label { color: var(--gold); }
+
+  .ob-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 16px;
+  }
+  .ob-footer .pattern-strip { opacity: 0.18; }
+
+  .btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(.2);
+  }
+  .btn[disabled]:hover { filter: grayscale(.2); }
+  .btn[disabled]:active { transform: none; }
+
+  /* =========================================================
+     SCREEN 3 — HOME
+     ========================================================= */
+  .home {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 44px 0 0; /* clear status bar */
+  }
+  .home-topbar {
+    height: 56px;
+    background: var(--card);
+    border-bottom: 1px solid var(--gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    gap: 10px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.18);
+  }
+  .home-topbar .username {
+    color: var(--cream);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tier-badge {
+    width: 64px;
+    height: 24px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    border: 1px solid rgba(0,0,0,.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.3);
+  }
+  .tier-free { background: var(--char); color: var(--sand); border-color: var(--sand); }
+  .tier-bronze { background: linear-gradient(180deg, #C2864F 0%, #8B5E3C 60%, #5C3A1E 100%); color: var(--cream); border-color: #5C3A1E; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 1px 2px rgba(0,0,0,.4); }
+  .tier-silver { background: linear-gradient(180deg, var(--silver-lt), var(--silver)); color: var(--char-dark); border-color: #8a8a8a; }
+  .tier-gold { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, var(--gold-dark) 100%); color: var(--char-dark); border-color: var(--gold-dark); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 8px rgba(232,160,32,.55); }
+  .tier-platinum { background: linear-gradient(180deg, #8475BA, var(--platinum)); color: var(--cream); border-color: #4a3f74; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 6px rgba(107,91,158,.55); }
+
+  .topbar-coins {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .coin-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #FFD86A 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    border: 1px solid var(--gold-dark);
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,.08);
+    flex: 0 0 auto;
+    position: relative;
+  }
+  .coin-icon::after {
+    content: "";
+    position: absolute; inset: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 55%, transparent 50%, rgba(0,0,0,.18) 100%);
+  }
+
+  .home-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 24px 24px;
+    gap: 18px;
+  }
+  .home-logo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(232,160,32,.18) 0%, transparent 60%),
+      radial-gradient(circle at 50% 50%, var(--wood-1) 0%, var(--wood-2) 100%);
+    border: 2px solid var(--gold);
+    box-shadow:
+      inset 0 0 0 4px rgba(0,0,0,.18),
+      inset 0 0 0 6px rgba(232,160,32,.45),
+      0 0 32px rgba(232,160,32,.25),
+      0 10px 20px rgba(0,0,0,.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .home-logo svg { width: 86px; height: 86px; color: var(--gold); }
+  .home-wordmark {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    line-height: 1;
+    margin-top: 2px;
+    text-shadow: 0 2px 6px rgba(0,0,0,.5);
+  }
+  .home-tagline {
+    font-family: "Poppins", sans-serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--sand);
+    letter-spacing: 0.04em;
+    margin-top: -2px;
+    opacity: 0.9;
+  }
+
+  .home-divider {
+    width: 100%;
+    margin: 4px 0 2px;
+  }
+
+  .home-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+  }
+  .home-actions .btn { width: 100%; max-width: 327px; }
+
+  .coin-bar-large {
+    width: 100%;
+    max-width: 327px;
+    background: rgba(0,0,0,.22);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: 999px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .coin-bar-large .coin-icon { width: 26px; height: 26px; }
+  .coin-bar-large .num {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 18px;
+    letter-spacing: 0.02em;
+  }
+  .coin-bar-large .progress {
+    flex: 1;
+    height: 8px;
+    background: rgba(0,0,0,.4);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+  }
+  .coin-bar-large .progress > span {
+    display: block;
+    height: 100%;
+    width: 62%;
+    background-color: var(--gold);
+    background-image:
+      linear-gradient(135deg, rgba(255,255,255,.22) 25%, transparent 25%),
+      linear-gradient(225deg, rgba(255,255,255,.22) 25%, transparent 25%),
+      linear-gradient(315deg, rgba(0,0,0,.18) 25%, transparent 25%),
+      linear-gradient(45deg, rgba(0,0,0,.18) 25%, transparent 25%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  }
+
+  .home-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 14px 0 22px;
+  }
+  .home-foot a {
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    padding: 8px 4px;
+    transition: color .15s ease;
+    cursor: pointer;
+  }
+  .home-foot a:hover { color: var(--gold); }
+  .home-foot .sep {
+    width: 1px;
+    height: 14px;
+    background: rgba(212,169,106,.35);
+  }
+
+  /* =========================================================
+     SCREEN 4 — DIFFICULTY
+     ========================================================= */
+  .difficulty {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 60px 24px 32px;
+  }
+  .diff-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    background: rgba(0,0,0,.18);
+    border: 1px solid var(--gold-dark);
+    border-radius: 10px;
+    color: var(--gold);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .icon-btn:hover { background: rgba(0,0,0,.3); border-color: var(--gold); }
+  .icon-btn:active { transform: translateY(1px); }
+  .diff-header h1 {
+    text-align: center;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    line-height: 1.1;
+    text-shadow: 0 2px 6px rgba(0,0,0,.5);
+  }
+  .diff-list { display: flex; flex-direction: column; gap: 16px; }
+  .diff-card {
+    background: var(--card);
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-card);
+    padding: 18px;
+    color: var(--cream);
+    text-align: left;
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    box-shadow: 0 2px 0 rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.3);
+    transition: border-color .18s, box-shadow .18s, transform .18s;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 16px;
+    row-gap: 6px;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .diff-card:hover { transform: translateY(-1px); }
+  .diff-card .name {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 22px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .diff-card .sub {
+    grid-column: 1 / 2;
+    font-size: 13px;
+    color: var(--sand);
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+  .diff-card .reward {
+    grid-row: 1 / 3;
+    grid-column: 2 / 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,.22);
+    border: 1px solid var(--gold-dark);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .diff-card .reward .coin-icon { width: 16px; height: 16px; }
+  .diff-card.selected {
+    border-color: var(--gold-bright);
+    box-shadow:
+      inset 0 0 0 1px rgba(244,181,58,.4),
+      inset 0 0 22px rgba(232,160,32,.25),
+      0 0 0 2px rgba(232,160,32,.18),
+      0 0 22px rgba(232,160,32,.4),
+      0 6px 14px rgba(0,0,0,.35);
+  }
+  .diff-card.selected .name { color: var(--gold-bright); text-shadow: 0 0 12px rgba(232,160,32,.5); }
+
+  .diff-foot {
+    margin-top: auto;
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .diff-foot .pattern-strip { opacity: 0.18; width: 100%; }
+
+  /* =========================================================
+     SCREENS 5 — ONLINE & 6 — MATCHMAKING
+     ========================================================= */
+  .online,
+  .matchmaking {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 60px 24px 32px;
+  }
+  .online .diff-list { margin-bottom: 18px; }
+  .mode-card {
+    background: var(--card);
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-card);
+    padding: 16px 18px;
+    color: var(--cream);
+    text-align: left;
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    box-shadow: 0 2px 0 rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.3);
+    transition: border-color .18s, box-shadow .18s, transform .18s;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    column-gap: 14px;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-card:hover { transform: translateY(-1px); }
+  .mode-card .mode-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: rgba(0,0,0,.28);
+    border: 1px solid var(--gold-dark);
+    color: var(--gold);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .mode-card .mode-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .mode-card .name {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 18px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .mode-card .sub {
+    font-size: 13px;
+    color: var(--sand);
+    font-style: italic;
+  }
+  .mode-card.selected,
+  .mode-card:focus-visible {
+    border-color: var(--gold-bright);
+    outline: none;
+    box-shadow:
+      inset 0 0 0 1px rgba(244,181,58,.4),
+      inset 0 0 22px rgba(232,160,32,.25),
+      0 0 0 2px rgba(232,160,32,.18),
+      0 0 22px rgba(232,160,32,.4),
+      0 6px 14px rgba(0,0,0,.35);
+  }
+  .online-count {
+    text-align: center;
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+  }
+  .online-count .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #6BBF7B;
+    box-shadow: 0 0 8px rgba(107,191,123,.7);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* --- Matchmaking --- */
+  .matchmaking {
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+  }
+  .mm-header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    align-items: center;
+    margin-bottom: 36px;
+  }
+  .mm-header h1 {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-size: 22px;
+    letter-spacing: 0.16em;
+    line-height: 1.1;
+    text-shadow: 0 2px 6px rgba(0,0,0,.5);
+    text-align: center;
+  }
+  .mm-pulse {
+    width: 140px; height: 140px;
+    margin: 8px auto 24px;
+    color: var(--gold);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mm-pulse svg { width: 100%; height: 100%; animation: mm-glow 1.8s ease-in-out infinite; }
+  .mm-pulse::before,
+  .mm-pulse::after {
+    content: "";
+    position: absolute; inset: 0;
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    opacity: 0.6;
+    animation: mm-ring 2.4s ease-out infinite;
+  }
+  .mm-pulse::after { animation-delay: 1.2s; }
+  @keyframes mm-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(232,160,32,.4)); transform: scale(1); }
+    50%      { filter: drop-shadow(0 0 18px rgba(244,181,58,.8)); transform: scale(1.04); }
+  }
+  @keyframes mm-ring {
+    0%   { transform: scale(0.85); opacity: 0.55; }
+    80%  { transform: scale(1.35); opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+  .mm-timer {
+    font-family: "Poppins", sans-serif;
+    color: var(--cream);
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .mm-status {
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 12px;
+  }
+  .mm-foot { margin-top: auto; width: 100%; display: flex; justify-content: center; }
+
+  .room-code-card {
+    margin-top: 8px;
+    width: 100%;
+    background: var(--card);
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-card);
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 2px 0 rgba(0,0,0,.2), 0 8px 22px rgba(0,0,0,.35);
+  }
+  .room-code-label {
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .room-code {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    text-shadow: 0 0 14px rgba(232,160,32,.4), 0 2px 6px rgba(0,0,0,.4);
+    line-height: 1;
+    padding-left: 0.32em; /* visual centering for tracked text */
+  }
+  .room-hint {
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    margin-top: 18px;
+  }
+  /* --- Private (PIN entry) variant --- */
+  .mm-private { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 24px; }
+  .pin-label {
+    font-family: "Hunters", "Poppins", sans-serif;
+    font-size: 20px; letter-spacing: 0.12em;
+    color: var(--gold); text-align: center; margin-bottom: 28px;
+    text-shadow: 0 2px 6px rgba(0,0,0,.4);
+  }
+  .pin-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; }
+  .pin-box {
+    width: 56px; height: 56px;
+    background: var(--card);
+    border: 1.5px solid var(--gold);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Poppins", sans-serif; font-weight: 800;
+    font-size: 28px; color: var(--cream);
+    box-shadow: 0 2px 0 rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.3);
+  }
+  .pin-box.filled { color: var(--gold); }
+  .pin-connect { width: 327px; }
+
+  /* =========================================================
+     SCREEN 7 — GAME
+     ========================================================= */
+  .game {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .game-strip {
+    margin-top: 44px; /* clear status bar */
+    height: 80px;
+    background: var(--card);
+    border-bottom: 1px solid rgba(0,0,0,.35);
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    position: relative;
+  }
+  .game-strip .vsep {
+    background: linear-gradient(to bottom, transparent, var(--gold-dark) 20%, var(--gold-dark) 80%, transparent);
+    opacity: 0.6;
+  }
+  .game-side {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    column-gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    transition: opacity .25s ease;
+    font-family: "Poppins", sans-serif;
+  }
+  .game-side.right { padding-right: 14px; }
+  .game-side.inactive { opacity: 0.4; }
+  .player-token {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .player-token.dark {
+    background: radial-gradient(circle at 30% 28%, #5A5A5A 0%, #1B1B1B 70%, #0A0A0A 100%);
+    border: 1px solid #050505;
+  }
+  .player-token.light {
+    background: radial-gradient(circle at 30% 28%, #FBF5E1 0%, #E2D2A8 70%, #BFA672 100%);
+    border: 1px solid #8B6E3A;
+  }
+  .player-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .player-meta .name-row {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--cream);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .player-meta .name-row .username {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100px;
+  }
+  .game-side .tier-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    letter-spacing: 0.14em;
+    line-height: 1;
+  }
+  .player-meta .onboard {
+    color: var(--sand);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .captured { display: flex; gap: 3px; margin-top: 2px; }
+  .captured .pip { width: 14px; height: 14px; border-radius: 50%; opacity: 0.5; box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+  .captured .pip.dark  { background: #1A1A1A; border: 1px solid #3A3A3A; }
+  .captured .pip.light { background: #D4C4A0; border: 1px solid #8B6E3A; }
+
+  .active-arrow {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid var(--gold);
+    filter: drop-shadow(0 0 8px rgba(232,160,32,.7));
+    pointer-events: none;
+    transition: left .3s ease;
+  }
+
+  .game-phase-wrap { display: flex; justify-content: center; margin: auto 0 10px; }
+  .game-phase {
+    background: rgba(0,0,0,.32);
+    border: 1px solid var(--gold);
+    border-radius: 999px;
+    padding: 5px 18px;
+    color: var(--gold);
+    font-family: "Poppins", sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(232,160,32,.4);
+  }
+
+  .game-board-wrap { display: flex; justify-content: center; padding: 0 24px; margin-bottom: auto; }
+  .game-board {
+    width: 327px; height: 327px;
+    border-radius: 6px;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,.5));
+    -webkit-tap-highlight-color: transparent;
+  }
+  .game-board .node-tap { fill: transparent; cursor: pointer; }
+  .game-board .node-tap:hover ~ .node-dot,
+  .game-board g[data-node]:hover .node-dot { fill: #4A2E18; }
+  .game-board .pulse {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: gp-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes gp-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+
+  .action-prompt {
+    margin-top: auto;
+    height: 48px;
+    background: #1F1612;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cream);
+    font-family: "Poppins", sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    border-top: 1px solid rgba(0,0,0,.45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  /* =========================================================
+     SCREEN 8 — MILL STATE (game screen, mill detection)
+     ========================================================= */
+  .game.mill-state .game-phase {
+    background: #CC2200;
+    border-color: #FF4422;
+    color: #FFF;
+    text-shadow: 0 0 10px rgba(255,68,34,.7);
+    box-shadow: 0 0 0 2px rgba(204,34,0,.25), 0 0 18px rgba(204,34,0,.5);
+    animation: phase-red-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes phase-red-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(204,34,0,.2), 0 0 14px rgba(204,34,0,.45); }
+    50%      { box-shadow: 0 0 0 3px rgba(204,34,0,.35), 0 0 22px rgba(204,34,0,.7); }
+  }
+  .game.mill-state .action-prompt {
+    font-family: "Poppins", sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: var(--gold);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(232,160,32,.55), 0 1px 2px rgba(0,0,0,.6);
+  }
+  .game.mill-state .action-prompt .em {
+    color: var(--gold-bright);
+    margin-right: 8px;
+  }
+
+  .mill-line {
+    stroke: #F4B53A;
+    stroke-width: 5;
+    stroke-linecap: round;
+    fill: none;
+    filter: drop-shadow(0 0 8px rgba(244,181,58,.9));
+    animation: mill-line-pulse 1.3s ease-in-out infinite;
+  }
+  @keyframes mill-line-pulse {
+    0%, 100% { opacity: 0.65; stroke-width: 4; filter: drop-shadow(0 0 5px rgba(244,181,58,.65)); }
+    50%      { opacity: 1;    stroke-width: 6; filter: drop-shadow(0 0 18px rgba(244,181,58,1)); }
+  }
+  .mill-endcap {
+    fill: #F4B53A;
+    filter: drop-shadow(0 0 6px rgba(244,181,58,.9));
+    animation: mill-line-pulse 1.3s ease-in-out infinite;
+  }
+
+  .removable-ring {
+    stroke: #CC2200;
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 6px rgba(204,34,0,.85));
+    animation: removable-pulse 1.8s ease-in-out infinite;
+    cursor: pointer;
+  }
+  @keyframes removable-pulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 0.95; }
+  }
+
+  .protected {
+    pointer-events: none;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.5));
+  }
+
+  /* =========================================================
+     SCREEN 9 — GAME OVER (3 variants: win / lose / draw)
+     ========================================================= */
+  .gameover { background: var(--terracotta); position: relative; overflow: hidden; }
+  .gameover .go-content {
+    position: relative; z-index: 2;
+    width: 100%; height: 100%; padding: 88px 24px 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  }
+  .result-title {
+    font-family: "Poppins", sans-serif; font-weight: 900;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 50px 0 0; text-align: center; display: none; line-height: 1;
+  }
+  .gameover[data-state="win"]  .result-title.win,
+  .gameover[data-state="lose"] .result-title.lose,
+  .gameover[data-state="draw"] .result-title.draw { display: block; }
+  .result-title.win  { font-size: 48px; color: var(--gold); text-shadow: 0 0 22px rgba(232,160,32,.65), 0 4px 8px rgba(0,0,0,.5); }
+  .result-title.lose { font-size: 48px; color: #C8C8C8; text-shadow: 0 0 16px rgba(220,220,220,.3), 0 4px 8px rgba(0,0,0,.5); }
+  .result-title.draw { font-size: 36px; color: var(--sand); text-shadow: 0 4px 8px rgba(0,0,0,.5); }
+  .result-tag {
+    font-family: "Poppins", sans-serif; font-style: italic;
+    font-size: 16px; color: var(--cream); margin: 12px 0 0;
+    text-align: center; display: none;
+  }
+  .gameover[data-state="win"]  .result-tag.win,
+  .gameover[data-state="lose"] .result-tag.lose,
+  .gameover[data-state="draw"] .result-tag.draw { display: block; }
+
+  .award-card {
+    width: 327px; height: 80px; margin-top: 28px;
+    background: var(--card); border: 1.5px solid var(--gold);
+    border-radius: 16px; padding: 12px 18px; gap: 4px;
+    display: flex; flex-direction: column; justify-content: center;
+    box-shadow: 0 0 24px rgba(232,160,32,.18), 0 8px 16px rgba(0,0,0,.3);
+  }
+  .award-coin-bar {
+    display: flex; align-items: center; gap: 12px;
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 22px;
+    color: var(--gold-bright); letter-spacing: 0.04em;
+  }
+  .award-coin-bar .coin-icon-md {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 30%, #FFD466 0%, #E8A020 55%, #8E6116 100%);
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 0 10px rgba(232,160,32,.5);
+    position: relative;
+  }
+  .award-coin-bar .coin-icon-md::after {
+    content: ""; position: absolute; inset: 5px;
+    border-radius: 50%; border: 1px solid rgba(255,212,102,.4);
+  }
+  .award-balance { font-family: "Poppins", sans-serif; font-size: 14px; color: var(--sand); }
+
+  .gameover-actions { width: 327px; display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+
+  .confetti { position: absolute; inset: 0; pointer-events: none; display: none; z-index: 1; overflow: hidden; }
+  .gameover[data-state="win"] .confetti { display: block; }
+  .confetti i {
+    position: absolute; top: -24px; width: 7px; height: 12px;
+    background: var(--gold); border-radius: 1px;
+    animation: confetti-fall linear infinite;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translate3d(0, -20px, 0) rotate(0deg);  opacity: 0; }
+    6%   { opacity: 1; }
+    100% { transform: translate3d(0, 920px, 0) rotate(720deg); opacity: 1; }
+  }
+
+  .variant-pills { position: absolute; top: 66px; right: 16px; display: flex; gap: 6px; z-index: 4; align-items: center; height: 24px; }
+  .variant-pills button {
+    font-family: "Poppins", sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 10px; border-radius: 999px;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(232,160,32,.4);
+    color: var(--cream); cursor: pointer;
+  }
+  .variant-pills button.active { background: var(--gold); color: #1A0E08; border-color: var(--gold-bright); }
+  .variant-hint { position: absolute; top: 66px; left: 18px; display: flex; align-items: center; height: 24px; font-family: "Poppins", sans-serif; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,239,228,.45); z-index: 4; }
+
+  /* =========================================================
+     SCREEN 10 — LEADERBOARD
+     ========================================================= */
+  .leaderboard, .profile, .rewards {
+    padding-top: 44px; /* clear status bar */
+  }
+  .leaderboard .home-topbar .back-arrow {
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; cursor: pointer; color: var(--gold);
+  }
+  .leaderboard .home-topbar .back-arrow:hover { background: rgba(232,160,32,.12); }
+  .lb-content { padding: 18px 24px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .lb-title {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 28px;
+    color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase;
+    text-align: center; margin: 4px 0 0;
+    text-shadow: 0 0 14px rgba(232,160,32,.4);
+  }
+  .lb-tabs { display: flex; gap: 8px; justify-content: center; }
+  .lb-tab {
+    font-family: "Poppins", sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--card); border: 1px solid rgba(232,160,32,.35);
+    color: var(--cream); cursor: pointer; flex: 1; max-width: 100px;
+  }
+  .lb-tab.active { background: var(--gold); color: #1A0E08; border-color: var(--gold-bright); }
+  .lb-rows { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .lb-row {
+    width: 327px; height: 56px; background: var(--card); border-radius: 12px;
+    display: grid; grid-template-columns: 36px 36px 1fr auto auto;
+    align-items: center; gap: 10px; padding: 0 14px 0 8px;
+    position: relative; overflow: hidden;
+    border: 1px solid transparent;
+  }
+  .lb-row .lb-rank {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 20px;
+    color: var(--sand); text-align: center;
+  }
+  .lb-row.top1 .lb-rank, .lb-row.top2 .lb-rank, .lb-row.top3 .lb-rank { color: var(--gold); }
+  .lb-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: transparent; }
+  .lb-row.top1::before { background: linear-gradient(180deg, #FFD466, #C8881C); box-shadow: 2px 0 8px rgba(232,160,32,.4); }
+  .lb-row.top2::before { background: linear-gradient(180deg, #E8E8E8, #888); }
+  .lb-row.top3::before { background: linear-gradient(180deg, #D08644, #6B3E18); }
+  .lb-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #6B3E18 0%, #2A1A0E 80%);
+    border: 1.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-bright); font-family: "Poppins", sans-serif; font-size: 13px; font-weight: 900;
+  }
+  .lb-name { font-family: "Poppins", sans-serif; font-size: 14px; color: var(--cream); }
+  .lb-tier { font-family: "Poppins", sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .lb-tier.tier-free   { background: rgba(167,165,156,.18); color: var(--sand); border: 1px solid rgba(167,165,156,.35); }
+  .lb-tier.tier-bronze { background: rgba(208,134,68,.18); color: #D08644; border: 1px solid rgba(208,134,68,.4); }
+  .lb-tier.tier-silver { background: rgba(220,220,220,.16); color: #DCDCDC; border: 1px solid rgba(220,220,220,.35); }
+  .lb-tier.tier-gold   { background: rgba(232,160,32,.18); color: var(--gold-bright); border: 1px solid rgba(232,160,32,.5); }
+  .lb-wins { font-family: "Poppins", sans-serif; font-weight: 900; font-size: 16px; color: var(--gold); letter-spacing: 0.04em; }
+  .lb-wins::after { content: " W"; font-size: 10px; color: var(--sand); font-weight: 600; }
+  .lb-self-divider {
+    height: 1px; width: 327px; align-self: center; margin: 6px auto 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(232,160,32,.55) 50%, transparent 100%);
+  }
+  .lb-row.self { border: 1.5px solid var(--gold); box-shadow: 0 0 18px rgba(232,160,32,.3); }
+  .lb-self-label { font-family: "Poppins", sans-serif; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); text-align: center; margin-top: -2px; }
+
+  /* =========================================================
+     SCREEN 11 — PROFILE
+     ========================================================= */
+  .profile { background: var(--terracotta); }
+  .profile .home-topbar .back-arrow,
+  .rewards .home-topbar .back-arrow {
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; cursor: pointer; color: var(--gold);
+  }
+  .profile .home-topbar .back-arrow:hover,
+  .rewards .home-topbar .back-arrow:hover { background: rgba(232,160,32,.12); }
+  .profile-content { padding: 20px 24px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto; }
+  .profile-avatar-wrap { position: relative; width: 96px; height: 96px; margin-top: 4px; }
+  .profile-avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #6B3E18 0%, #2A1A0E 80%);
+    border: 2.5px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-bright); font-family: "Poppins", sans-serif; font-size: 38px; font-weight: 900;
+    box-shadow: 0 0 24px rgba(232,160,32,.3), inset 0 -4px 12px rgba(0,0,0,.4);
+  }
+  .avatar-tier {
+    position: absolute; right: -4px; bottom: -2px;
+    transform: scale(1.05); transform-origin: bottom right;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5);
+  }
+  .profile-name {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 24px;
+    color: var(--gold); letter-spacing: 0.04em; text-transform: uppercase;
+    margin: 8px 0 0; text-align: center;
+    text-shadow: 0 0 14px rgba(232,160,32,.35);
+  }
+  .profile-region { font-family: "Poppins", sans-serif; font-size: 12px; color: var(--sand); margin: 0; text-align: center; }
+  .profile .coin-bar-large { margin-top: 12px; cursor: pointer; transition: box-shadow .2s, transform .15s; }
+  .profile .coin-bar-large:hover { box-shadow: 0 0 22px rgba(232,160,32,.35), inset 0 1px 0 rgba(255,255,255,.05); transform: translateY(-1px); }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(2, 155px); gap: 10px; margin-top: 12px;
+  }
+  .stat-card {
+    width: 155px; height: 72px; background: var(--card); border-radius: 12px;
+    padding: 10px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
+    border: 1px solid rgba(232,160,32,.18);
+  }
+  .stat-value {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 24px;
+    color: var(--gold); letter-spacing: 0.02em; line-height: 1;
+  }
+  .stat-label {
+    font-family: "Poppins", sans-serif; font-size: 11px; color: var(--sand);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .profile-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 16px; width: 100%; }
+  .profile-actions .btn { width: 327px; }
+  .edit-username-link {
+    font-family: "Poppins", sans-serif; font-size: 13px; color: var(--sand);
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+    background: none; border: none; padding: 4px 8px;
+  }
+  .edit-username-link:hover { color: var(--gold); }
+
+  /* =========================================================
+     SCREEN 12 — REWARDS
+     ========================================================= */
+  .rewards { background: var(--terracotta); }
+  .rewards-content { padding: 20px 24px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; overflow-y: auto; }
+  .rewards-title {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 28px;
+    color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase;
+    text-align: center; margin: 4px 0 0;
+    text-shadow: 0 0 14px rgba(232,160,32,.4);
+  }
+  .coming-soon-card {
+    width: 327px; height: 200px;
+    background: var(--card);
+    border: 1.5px dashed var(--gold);
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(232,160,32,.12);
+  }
+  .hourglass-icon { color: var(--gold-bright); filter: drop-shadow(0 0 8px rgba(232,160,32,.5)); }
+  .coming-soon-title {
+    font-family: "Poppins", sans-serif; font-weight: 900; font-size: 24px;
+    color: var(--sand); letter-spacing: 0.06em; text-transform: uppercase;
+    margin: -2px 0 0; line-height: 1;
+  }
+  .coming-soon-body {
+    font-family: "Poppins", sans-serif; font-size: 12.5px; color: var(--cream);
+    text-align: center; margin: 0; line-height: 1.35; max-width: 280px;
+  }
+  .reward-placeholders {
+    display: flex; gap: 16px; margin-top: 6px;
+  }
+  .reward-placeholder {
+    width: 72px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    opacity: 0.55;
+  }
+  .reward-placeholder .icon-block {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(167,165,156,.25);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sand); position: relative;
+  }
+  .reward-placeholder .lock-badge {
+    position: absolute; right: -4px; bottom: -4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(0,0,0,.7); border: 1px solid rgba(167,165,156,.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sand);
+  }
+  .reward-placeholder .label { font-family: "Poppins", sans-serif; font-size: 10px; color: var(--sand); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .tier-upgrade-card {
+    width: 327px; min-height: 72px; background: var(--card);
+    border: 1.5px solid var(--gold); border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: 0 0 18px rgba(232,160,32,.2);
+  }
+  .tier-upgrade-text {
+    font-family: "Poppins", sans-serif; font-size: 13.5px; color: var(--cream); line-height: 1.3;
+  }
+  .tier-upgrade-text strong { color: var(--gold-bright); font-weight: 900; letter-spacing: 0.04em; }
+
+  /* =========================================================
+     SCREEN 13 — TUTORIAL (4 steps)
+     ========================================================= */
+  .tutorial {
+    background: var(--terracotta);
+    padding: 60px 24px 24px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+  }
+  .tut-progress { display: flex; gap: 12px; margin-bottom: 28px; }
+  .tut-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--sand); background: transparent; transition: background .2s, border-color .2s; }
+  .tutorial[data-state="placing"] .tut-dot[data-step="placing"],
+  .tutorial[data-state="mill"]    .tut-dot[data-step="mill"],
+  .tutorial[data-state="moving"]  .tut-dot[data-step="moving"],
+  .tutorial[data-state="flying"]  .tut-dot[data-step="flying"] { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 8px rgba(232,160,32,.6); }
+  .tut-card {
+    width: 327px; height: 400px;
+    background: #8B3A14;
+    border: 1.5px solid var(--gold);
+    border-radius: var(--radius-card);
+    padding: 24px 22px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 4px 0 rgba(0,0,0,.2), 0 12px 28px rgba(0,0,0,.4);
+  }
+  .tut-step { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .tut-step[hidden] { display: none; }
+  .tut-board { width: 200px; height: 200px; color: var(--gold); margin-bottom: 18px; }
+  .tut-pulse circle, .tut-pulse-c { animation: tut-pulse 1.4s ease-in-out infinite; }
+  @keyframes tut-pulse { 0%,100% { opacity: 0.45; } 50% { opacity: 1; } }
+  .tut-title {
+    font-family: "Hunters", "Poppins", sans-serif;
+    font-size: 20px; letter-spacing: 0.08em;
+    color: var(--gold); margin: 0 0 10px; text-align: center;
+    text-shadow: 0 2px 6px rgba(0,0,0,.4);
+  }
+  .tut-title.tut-title-flying { text-shadow: 0 0 12px rgba(200,80,60,.7), 0 2px 6px rgba(0,0,0,.4); }
+  .tut-body {
+    font-family: "Poppins", sans-serif; font-size: 14px; color: var(--cream);
+    text-align: center; margin: 0; line-height: 1.45;
+  }
+  .tut-foot { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; width: 327px; }
+  .tut-skip {
+    font-family: "Poppins", sans-serif; font-size: 13px; color: var(--sand);
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+    letter-spacing: 0.04em;
+  }
+  .tut-skip:hover { color: var(--gold); }
+
+  /* =========================================================
+     SCREEN 14 — SETTINGS
+     ========================================================= */
+  .settings { background: var(--terracotta); padding: 0; }
+  .settings .home-topbar { padding: 14px 16px; }
+  .settings .icon-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,.18); border: 1px solid rgba(232,160,32,.3); color: var(--cream); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+  .settings-body { width: 100%; padding: 12px 24px 24px; display: flex; flex-direction: column; align-items: center; }
+  .settings-title {
+    font-family: "Hunters", "Poppins", sans-serif;
+    font-size: 28px; letter-spacing: 0.1em;
+    color: var(--gold); margin: 8px 0 22px; text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .settings-list { width: 327px; background: #8B3A14; border-radius: var(--radius-card); overflow: hidden; box-shadow: 0 4px 0 rgba(0,0,0,.2), 0 10px 24px rgba(0,0,0,.35); }
+  .settings-row {
+    height: 52px; padding: 0 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid rgba(232,160,32,.25);
+    font-family: "Poppins", sans-serif;
+  }
+  .settings-row:last-child { border-bottom: 0; }
+  .settings-row.clickable { cursor: pointer; }
+  .settings-row.clickable:hover { background: rgba(0,0,0,.12); }
+  .set-icon { font-size: 18px; width: 22px; text-align: center; }
+  .set-label { flex: 1; font-size: 14px; color: var(--cream); }
+  .set-toggle { width: 40px; height: 22px; border-radius: 999px; background: #2A1E14; border: 1px solid rgba(232,160,32,.4); position: relative; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+  .set-toggle .set-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--cream); transition: transform .18s ease; }
+  .set-toggle.on { background: var(--gold); border-color: var(--gold-dark); }
+  .set-toggle.on .set-thumb { transform: translateX(18px); background: #2A1E14; }
+  .set-dropdown { display: inline-flex; align-items: center; gap: 6px; color: var(--cream); font-size: 14px; cursor: pointer; }
+  .set-version { color: var(--sand); font-size: 12px; }
+  .set-chev { color: var(--sand); }
+  .btn-reset-tut {
+    width: 100px; height: 32px;
+    background: transparent; border: 1px solid var(--gold);
+    border-radius: 6px; color: var(--cream);
+    font-family: "Hunters", "Poppins", sans-serif;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; padding: 0;
+  }
+  .btn-reset-tut:hover { background: rgba(232,160,32,.12); }
+  .set-signout {
+    margin-top: 22px; font-family: "Poppins", sans-serif; font-size: 12px;
+    color: var(--sand); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .set-signout:hover { color: var(--gold); }
+
+  /* Screen indicator (debug, hidden in user view) */
+  .screen-indicator {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    color: var(--sand);
+    font-family: "Poppins", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="right">
+        <!-- signal -->
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+        <!-- wifi -->
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 1C4.5 1 1.9 2.1 0 3.8l1.4 1.4C2.9 3.9 5.1 3 7.5 3s4.6.9 6.1 2.2L15 3.8C13.1 2.1 10.5 1 7.5 1zm0 3.5c-1.9 0-3.6.7-4.9 1.8L4 7.7c1-.8 2.2-1.2 3.5-1.2s2.5.5 3.5 1.2l1.4-1.4c-1.3-1.1-3-1.8-4.9-1.8zm0 3.5c-.9 0-1.7.4-2.3 1l2.3 2 2.3-2c-.6-.6-1.4-1-2.3-1z"/></svg>
+        <!-- battery -->
+        <svg width="27" height="11" viewBox="0 0 27 11" fill="none"><rect x="0.5" y="0.5" width="22" height="10" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="19" height="7" rx="1" fill="currentColor"/><rect x="23.5" y="3.5" width="2" height="4" rx="1" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <!-- Screen 1 — Splash -->
+    <div class="screen splash" data-screen-label="01 Splash" data-active="true">
+      <div class="splash-bg-pattern" aria-hidden="true">
+        <div class="pattern-strip strip s1"></div>
+        <div class="pattern-strip strip s2"></div>
+      </div>
+
+      <div class="splash-content">
+        <div class="logo-placeholder" role="img" aria-label="Morabaraba logo placeholder">
+          <svg class="logo-mark" viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <!-- Three nested squares -->
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <!-- Connectors (mid-points of each square side) -->
+            <line x1="84" y1="14" x2="84" y2="70"/>
+            <line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/>
+            <line x1="98" y1="84" x2="154" y2="84"/>
+            <!-- Diagonals (Morabaraba additions) -->
+            <line x1="14" y1="14" x2="70" y2="70"/>
+            <line x1="154" y1="14" x2="98" y2="70"/>
+            <line x1="14" y1="154" x2="70" y2="98"/>
+            <line x1="154" y1="154" x2="98" y2="98"/>
+            <!-- Intersection dots -->
+            <g fill="currentColor" stroke="none">
+              <circle cx="14" cy="14" r="4"/>
+              <circle cx="84" cy="14" r="4"/>
+              <circle cx="154" cy="14" r="4"/>
+              <circle cx="42" cy="42" r="4"/>
+              <circle cx="84" cy="42" r="4"/>
+              <circle cx="126" cy="42" r="4"/>
+              <circle cx="70" cy="70" r="4"/>
+              <circle cx="84" cy="70" r="4"/>
+              <circle cx="98" cy="70" r="4"/>
+              <circle cx="14" cy="84" r="4"/>
+              <circle cx="42" cy="84" r="4"/>
+              <circle cx="70" cy="84" r="4"/>
+              <circle cx="98" cy="84" r="4"/>
+              <circle cx="126" cy="84" r="4"/>
+              <circle cx="154" cy="84" r="4"/>
+              <circle cx="70" cy="98" r="4"/>
+              <circle cx="84" cy="98" r="4"/>
+              <circle cx="98" cy="98" r="4"/>
+              <circle cx="42" cy="126" r="4"/>
+              <circle cx="84" cy="126" r="4"/>
+              <circle cx="126" cy="126" r="4"/>
+              <circle cx="14" cy="154" r="4"/>
+              <circle cx="84" cy="154" r="4"/>
+              <circle cx="154" cy="154" r="4"/>
+            </g>
+          </svg>
+        </div>
+        <div class="logo-wordmark">MORABARABA</div>
+        <div class="tagline">The Ancient Game of Africa</div>
+      </div>
+
+      <div class="loader-wrap">
+        <div class="loader-track"><div class="loader-fill"></div></div>
+        <div class="loader-label">Loading</div>
+      </div>
+    </div>
+
+    <!-- Screen 2 — Onboarding -->
+    <div class="screen onboarding" data-screen-label="02 Onboarding" data-active="false">
+      <div class="ob-header">
+        <h1>Welcome Warrior</h1>
+        <p class="ob-sub">Choose your name and avatar</p>
+      </div>
+
+      <div class="ob-body">
+        <div>
+          <label class="field-label" for="warrior-name">Your Name</label>
+          <input id="warrior-name" class="text-input" type="text" placeholder="Enter your warrior name" maxlength="18" autocomplete="off" />
+        </div>
+
+        <div>
+          <span class="field-label">Choose Avatar</span>
+          <div class="avatar-grid" role="radiogroup" aria-label="Avatar">
+            <button class="avatar-tile" data-avatar="warrior" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- shield + crossed spears -->
+                  <path d="M16 5 L24 8 V16 C24 21 20 25 16 27 C12 25 8 21 8 16 V8 Z"/>
+                  <line x1="6" y1="6" x2="26" y2="26"/>
+                  <line x1="26" y1="6" x2="6" y2="26"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Warrior</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="elder" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- staff with sun -->
+                  <circle cx="22" cy="9" r="4"/>
+                  <path d="M22 3 V5 M22 13 V15 M28 9 H26 M18 9 H16" stroke-width="1.4"/>
+                  <line x1="12" y1="6" x2="12" y2="28"/>
+                  <path d="M9 28 H15"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Elder</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="huntress" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- bow & arrow -->
+                  <path d="M9 6 C18 10 18 22 9 26"/>
+                  <line x1="9" y1="6" x2="9" y2="26" stroke-dasharray="2 2"/>
+                  <line x1="6" y1="16" x2="26" y2="16"/>
+                  <path d="M22 13 L26 16 L22 19"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Huntress</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="chief" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- 3-peak headdress / crown -->
+                  <path d="M5 22 L9 8 L13 18 L16 6 L19 18 L23 8 L27 22 Z"/>
+                  <line x1="5" y1="26" x2="27" y2="26"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Chief</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="scout" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- eye -->
+                  <path d="M3 16 C8 9 14 6 16 6 C18 6 24 9 29 16 C24 23 18 26 16 26 C14 26 8 23 3 16 Z"/>
+                  <circle cx="16" cy="16" r="4" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Scout</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="healer" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- leaf -->
+                  <path d="M7 25 C7 14 14 7 25 7 C25 18 18 25 7 25 Z"/>
+                  <line x1="7" y1="25" x2="22" y2="10"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Healer</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="merchant" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- stacked coins -->
+                  <ellipse cx="16" cy="10" rx="9" ry="3"/>
+                  <path d="M7 10 V14 C7 16 11 17 16 17 C21 17 25 16 25 14 V10"/>
+                  <path d="M7 16 V20 C7 22 11 23 16 23 C21 23 25 22 25 20 V16"/>
+                  <path d="M7 22 V26 C7 28 11 29 16 29 C21 29 25 28 25 26 V22"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Merchant</span>
+            </button>
+
+            <button class="avatar-tile" data-avatar="nomad" role="radio" aria-checked="false">
+              <span class="avatar-circle">
+                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- sun + dunes -->
+                  <circle cx="22" cy="10" r="3.5"/>
+                  <path d="M3 22 C7 18 10 22 14 20 C18 18 22 22 29 19"/>
+                  <path d="M3 27 C8 23 14 27 19 24 C23 22 26 25 29 24"/>
+                </svg>
+              </span>
+              <span class="avatar-label">Nomad</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-footer">
+        <div class="pattern-strip"></div>
+        <button class="btn btn-primary" id="ob-cta" disabled>Begin Your Journey</button>
+      </div>
+    </div>
+
+    <!-- Screen 3 — Home -->
+    <div class="screen home" data-screen-label="03 Home" data-active="false">
+      <div class="home-topbar">
+        <span class="username" id="home-username">@warrior</span>
+        <span class="tier-badge tier-free" id="home-tier">Free</span>
+        <span class="topbar-coins"><span class="coin-icon"></span><span>1,240</span></span>
+      </div>
+
+      <div class="home-body">
+        <div class="home-logo" role="img" aria-label="Morabaraba">
+          <svg viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <line x1="84" y1="14" x2="84" y2="70"/><line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/><line x1="98" y1="84" x2="154" y2="84"/>
+            <line x1="14" y1="14" x2="70" y2="70"/><line x1="154" y1="14" x2="98" y2="70"/>
+            <line x1="14" y1="154" x2="70" y2="98"/><line x1="154" y1="154" x2="98" y2="98"/>
+            <g fill="currentColor" stroke="none">
+              <circle cx="14" cy="14" r="5"/><circle cx="84" cy="14" r="5"/><circle cx="154" cy="14" r="5"/>
+              <circle cx="42" cy="42" r="5"/><circle cx="84" cy="42" r="5"/><circle cx="126" cy="42" r="5"/>
+              <circle cx="70" cy="70" r="5"/><circle cx="84" cy="70" r="5"/><circle cx="98" cy="70" r="5"/>
+              <circle cx="14" cy="84" r="5"/><circle cx="42" cy="84" r="5"/><circle cx="70" cy="84" r="5"/>
+              <circle cx="98" cy="84" r="5"/><circle cx="126" cy="84" r="5"/><circle cx="154" cy="84" r="5"/>
+              <circle cx="70" cy="98" r="5"/><circle cx="84" cy="98" r="5"/><circle cx="98" cy="98" r="5"/>
+              <circle cx="42" cy="126" r="5"/><circle cx="84" cy="126" r="5"/><circle cx="126" cy="126" r="5"/>
+              <circle cx="14" cy="154" r="5"/><circle cx="84" cy="154" r="5"/><circle cx="154" cy="154" r="5"/>
+            </g>
+          </svg>
+        </div>
+        <div class="home-wordmark">MORABARABA</div>
+
+        <div class="home-divider pattern-strip"></div>
+
+        <div class="home-actions">
+          <button class="btn btn-primary"   data-route="difficulty">Play AI</button>
+          <button class="btn btn-secondary" data-route="local">Local Play</button>
+          <button class="btn btn-secondary" data-route="online">Online Play</button>
+          <button class="btn btn-secondary" data-route="leaderboard">Leaderboard</button>
+        </div>
+
+        <div class="coin-bar-large" aria-label="Coins balance and progress">
+          <span class="coin-icon"></span>
+          <span class="num">1,240</span>
+          <span class="progress"><span></span></span>
+        </div>
+      </div>
+
+      <div class="home-foot">
+        <a data-route="profile">Profile</a>
+        <span class="sep"></span>
+        <a data-route="settings">Settings</a>
+      </div>
+    </div>
+
+    <!-- Screen 4 — Difficulty -->
+    <div class="screen difficulty" data-screen-label="04 Difficulty" data-active="false">
+      <div class="diff-header">
+        <button class="icon-btn" id="diff-back" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg>
+        </button>
+        <h1>Choose Difficulty</h1>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <div class="diff-list" role="radiogroup" aria-label="Difficulty">
+        <button class="diff-card" data-difficulty="easy" role="radio" aria-checked="false">
+          <span class="name">Easy</span>
+          <span class="sub">Learn the game</span>
+          <span class="reward"><span class="coin-icon"></span>5 per win</span>
+        </button>
+        <button class="diff-card" data-difficulty="medium" role="radio" aria-checked="false">
+          <span class="name">Medium</span>
+          <span class="sub">A worthy challenge</span>
+          <span class="reward"><span class="coin-icon"></span>10 per win</span>
+        </button>
+        <button class="diff-card" data-difficulty="hard" role="radio" aria-checked="false">
+          <span class="name">Hard</span>
+          <span class="sub">For masters only</span>
+          <span class="reward"><span class="coin-icon"></span>20 per win</span>
+        </button>
+      </div>
+
+      <div class="diff-foot">
+        <div class="pattern-strip"></div>
+        <button class="btn btn-primary" id="diff-cta" disabled>Start Match</button>
+      </div>
+    </div>
+    <!-- Screen 5 — Online play -->
+    <div class="screen online" data-screen-label="05 Online" data-active="false">
+      <div class="diff-header">
+        <button class="icon-btn" data-back="home" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg>
+        </button>
+        <h1>Online Play</h1>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <div class="diff-list">
+        <button class="mode-card" data-mode="quick">
+          <span class="mode-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9 V13 L15 15"/><path d="M9 3 H15"/></svg>
+          </span>
+          <span class="mode-text"><span class="name">Quick Match</span><span class="sub">Find an opponent instantly</span></span>
+        </button>
+        <button class="mode-card" data-mode="invite">
+          <span class="mode-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 14.5 L14.5 9.5"/><path d="M11 6.5 L13 4.5 a4 4 0 0 1 5.7 5.7 L16.7 12.2"/><path d="M13 17.5 L11 19.5 a4 4 0 0 1 -5.7 -5.7 L7.3 11.8"/></svg>
+          </span>
+          <span class="mode-text"><span class="name">Invite Friend</span><span class="sub">Share a 6-digit code</span></span>
+        </button>
+        <button class="mode-card" data-mode="private">
+          <span class="mode-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="11" width="13" height="9" rx="1.6"/><path d="M8.5 11 V8 a3.5 3.5 0 0 1 7 0 V11"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span class="mode-text"><span class="name">Private Room</span><span class="sub">PIN-protected match</span></span>
+        </button>
+      </div>
+
+      <div class="online-count"><span class="dot"></span>Players online now: <strong>247</strong></div>
+    </div>
+
+    <!-- Screen 6 — Matchmaking -->
+    <div class="screen matchmaking" data-screen-label="06 Matchmaking" data-active="false">
+      <div class="mm-header">
+        <button class="icon-btn" data-back="online" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg>
+        </button>
+        <h1 id="mm-title">Finding Opponent</h1>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <!-- Quick-match variant -->
+      <div class="mm-quick" data-variant>
+        <div class="mm-pulse" aria-hidden="true">
+          <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <rect x="10" y="10" width="80" height="80"/>
+            <rect x="26" y="26" width="48" height="48"/>
+            <rect x="42" y="42" width="16" height="16"/>
+            <line x1="50" y1="10" x2="50" y2="42"/><line x1="50" y1="58" x2="50" y2="90"/>
+            <line x1="10" y1="50" x2="42" y2="50"/><line x1="58" y1="50" x2="90" y2="50"/>
+          </svg>
+        </div>
+        <div class="mm-timer" id="mm-timer">0:00</div>
+        <div class="mm-status">Searching for a worthy warrior…</div>
+      </div>
+
+      <!-- Invite variant -->
+      <div class="mm-invite" data-variant hidden>
+        <div class="room-code-card">
+          <div class="room-code-label">Your room code</div>
+          <div class="room-code">A7X9K2</div>
+          <div class="room-hint">Share this code with a friend to play</div>
+        </div>
+      </div>
+
+      <!-- Private (PIN entry) variant -->
+      <div class="mm-private" data-variant hidden>
+        <div class="pin-label">ENTER ROOM PIN</div>
+        <div class="pin-row">
+          <div class="pin-box filled">4</div>
+          <div class="pin-box filled">2</div>
+          <div class="pin-box filled">7</div>
+          <div class="pin-box"></div>
+        </div>
+        <button class="btn btn-primary pin-connect">Connect</button>
+      </div>
+
+      <div class="mm-foot">
+        <button class="btn btn-secondary" id="mm-cancel">Cancel</button>
+      </div>
+    </div>
+    <!-- Screen 7 — Game -->
+    <div class="screen game" data-screen-label="07 Game" data-active="false">
+      <div class="game-strip">
+        <div class="game-side left" id="gp1">
+          <span class="active-arrow" id="gp-arrow"></span>
+          <div class="player-token dark" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@warrior</span>
+              <span class="tier-badge tier-free">Free</span>
+            </div>
+            <span class="onboard">On board: 9</span>
+            <div class="captured" aria-label="Captured by P1">
+              <span class="pip light"></span>
+            </div>
+          </div>
+        </div>
+        <div class="vsep" aria-hidden="true"></div>
+        <div class="game-side right inactive" id="gp2">
+          <div class="player-token light" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@kasi_ace</span>
+              <span class="tier-badge tier-bronze">Bronze</span>
+            </div>
+            <span class="onboard">On board: 11</span>
+            <div class="captured" aria-label="Captured by P2">
+              <span class="pip dark"></span>
+              <span class="pip dark"></span>
+              <span class="pip dark"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-phase-wrap">
+        <span class="game-phase">Moving</span>
+      </div>
+
+      <div class="game-board-wrap">
+        <svg class="game-board" viewBox="0 0 327 327" xmlns="http://www.w3.org/2000/svg" aria-label="Morabaraba board">
+          <defs>
+            <radialGradient id="woodGrad" cx="50%" cy="45%" r="70%">
+              <stop offset="0%"  stop-color="#C9913A"/>
+              <stop offset="100%" stop-color="#A0722A"/>
+            </radialGradient>
+            <pattern id="edgeChevron" width="16" height="8" patternUnits="userSpaceOnUse">
+              <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4" stroke="#5C3A1E" stroke-width="1.4" fill="none" stroke-linejoin="miter"/>
+            </pattern>
+            <radialGradient id="tokenDark" cx="35%" cy="32%" r="75%">
+              <stop offset="0%"   stop-color="#555555"/>
+              <stop offset="18%"  stop-color="#2C2C2A"/>
+              <stop offset="45%"  stop-color="#1A1A18"/>
+              <stop offset="100%" stop-color="#050505"/>
+            </radialGradient>
+            <radialGradient id="tokenLight" cx="35%" cy="32%" r="75%">
+              <stop offset="0%"  stop-color="#FBF5E1"/>
+              <stop offset="55%" stop-color="#E5D5AC"/>
+              <stop offset="100%" stop-color="#B89858"/>
+            </radialGradient>
+            <radialGradient id="validGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#F4B53A" stop-opacity="0.85"/>
+              <stop offset="60%" stop-color="#E8A020" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#E8A020" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- wood fill -->
+          <rect x="0" y="0" width="327" height="327" rx="6" fill="url(#woodGrad)"/>
+
+          <!-- 16px decorative border w/ chevron pattern @ 20% -->
+          <path d="M0 0 H327 V327 H0 Z M16 16 V311 H311 V16 Z" fill="url(#edgeChevron)" fill-opacity="0.2" fill-rule="evenodd"/>
+          <rect x="0.75" y="0.75" width="325.5" height="325.5" rx="5.5" fill="none" stroke="#5C3A1E" stroke-opacity="0.35" stroke-width="1.5"/>
+          <rect x="15.5" y="15.5" width="296" height="296" rx="3" fill="none" stroke="#5C3A1E" stroke-opacity="0.35" stroke-width="1"/>
+
+          <!-- Three concentric squares + midpoint connectors. NO DIAGONALS. -->
+          <g stroke="#5C3A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <rect x="32" y="32" width="263" height="263"/>
+            <rect x="76" y="76" width="175" height="175"/>
+            <rect x="120" y="120" width="87" height="87"/>
+            <line x1="163.5" y1="32"  x2="163.5" y2="120"/>
+            <line x1="163.5" y1="207" x2="163.5" y2="295"/>
+            <line x1="32"  y1="163.5" x2="120" y2="163.5"/>
+            <line x1="207" y1="163.5" x2="295" y2="163.5"/>
+          </g>
+
+          <!-- 24 node holes -->
+          <g fill="#5C3A1E">
+            <circle cx="32"    cy="32"    r="6"/>
+            <circle cx="163.5" cy="32"    r="6"/>
+            <circle cx="295"   cy="32"    r="6"/>
+            <circle cx="295"   cy="163.5" r="6"/>
+            <circle cx="295"   cy="295"   r="6"/>
+            <circle cx="163.5" cy="295"   r="6"/>
+            <circle cx="32"    cy="295"   r="6"/>
+            <circle cx="32"    cy="163.5" r="6"/>
+            <circle cx="76"    cy="76"    r="6"/>
+            <circle cx="163.5" cy="76"    r="6"/>
+            <circle cx="251"   cy="76"    r="6"/>
+            <circle cx="251"   cy="163.5" r="6"/>
+            <circle cx="251"   cy="251"   r="6"/>
+            <circle cx="163.5" cy="251"   r="6"/>
+            <circle cx="76"    cy="251"   r="6"/>
+            <circle cx="76"    cy="163.5" r="6"/>
+            <circle cx="120"   cy="120"   r="6"/>
+            <circle cx="163.5" cy="120"   r="6"/>
+            <circle cx="207"   cy="120"   r="6"/>
+            <circle cx="207"   cy="163.5" r="6"/>
+            <circle cx="207"   cy="207"   r="6"/>
+            <circle cx="163.5" cy="207"   r="6"/>
+            <circle cx="120"   cy="207"   r="6"/>
+            <circle cx="120"   cy="163.5" r="6"/>
+          </g>
+
+          <!-- Tokens (radius 14) — aligned with Screen 8 positions -->
+          <!-- DARK P1 (9): O1 O7 M1 M2 M3 M7 I1 I3 I6 (M1-M2-M3 forms mill on top mid edge) -->
+          <g class="tokens">
+            <circle cx="32"    cy="32"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="32"    cy="295"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="76"    cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="251"   cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="76"    cy="251"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="120"   cy="120"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="207"   cy="120"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="207"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <!-- LIGHT P2 (11): O2 O3 O4 O5 O6 O8 M5 M6 I2 I4 I5 (O3-O4-O5 forms mill on outer right edge) -->
+            <circle cx="163.5" cy="32"    r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="32"    r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="295"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="295"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="32"    cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251"   cy="251"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="251"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="120"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207"   cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207"   cy="207"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+          </g>
+
+          <!-- Small pulsing gold dots on empty nodes: M8, I8, I7 — destination hints for the selected piece -->
+          <g class="valid-moves">
+            <circle class="pulse" cx="76"    cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5"/>
+            <circle class="pulse" cx="120"   cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay: -.45s;"/>
+            <circle class="pulse" cx="120"   cy="207"   r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay: -.9s;"/>
+          </g>
+
+          <!-- 44px tap targets, last so they receive clicks -->
+          <g class="taps">
+            <circle class="node-tap" cx="32"    cy="32"    r="22"/>
+            <circle class="node-tap" cx="163.5" cy="32"    r="22"/>
+            <circle class="node-tap" cx="295"   cy="32"    r="22"/>
+            <circle class="node-tap" cx="295"   cy="163.5" r="22"/>
+            <circle class="node-tap" cx="295"   cy="295"   r="22"/>
+            <circle class="node-tap" cx="163.5" cy="295"   r="22"/>
+            <circle class="node-tap" cx="32"    cy="295"   r="22"/>
+            <circle class="node-tap" cx="32"    cy="163.5" r="22"/>
+            <circle class="node-tap" cx="76"    cy="76"    r="22"/>
+            <circle class="node-tap" cx="163.5" cy="76"    r="22"/>
+            <circle class="node-tap" cx="251"   cy="76"    r="22"/>
+            <circle class="node-tap" cx="251"   cy="163.5" r="22"/>
+            <circle class="node-tap" cx="251"   cy="251"   r="22"/>
+            <circle class="node-tap" cx="163.5" cy="251"   r="22"/>
+            <circle class="node-tap" cx="76"    cy="251"   r="22"/>
+            <circle class="node-tap" cx="76"    cy="163.5" r="22"/>
+            <circle class="node-tap" cx="120"   cy="120"   r="22"/>
+            <circle class="node-tap" cx="163.5" cy="120"   r="22"/>
+            <circle class="node-tap" cx="207"   cy="120"   r="22"/>
+            <circle class="node-tap" cx="207"   cy="163.5" r="22"/>
+            <circle class="node-tap" cx="207"   cy="207"   r="22"/>
+            <circle class="node-tap" cx="163.5" cy="207"   r="22"/>
+            <circle class="node-tap" cx="120"   cy="207"   r="22"/>
+            <circle class="node-tap" cx="120"   cy="163.5" r="22"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="action-prompt" id="action-prompt">Select a piece to move</div>
+    </div>
+<style>
+  /* Phase variants */
+  .game-phase.placing { background: #D4A96A; color: #1F1812; }
+  .game-phase.flying  { background: #CC2200; color: #FAFAFA; box-shadow: 0 0 14px rgba(204,34,0,.55); }
+  .onboard.flying-red { color: #FF6450 !important; font-weight: 600; }
+  .flying-badge {
+    display: inline-block; margin-left: 6px; padding: 2px 6px;
+    font: 700 9px/1 'Poppins', sans-serif; letter-spacing: .12em;
+    background: #CC2200; color: #FAFAFA; border-radius: 3px; text-transform: uppercase;
+    box-shadow: 0 0 8px rgba(204,34,0,.6);
+  }
+  /* hand pips: pieces still to be placed */
+  .hand-pips { display: flex; gap: 3px; margin-top: 4px; }
+  .hand-pip { width: 9px; height: 9px; border-radius: 50%; }
+  .hand-pip.dark  { background: #0F0F0F; box-shadow: inset 0 0 0 0.5px #000; }
+  .hand-pip.light { background: #FAFAFA; box-shadow: inset 0 0 0 0.5px #888; }
+  /* selection ring */
+  .selection-ring { stroke: #F4B53A; stroke-width: 2.5; fill: none; filter: drop-shadow(0 0 8px rgba(244,181,58,.9)); animation: sel-pulse 1.6s ease-in-out infinite; }
+  @keyframes sel-pulse { 0%,100%{opacity:.7;} 50%{opacity:1;} }
+  /* phase transition overlay */
+  .phase-transition {
+    position: absolute; inset: 0; z-index: 100;
+    background: rgba(166,73,42,0.96); /* terracotta */
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px;
+    border: 3px solid #F4B53A;
+    box-shadow: inset 0 0 32px rgba(244,181,58,.25), 0 0 24px rgba(0,0,0,.4);
+    animation: phase-fade-in 280ms ease-out both;
+  }
+  .phase-transition.show { display: flex; }
+  .phase-transition .pt-label {
+    font: 700 14px/1 'Poppins', sans-serif;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: #E8C892;
+  }
+  .phase-transition .pt-name {
+    font: 900 48px/1 'Poppins', sans-serif;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: #F4B53A;
+    text-shadow: 0 0 18px rgba(244,181,58,.7), 0 2px 0 rgba(0,0,0,.3);
+  }
+  @keyframes phase-fade-in { from{opacity:0;transform:scale(0.94);} to{opacity:1;transform:scale(1);} }
+</style>
+
+    <!-- Screen 7B — Placing phase -->
+    <div class="screen game placing-state" data-screen-label="07B Placing" data-active="false">
+      <div class="game-strip">
+        <div class="game-side left" id="gp1p">
+          <span class="active-arrow"></span>
+          <div class="player-token dark" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@warrior</span>
+              <span class="tier-badge tier-free">Free</span>
+            </div>
+            <span class="onboard">To place: 4</span>
+            <div class="hand-pips" aria-label="Pieces in hand">
+              <span class="hand-pip dark"></span><span class="hand-pip dark"></span>
+              <span class="hand-pip dark"></span><span class="hand-pip dark"></span>
+            </div>
+          </div>
+        </div>
+        <div class="vsep" aria-hidden="true"></div>
+        <div class="game-side right inactive">
+          <div class="player-token light" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@kasi_ace</span>
+              <span class="tier-badge tier-bronze">Bronze</span>
+            </div>
+            <span class="onboard">To place: 4</span>
+            <div class="hand-pips" aria-label="Pieces in hand">
+              <span class="hand-pip light"></span><span class="hand-pip light"></span>
+              <span class="hand-pip light"></span><span class="hand-pip light"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-phase-wrap">
+        <span class="game-phase placing">Placing</span>
+      </div>
+
+      <div class="game-board-wrap">
+        <svg class="game-board" viewBox="0 0 327 327" xmlns="http://www.w3.org/2000/svg" aria-label="Placing phase board">
+          <defs>
+            <radialGradient id="woodGradPlace" cx="50%" cy="45%" r="70%">
+              <stop offset="0%" stop-color="#C9913A"/><stop offset="100%" stop-color="#A0722A"/>
+            </radialGradient>
+            <pattern id="edgeChevPlace" width="16" height="8" patternUnits="userSpaceOnUse">
+              <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4" stroke="#5C3A1E" stroke-width="1.4" fill="none"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="327" height="327" rx="6" fill="url(#woodGradPlace)"/>
+          <path d="M0 0 H327 V327 H0 Z M16 16 V311 H311 V16 Z" fill="url(#edgeChevPlace)" fill-opacity="0.2" fill-rule="evenodd"/>
+          <rect x="0.75" y="0.75" width="325.5" height="325.5" rx="5.5" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1.5"/>
+          <rect x="15.5" y="15.5" width="296" height="296" rx="3" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1"/>
+          <g stroke="#5C3A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <rect x="32" y="32" width="263" height="263"/>
+            <rect x="76" y="76" width="175" height="175"/>
+            <rect x="120" y="120" width="87" height="87"/>
+            <line x1="163.5" y1="32" x2="163.5" y2="120"/>
+            <line x1="163.5" y1="207" x2="163.5" y2="295"/>
+            <line x1="32" y1="163.5" x2="120" y2="163.5"/>
+            <line x1="207" y1="163.5" x2="295" y2="163.5"/>
+          </g>
+          <g fill="#5C3A1E">
+            <circle cx="32" cy="32" r="6"/><circle cx="163.5" cy="32" r="6"/><circle cx="295" cy="32" r="6"/>
+            <circle cx="295" cy="163.5" r="6"/><circle cx="295" cy="295" r="6"/><circle cx="163.5" cy="295" r="6"/>
+            <circle cx="32" cy="295" r="6"/><circle cx="32" cy="163.5" r="6"/>
+            <circle cx="76" cy="76" r="6"/><circle cx="163.5" cy="76" r="6"/><circle cx="251" cy="76" r="6"/>
+            <circle cx="251" cy="163.5" r="6"/><circle cx="251" cy="251" r="6"/><circle cx="163.5" cy="251" r="6"/>
+            <circle cx="76" cy="251" r="6"/><circle cx="76" cy="163.5" r="6"/>
+            <circle cx="120" cy="120" r="6"/><circle cx="163.5" cy="120" r="6"/><circle cx="207" cy="120" r="6"/>
+            <circle cx="207" cy="163.5" r="6"/><circle cx="207" cy="207" r="6"/><circle cx="163.5" cy="207" r="6"/>
+            <circle cx="120" cy="207" r="6"/><circle cx="120" cy="163.5" r="6"/>
+          </g>
+          <!-- DARK (8): O1, O7, M1, M2, I1, I3, I5, I7 -->
+          <g class="tokens">
+            <circle cx="32" cy="32" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="32" cy="295" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="76" cy="76" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="76" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="120" cy="120" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="207" cy="120" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="207" cy="207" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="120" cy="207" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <!-- LIGHT (8): O3, O5, O8, M3, M4, M6, I2, I4 -->
+            <circle cx="295" cy="32" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295" cy="295" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="32" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251" cy="76" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="251" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="120" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+          </g>
+          <!-- 4 strategic placement hints: O2, O4, M5, I6 -->
+          <g class="valid-moves">
+            <circle class="pulse" cx="163.5" cy="32" r="6" fill="#E8A020" fill-opacity="0.5"/>
+            <circle class="pulse" cx="295" cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.4s;"/>
+            <circle class="pulse" cx="251" cy="251" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.8s;"/>
+            <circle class="pulse" cx="163.5" cy="207" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.2s;"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="action-prompt" id="placing-prompt">Place your piece</div>
+      <div class="phase-transition" id="pt-placing"><span class="pt-label">Phase change</span><span class="pt-name" id="pt-placing-name">Moving</span></div>
+    </div>
+
+    <!-- Screen 7C — Flying phase -->
+    <div class="screen game flying-state" data-screen-label="07C Flying" data-active="false">
+      <div class="game-strip">
+        <div class="game-side left" id="gp1f">
+          <span class="active-arrow"></span>
+          <div class="player-token dark" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@warrior</span>
+              <span class="tier-badge tier-free">Free</span>
+              <span class="flying-badge">Flying</span>
+            </div>
+            <span class="onboard flying-red">On board: 3</span>
+            <div class="captured" aria-label="Captured by P1">
+              <span class="pip light"></span><span class="pip light"></span><span class="pip light"></span>
+            </div>
+          </div>
+        </div>
+        <div class="vsep" aria-hidden="true"></div>
+        <div class="game-side right inactive">
+          <div class="player-token light" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@kasi_ace</span>
+              <span class="tier-badge tier-bronze">Bronze</span>
+            </div>
+            <span class="onboard">On board: 8</span>
+            <div class="captured" aria-label="Captured by P2">
+              <span class="pip dark"></span><span class="pip dark"></span><span class="pip dark"></span>
+              <span class="pip dark"></span><span class="pip dark"></span><span class="pip dark"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-phase-wrap">
+        <span class="game-phase flying">Flying</span>
+      </div>
+
+      <div class="game-board-wrap">
+        <svg class="game-board" viewBox="0 0 327 327" xmlns="http://www.w3.org/2000/svg" aria-label="Flying phase board">
+          <defs>
+            <radialGradient id="woodGradFly" cx="50%" cy="45%" r="70%">
+              <stop offset="0%" stop-color="#C9913A"/><stop offset="100%" stop-color="#A0722A"/>
+            </radialGradient>
+            <pattern id="edgeChevFly" width="16" height="8" patternUnits="userSpaceOnUse">
+              <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4" stroke="#5C3A1E" stroke-width="1.4" fill="none"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="327" height="327" rx="6" fill="url(#woodGradFly)"/>
+          <path d="M0 0 H327 V327 H0 Z M16 16 V311 H311 V16 Z" fill="url(#edgeChevFly)" fill-opacity="0.2" fill-rule="evenodd"/>
+          <rect x="0.75" y="0.75" width="325.5" height="325.5" rx="5.5" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1.5"/>
+          <rect x="15.5" y="15.5" width="296" height="296" rx="3" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1"/>
+          <g stroke="#5C3A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <rect x="32" y="32" width="263" height="263"/>
+            <rect x="76" y="76" width="175" height="175"/>
+            <rect x="120" y="120" width="87" height="87"/>
+            <line x1="163.5" y1="32" x2="163.5" y2="120"/>
+            <line x1="163.5" y1="207" x2="163.5" y2="295"/>
+            <line x1="32" y1="163.5" x2="120" y2="163.5"/>
+            <line x1="207" y1="163.5" x2="295" y2="163.5"/>
+          </g>
+          <g fill="#5C3A1E">
+            <circle cx="32" cy="32" r="6"/><circle cx="163.5" cy="32" r="6"/><circle cx="295" cy="32" r="6"/>
+            <circle cx="295" cy="163.5" r="6"/><circle cx="295" cy="295" r="6"/><circle cx="163.5" cy="295" r="6"/>
+            <circle cx="32" cy="295" r="6"/><circle cx="32" cy="163.5" r="6"/>
+            <circle cx="76" cy="76" r="6"/><circle cx="163.5" cy="76" r="6"/><circle cx="251" cy="76" r="6"/>
+            <circle cx="251" cy="163.5" r="6"/><circle cx="251" cy="251" r="6"/><circle cx="163.5" cy="251" r="6"/>
+            <circle cx="76" cy="251" r="6"/><circle cx="76" cy="163.5" r="6"/>
+            <circle cx="120" cy="120" r="6"/><circle cx="163.5" cy="120" r="6"/><circle cx="207" cy="120" r="6"/>
+            <circle cx="207" cy="163.5" r="6"/><circle cx="207" cy="207" r="6"/><circle cx="163.5" cy="207" r="6"/>
+            <circle cx="120" cy="207" r="6"/><circle cx="120" cy="163.5" r="6"/>
+          </g>
+          <!-- DARK (3): M2, I1, I6 — M2 is selected -->
+          <g class="tokens">
+            <circle cx="163.5" cy="76" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="120" cy="120" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="207" r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <!-- LIGHT (8): O3, O5, O8, M4, M5, M6, I4, I5 -->
+            <circle cx="295" cy="32" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295" cy="295" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="32" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251" cy="251" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="251" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207" cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207" cy="207" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+          </g>
+          <!-- Selection ring on M2 -->
+          <circle class="selection-ring" cx="163.5" cy="76" r="18"/>
+          <!-- All 13 empty nodes pulse: O1, O2, O4, O6, O7, M1, M3, M7, M8, I2, I3, I7, I8 -->
+          <g class="valid-moves">
+            <circle class="pulse" cx="32" cy="32" r="6" fill="#E8A020" fill-opacity="0.5"/>
+            <circle class="pulse" cx="163.5" cy="32" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.15s;"/>
+            <circle class="pulse" cx="295" cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.3s;"/>
+            <circle class="pulse" cx="163.5" cy="295" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.45s;"/>
+            <circle class="pulse" cx="32" cy="295" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.6s;"/>
+            <circle class="pulse" cx="76" cy="76" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.75s;"/>
+            <circle class="pulse" cx="251" cy="76" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-.9s;"/>
+            <circle class="pulse" cx="76" cy="251" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.05s;"/>
+            <circle class="pulse" cx="76" cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.2s;"/>
+            <circle class="pulse" cx="163.5" cy="120" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.35s;"/>
+            <circle class="pulse" cx="207" cy="120" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.5s;"/>
+            <circle class="pulse" cx="120" cy="207" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.65s;"/>
+            <circle class="pulse" cx="120" cy="163.5" r="6" fill="#E8A020" fill-opacity="0.5" style="animation-delay:-1.8s;"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="action-prompt" id="flying-prompt">Choose any empty point to fly to</div>
+    </div>
+
+    <!-- Shared phase-transition overlay (positioned over active screen) -->
+    <div class="phase-transition" id="phase-transition-overlay" aria-hidden="true">
+      <span class="pt-label">Phase change</span>
+      <span class="pt-name" id="phase-transition-name">Moving</span>
+    </div>
+
+    <!-- Screen 8 — Mill detection -->
+    <div class="screen game mill-state" data-screen-label="08 Mill" data-active="false">
+      <div class="game-strip">
+        <div class="game-side left" id="gp1m">
+          <span class="active-arrow"></span>
+          <div class="player-token dark" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@warrior</span>
+              <span class="tier-badge tier-free">Free</span>
+            </div>
+            <span class="onboard">On board: 9</span>
+            <div class="captured" aria-label="Captured by P1">
+              <span class="pip light"></span>
+            </div>
+          </div>
+        </div>
+        <div class="vsep" aria-hidden="true"></div>
+        <div class="game-side right inactive">
+          <div class="player-token light" aria-hidden="true"></div>
+          <div class="player-meta">
+            <div class="name-row">
+              <span class="username">@kasi_ace</span>
+              <span class="tier-badge tier-bronze">Bronze</span>
+            </div>
+            <span class="onboard">On board: 11</span>
+            <div class="captured" aria-label="Captured by P2">
+              <span class="pip dark"></span>
+              <span class="pip dark"></span>
+              <span class="pip dark"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-phase-wrap">
+        <span class="game-phase">Remove 1 Piece</span>
+      </div>
+
+      <div class="game-board-wrap">
+        <svg class="game-board" viewBox="0 0 327 327" xmlns="http://www.w3.org/2000/svg" aria-label="Morabaraba mill state">
+          <defs>
+            <radialGradient id="woodGradMill" cx="50%" cy="45%" r="70%">
+              <stop offset="0%"  stop-color="#C9913A"/>
+              <stop offset="100%" stop-color="#A0722A"/>
+            </radialGradient>
+            <pattern id="edgeChevronMill" width="16" height="8" patternUnits="userSpaceOnUse">
+              <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4" stroke="#5C3A1E" stroke-width="1.4" fill="none" stroke-linejoin="miter"/>
+            </pattern>
+          </defs>
+
+          <!-- wood fill -->
+          <rect x="0" y="0" width="327" height="327" rx="6" fill="url(#woodGradMill)"/>
+          <path d="M0 0 H327 V327 H0 Z M16 16 V311 H311 V16 Z" fill="url(#edgeChevronMill)" fill-opacity="0.2" fill-rule="evenodd"/>
+          <rect x="0.75" y="0.75" width="325.5" height="325.5" rx="5.5" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1.5"/>
+          <rect x="15.5" y="15.5" width="296" height="296" rx="3" fill="none" stroke="#5C3A1E" stroke-opacity="0.5" stroke-width="1"/>
+
+          <!-- Three concentric squares + midpoint connectors. NO DIAGONALS. -->
+          <g stroke="#5C3A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <rect x="32" y="32" width="263" height="263"/>
+            <rect x="76" y="76" width="175" height="175"/>
+            <rect x="120" y="120" width="87" height="87"/>
+            <line x1="163.5" y1="32"  x2="163.5" y2="120"/>
+            <line x1="163.5" y1="207" x2="163.5" y2="295"/>
+            <line x1="32"  y1="163.5" x2="120" y2="163.5"/>
+            <line x1="207" y1="163.5" x2="295" y2="163.5"/>
+          </g>
+
+          <!-- nodes -->
+          <g fill="#5C3A1E">
+            <circle cx="32" cy="32" r="6"/><circle cx="163.5" cy="32" r="6"/><circle cx="295" cy="32" r="6"/>
+            <circle cx="295" cy="163.5" r="6"/><circle cx="295" cy="295" r="6"/><circle cx="163.5" cy="295" r="6"/>
+            <circle cx="32" cy="295" r="6"/><circle cx="32" cy="163.5" r="6"/>
+            <circle cx="76" cy="76" r="6"/><circle cx="163.5" cy="76" r="6"/><circle cx="251" cy="76" r="6"/>
+            <circle cx="251" cy="163.5" r="6"/><circle cx="251" cy="251" r="6"/><circle cx="163.5" cy="251" r="6"/>
+            <circle cx="76" cy="251" r="6"/><circle cx="76" cy="163.5" r="6"/>
+            <circle cx="120" cy="120" r="6"/><circle cx="163.5" cy="120" r="6"/><circle cx="207" cy="120" r="6"/>
+            <circle cx="207" cy="163.5" r="6"/><circle cx="207" cy="207" r="6"/><circle cx="163.5" cy="207" r="6"/>
+            <circle cx="120" cy="207" r="6"/><circle cx="120" cy="163.5" r="6"/>
+          </g>
+
+          <!-- glowing mill line over M1-M2-M3 -->
+          <line class="mill-line" x1="76" y1="76" x2="251" y2="76"/>
+          <circle class="mill-endcap" cx="76"  cy="76" r="3.5"/>
+          <circle class="mill-endcap" cx="251" cy="76" r="3.5"/>
+
+          <!-- DARK P1 tokens (9): O1 O7 M1 M2 M3 M7 I1 I3 I6 -->
+          <g class="tokens">
+            <circle cx="32"    cy="32"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="32"    cy="295"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="76"    cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="251"   cy="76"    r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="76"    cy="251"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="120"   cy="120"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="207"   cy="120"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+            <circle cx="163.5" cy="207"   r="14" fill="#0F0F0F" stroke="#050505" stroke-width="0.8"/>
+
+            <!-- LIGHT P2 tokens (11): O2 O3 O4 O5 (mill) O6 O8 M5 M6 I2 I4 I5 -->
+            <circle cx="163.5" cy="32"    r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="32"    r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="295"   cy="295"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="295"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="32"    cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="251"   cy="251"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="251"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="163.5" cy="120"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207"   cy="163.5" r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+            <circle cx="207"   cy="207"   r="14" fill="#FAFAFA" stroke="#888888" stroke-width="0.8"/>
+          </g>
+
+          <!-- Removable opponent rings (NOT in mill): O2 O6 O8 M5 M6 I2 I4 I5 -->
+          <g class="removables">
+            <circle class="removable-ring" cx="163.5" cy="32"    r="18"/>
+            <circle class="removable-ring" cx="163.5" cy="295"   r="18"/>
+            <circle class="removable-ring" cx="32"    cy="163.5" r="18"/>
+            <circle class="removable-ring" cx="251"   cy="251"   r="18"/>
+            <circle class="removable-ring" cx="163.5" cy="251"   r="18"/>
+            <circle class="removable-ring" cx="163.5" cy="120"   r="18"/>
+            <circle class="removable-ring" cx="207"   cy="163.5" r="18"/>
+            <circle class="removable-ring" cx="207"   cy="207"   r="18"/>
+          </g>
+
+          <!-- Shields removed — mill line alone communicates protection -->
+
+          <!-- Tap targets for removable pieces -->
+          <g class="removable-taps">
+            <circle class="node-tap mill-tap" cx="163.5" cy="32"    r="22" data-removed="O2"/>
+            <circle class="node-tap mill-tap" cx="163.5" cy="295"   r="22" data-removed="O6"/>
+            <circle class="node-tap mill-tap" cx="32"    cy="163.5" r="22" data-removed="O8"/>
+            <circle class="node-tap mill-tap" cx="251"   cy="251"   r="22" data-removed="M5"/>
+            <circle class="node-tap mill-tap" cx="163.5" cy="251"   r="22" data-removed="M6"/>
+            <circle class="node-tap mill-tap" cx="163.5" cy="120"   r="22" data-removed="I2"/>
+            <circle class="node-tap mill-tap" cx="207"   cy="163.5" r="22" data-removed="I4"/>
+            <circle class="node-tap mill-tap" cx="207"   cy="207"   r="22" data-removed="I5"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="action-prompt"><span class="em">MILL</span>— Remove an opponent piece</div>
+    </div>
+
+    <!-- Screen 9 — Game Over (3 variants) -->
+    <div class="screen gameover" data-screen-label="09 Game Over" data-state="win" data-active="false" id="gameover">
+      <div class="confetti" aria-hidden="true" id="confetti"></div>
+      <span class="variant-hint">Variant</span>
+      <div class="variant-pills" id="variant-pills">
+        <button data-variant="win"  class="active">Win</button>
+        <button data-variant="lose">Lose</button>
+        <button data-variant="draw">Draw</button>
+      </div>
+      <div class="go-content">
+        <h1 class="result-title win">Victory</h1>
+        <h1 class="result-title lose">Defeat</h1>
+        <h1 class="result-title draw">Honourable Draw</h1>
+        <p class="result-tag win">Well played, warrior</p>
+        <p class="result-tag lose">Better luck next time, warrior</p>
+        <p class="result-tag draw">A balanced battle</p>
+        <div class="award-card" style="margin: 28px 0px 0px">
+          <div class="award-coin-bar">
+            <span class="coin-icon-md" aria-hidden="true"></span>
+            <span id="go-coins">+25 coins</span>
+          </div>
+          <div class="award-balance">New balance: <span id="go-balance">2,460</span></div>
+        </div>
+        <div class="gameover-actions">
+          <button class="btn btn-primary" id="go-replay">Play Again</button>
+          <button class="btn btn-secondary" id="go-home">Home</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 10 — Leaderboard -->
+    <div class="screen leaderboard" data-screen-label="10 Leaderboard" data-active="false">
+      <div class="home-topbar">
+        <span class="back-arrow" id="lb-back" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </span>
+        <span class="username">@warrior</span>
+        <span class="tier-badge tier-free">Free</span>
+        <span class="topbar-coins"><span class="coin-icon"></span><span>1,240</span></span>
+      </div>
+      <div class="lb-content">
+        <h2 class="lb-title">Leaderboard</h2>
+        <div class="lb-tabs" id="lb-tabs">
+          <button class="lb-tab" data-tab="today">Today</button>
+          <button class="lb-tab active" data-tab="week">This Week</button>
+          <button class="lb-tab" data-tab="all">All Time</button>
+        </div>
+        <div class="pattern-strip" aria-hidden="true"></div>
+        <div class="lb-rows">
+          <div class="lb-row top1"><span class="lb-rank">1</span><span class="lb-avatar">K</span><span class="lb-name">@khaya_king</span><span class="lb-tier tier-gold">Gold</span><span class="lb-wins">247</span></div>
+          <div class="lb-row top2"><span class="lb-rank">2</span><span class="lb-avatar">N</span><span class="lb-name">@noma_warrior</span><span class="lb-tier tier-gold">Gold</span><span class="lb-wins">218</span></div>
+          <div class="lb-row top3"><span class="lb-rank">3</span><span class="lb-avatar">B</span><span class="lb-name">@bo_stone</span><span class="lb-tier tier-silver">Silver</span><span class="lb-wins">195</span></div>
+          <div class="lb-row"><span class="lb-rank">4</span><span class="lb-avatar">Z</span><span class="lb-name">@zana_hunt</span><span class="lb-tier tier-silver">Silver</span><span class="lb-wins">174</span></div>
+          <div class="lb-row"><span class="lb-rank">5</span><span class="lb-avatar">T</span><span class="lb-name">@tau_pride</span><span class="lb-tier tier-bronze">Bronze</span><span class="lb-wins">156</span></div>
+          <div class="lb-row"><span class="lb-rank">6</span><span class="lb-avatar">K</span><span class="lb-name">@kopa_crown</span><span class="lb-tier tier-bronze">Bronze</span><span class="lb-wins">142</span></div>
+          <div class="lb-row"><span class="lb-rank">7</span><span class="lb-avatar">S</span><span class="lb-name">@sankara_k</span><span class="lb-tier tier-bronze">Bronze</span><span class="lb-wins">128</span></div>
+          <div class="lb-row"><span class="lb-rank">8</span><span class="lb-avatar">U</span><span class="lb-name">@ubuntu_mo</span><span class="lb-tier tier-free">Free</span><span class="lb-wins">115</span></div>
+          <div class="lb-self-divider" aria-hidden="true"></div>
+          <div class="lb-row self"><span class="lb-rank">14</span><span class="lb-avatar" id="lb-self-avatar">W</span><span class="lb-name" id="lb-self-name">@warrior</span><span class="lb-tier tier-free">Free</span><span class="lb-wins">42</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Screen 11 — Profile -->
+    <div class="screen profile" data-screen-label="11 Profile" data-active="false">
+      <div class="home-topbar">
+        <span class="back-arrow" id="prof-back" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </span>
+        <span class="username" id="prof-topbar-name">@warrior</span>
+        <span class="tier-badge tier-free">Free</span>
+        <span class="topbar-coins"><span class="coin-icon"></span><span>1,240</span></span>
+      </div>
+      <div class="profile-content">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="prof-avatar">W</div>
+          <span class="tier-badge tier-free avatar-tier">Free</span>
+        </div>
+        <h2 class="profile-name" id="prof-name">@warrior</h2>
+        <p class="profile-region">🇿🇦 South Africa</p>
+        <div class="coin-bar-large" id="prof-coin-bar" role="button" aria-label="Open rewards">
+          <span class="coin-icon"></span>
+          <span class="num">1,240</span>
+          <span class="progress"><span style="width: 62%;"></span></span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><span class="stat-value">42</span><span class="stat-label">Wins</span></div>
+          <div class="stat-card"><span class="stat-value">28</span><span class="stat-label">Losses</span></div>
+          <div class="stat-card"><span class="stat-value">60%</span><span class="stat-label">Win Rate</span></div>
+          <div class="stat-card"><span class="stat-value">5</span><span class="stat-label">Streak</span></div>
+          <div class="stat-card"><span class="stat-value">#14</span><span class="stat-label">Rank</span></div>
+          <div class="stat-card"><span class="stat-value">1.2k</span><span class="stat-label">Coins Earned</span></div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-secondary">Change Avatar</button>
+          <button class="edit-username-link">Edit Username</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 12 — Rewards -->
+    <div class="screen rewards" data-screen-label="12 Rewards" data-active="false">
+      <div class="home-topbar">
+        <span class="back-arrow" id="rew-back" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </span>
+        <span class="username">@warrior</span>
+        <span class="tier-badge tier-free">Free</span>
+        <span class="topbar-coins"><span class="coin-icon"></span><span>1,240</span></span>
+      </div>
+      <div class="rewards-content">
+        <h2 class="rewards-title">Rewards</h2>
+        <div class="coin-bar-large">
+          <span class="coin-icon"></span>
+          <span class="num">1,240</span>
+          <span class="progress"><span style="width: 62%;"></span></span>
+        </div>
+        <div class="coming-soon-card">
+          <svg class="hourglass-icon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2h12M6 22h12M6 2v4c0 3 3 4 6 6 3-2 6-3 6-6V2M6 22v-4c0-3 3-4 6-6 3 2 6 3 6 6v4"/>
+          </svg>
+          <h3 class="coming-soon-title">Coming Soon</h3>
+          <p class="coming-soon-body">Redeem your coins for airtime, data bundles, and exclusive in-game items.</p>
+          <div class="reward-placeholders">
+            <div class="reward-placeholder">
+              <div class="icon-block">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>
+                <span class="lock-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+              </div>
+              <span class="label">Airtime</span>
+            </div>
+            <div class="reward-placeholder">
+              <div class="icon-block">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 6 8 12 8 12s8-6 8-12a8 8 0 0 0-8-8z"/><path d="M8 10h8M8 13h6"/></svg>
+                <span class="lock-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+              </div>
+              <span class="label">Data</span>
+            </div>
+            <div class="reward-placeholder">
+              <div class="icon-block">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.5 9 9 12 2"/></svg>
+                <span class="lock-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+              </div>
+              <span class="label">Exclusive</span>
+            </div>
+          </div>
+        </div>
+        <div class="tier-upgrade-card">
+          <span class="tier-upgrade-text">Upgrade to <strong>GOLD</strong> for more rewards</span>
+          <span class="tier-badge tier-gold">Gold</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 13 — Tutorial (4 steps: placing / mill / moving / flying) -->
+    <div class="screen tutorial" data-screen-label="13 Tutorial" data-state="placing" data-active="false" id="tutorial">
+      <div class="tut-progress" aria-hidden="true">
+        <span class="tut-dot" data-step="placing"></span>
+        <span class="tut-dot" data-step="mill"></span>
+        <span class="tut-dot" data-step="moving"></span>
+        <span class="tut-dot" data-step="flying"></span>
+      </div>
+
+      <div class="tut-card">
+        <!-- PLACING -->
+        <div class="tut-step" data-step="placing">
+          <svg class="tut-board" viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <line x1="84" y1="14" x2="84" y2="70"/><line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/><line x1="98" y1="84" x2="154" y2="84"/>
+            <line x1="14" y1="14" x2="70" y2="70"/><line x1="154" y1="14" x2="98" y2="70"/>
+            <line x1="14" y1="154" x2="70" y2="98"/><line x1="154" y1="154" x2="98" y2="98"/>
+            <g class="tut-pulse" fill="#E8A020" stroke="none">
+              <circle cx="14"  cy="14"  r="5"/>
+              <circle cx="84"  cy="42"  r="5"/>
+              <circle cx="154" cy="84"  r="5"/>
+              <circle cx="42"  cy="126" r="5"/>
+              <circle cx="98"  cy="98"  r="5"/>
+            </g>
+          </svg>
+          <h2 class="tut-title">PLACE YOUR PIECES</h2>
+          <p class="tut-body">Tap any empty point to place your cow on the board. Each player has 12 cows to place.</p>
+        </div>
+        <!-- MILL -->
+        <div class="tut-step" data-step="mill" hidden>
+          <svg class="tut-board" viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <line x1="84" y1="14" x2="84" y2="70"/><line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/><line x1="98" y1="84" x2="154" y2="84"/>
+            <!-- Mill line glow (mid-square top row) -->
+            <line x1="42" y1="42" x2="126" y2="42" stroke="#E8A020" stroke-width="4" opacity="0.85"/>
+            <!-- 3 cream pieces forming the mill -->
+            <g fill="#F5EFE4" stroke="#000" stroke-width="0.8">
+              <circle cx="42"  cy="42" r="7"/>
+              <circle cx="84"  cy="42" r="7"/>
+              <circle cx="126" cy="42" r="7"/>
+            </g>
+            <!-- Charcoal opponent piece with red removable ring -->
+            <circle cx="84" cy="126" r="11" fill="none" stroke="#C8503C" stroke-width="2" stroke-dasharray="3 2"/>
+            <circle cx="84" cy="126" r="7" fill="#1F140C" stroke="#000" stroke-width="0.8"/>
+          </svg>
+          <h2 class="tut-title">FORM A MILL</h2>
+          <p class="tut-body">Get 3 in a row to form a mill, then remove one of your opponent's cows from the board.</p>
+        </div>
+        <!-- MOVING -->
+        <div class="tut-step" data-step="moving" hidden>
+          <svg class="tut-board" viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <line x1="84" y1="14" x2="84" y2="70"/><line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/><line x1="98" y1="84" x2="154" y2="84"/>
+            <!-- 7 cream pieces -->
+            <g fill="#F5EFE4" stroke="#000" stroke-width="0.8">
+              <circle cx="14"  cy="14"  r="7"/>
+              <circle cx="84"  cy="14"  r="7"/>
+              <circle cx="42"  cy="126" r="7"/>
+              <circle cx="84"  cy="126" r="7"/>
+              <circle cx="14"  cy="154" r="7"/>
+              <circle cx="70"  cy="98"  r="7"/>
+              <circle cx="98"  cy="84"  r="7"/>
+            </g>
+            <!-- 6 charcoal pieces + 1 selected -->
+            <g fill="#1F140C" stroke="#000" stroke-width="0.8">
+              <circle cx="154" cy="14"  r="7"/>
+              <circle cx="126" cy="42"  r="7"/>
+              <circle cx="42"  cy="42"  r="7"/>
+              <circle cx="14"  cy="84"  r="7"/>
+              <circle cx="126" cy="126" r="7"/>
+              <circle cx="154" cy="154" r="7"/>
+            </g>
+            <!-- Selected charcoal piece at (84,70) with gold ring -->
+            <circle cx="84" cy="70" r="11" fill="none" stroke="#E8A020" stroke-width="2.5"/>
+            <circle cx="84" cy="70" r="7"  fill="#1F140C" stroke="#000" stroke-width="0.8"/>
+            <!-- Pulsing adjacent empty nodes -->
+            <g class="tut-pulse" fill="#E8A020" stroke="none">
+              <circle cx="70" cy="70" r="5"/>
+              <circle cx="98" cy="70" r="5"/>
+              <circle cx="84" cy="42" r="5"/>
+            </g>
+          </svg>
+          <h2 class="tut-title">MOVE YOUR PIECES</h2>
+          <p class="tut-body">Once all pieces are placed, slide your cows along the lines to adjacent empty spots to keep forming mills.</p>
+        </div>
+        <!-- FLYING -->
+        <div class="tut-step" data-step="flying" hidden>
+          <svg class="tut-board" viewBox="0 0 168 168" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <rect x="14" y="14" width="140" height="140"/>
+            <rect x="42" y="42" width="84" height="84"/>
+            <rect x="70" y="70" width="28" height="28"/>
+            <line x1="84" y1="14" x2="84" y2="70"/><line x1="84" y1="98" x2="84" y2="154"/>
+            <line x1="14" y1="84" x2="70" y2="84"/><line x1="98" y1="84" x2="154" y2="84"/>
+            <!-- Every empty node pulses gold -->
+            <g class="tut-pulse" fill="#E8A020" stroke="none">
+              <circle cx="14"  cy="14"  r="5"/>
+              <circle cx="154" cy="14"  r="5"/>
+              <circle cx="14"  cy="84"  r="5"/>
+              <circle cx="154" cy="84"  r="5"/>
+              <circle cx="14"  cy="154" r="5"/>
+              <circle cx="84"  cy="154" r="5"/>
+              <circle cx="154" cy="154" r="5"/>
+              <circle cx="42"  cy="42"  r="5"/>
+              <circle cx="126" cy="42"  r="5"/>
+              <circle cx="42"  cy="84"  r="5"/>
+              <circle cx="126" cy="84"  r="5"/>
+              <circle cx="42"  cy="126" r="5"/>
+              <circle cx="84"  cy="126" r="5"/>
+              <circle cx="126" cy="126" r="5"/>
+              <circle cx="70"  cy="70"  r="5"/>
+              <circle cx="98"  cy="70"  r="5"/>
+              <circle cx="70"  cy="84"  r="5"/>
+              <circle cx="98"  cy="84"  r="5"/>
+              <circle cx="70"  cy="98"  r="5"/>
+              <circle cx="84"  cy="98"  r="5"/>
+              <circle cx="98"  cy="98"  r="5"/>
+            </g>
+            <!-- 2 plain charcoal pieces -->
+            <g fill="#1F140C" stroke="#000" stroke-width="0.8">
+              <circle cx="84"  cy="14" r="7"/>
+              <circle cx="126" cy="126" r="7"/>
+            </g>
+            <!-- Selected charcoal piece with gold ring -->
+            <circle cx="84" cy="42" r="11" fill="none" stroke="#E8A020" stroke-width="2.5"/>
+            <circle cx="84" cy="42" r="7"  fill="#1F140C" stroke="#000" stroke-width="0.8"/>
+          </svg>
+          <h2 class="tut-title tut-title-flying">FLYING</h2>
+          <p class="tut-body">When reduced to 3 cows, a desperate warrior may jump to any empty point on the board.</p>
+        </div>
+      </div>
+
+      <div class="tut-foot">
+        <button class="btn btn-primary tut-next" id="tut-next">Next</button>
+        <a class="tut-skip" id="tut-skip">Skip Tutorial</a>
+      </div>
+    </div>
+
+    <!-- Screen 14 — Settings -->
+    <div class="screen settings" data-screen-label="14 Settings" data-active="false" id="settings">
+      <div class="home-topbar">
+        <button class="icon-btn" data-back="home" aria-label="Back" style="margin-right:auto;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg>
+        </button>
+        <span class="username">@warrior</span>
+        <span class="tier-badge tier-free">Free</span>
+        <span class="topbar-coins"><span class="coin-icon"></span><span>1,240</span></span>
+      </div>
+
+      <div class="settings-body">
+        <h1 class="settings-title">SETTINGS</h1>
+
+        <div class="settings-list">
+          <div class="settings-row">
+            <span class="set-icon" aria-hidden="true">🔊</span>
+            <span class="set-label">Sound Effects</span>
+            <span class="set-toggle on" data-toggle="sfx" role="switch" aria-checked="true"><span class="set-thumb"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="set-icon" aria-hidden="true">🎵</span>
+            <span class="set-label">Background Music</span>
+            <span class="set-toggle on" data-toggle="music" role="switch" aria-checked="true"><span class="set-thumb"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="set-icon" aria-hidden="true">🌍</span>
+            <span class="set-label">Region</span>
+            <span class="set-dropdown">🇿🇦 South Africa
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 15 L18 9"/></svg>
+            </span>
+          </div>
+          <div class="settings-row">
+            <span class="set-icon" aria-hidden="true">📖</span>
+            <span class="set-label">Tutorial</span>
+            <button class="btn-reset-tut" id="set-reset-tut">Reset Tutorial</button>
+          </div>
+          <div class="settings-row">
+            <span class="set-icon" aria-hidden="true">📋</span>
+            <span class="set-label">Version</span>
+            <span class="set-version">v1.0.0</span>
+          </div>
+          <div class="settings-row clickable">
+            <span class="set-icon" aria-hidden="true">🔒</span>
+            <span class="set-label">Privacy Policy</span>
+            <svg class="set-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 L16 12 L9 19"/></svg>
+          </div>
+          <div class="settings-row clickable">
+            <span class="set-icon" aria-hidden="true">✉️</span>
+            <span class="set-label">Contact Us</span>
+            <svg class="set-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 L16 12 L9 19"/></svg>
+          </div>
+        </div>
+
+        <a class="set-signout">Sign Out</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-indicator" id="screen-indicator">Screen 1 / 4 · Splash</div>
+
+  <script>
+    // ----- Tiny router -----
+    const SCREENS = {
+      splash:     { el: document.querySelector('.splash'),     label: 'Screen 1 / 12 · Splash' },
+      onboarding: { el: document.querySelector('.onboarding'), label: 'Screen 2 / 12 · Onboarding' },
+      home:       { el: document.querySelector('.home'),       label: 'Screen 3 / 12 · Home' },
+      difficulty: { el: document.querySelector('.difficulty'), label: 'Screen 4 / 12 · Difficulty' },
+      online:     { el: document.querySelector('.online'),     label: 'Screen 5 / 12 · Online' },
+      matchmaking:{ el: document.querySelector('.matchmaking'),label: 'Screen 6 / 12 · Matchmaking' },
+      placing:    { el: document.querySelector('.game.placing-state'), label: 'Screen 7B · Placing' },
+      game:       { el: document.querySelector('.game:not(.mill-state):not(.placing-state):not(.flying-state)'), label: 'Screen 7 · Moving' },
+      flying:     { el: document.querySelector('.game.flying-state'),  label: 'Screen 7C · Flying' },
+      mill:       { el: document.querySelector('.game.mill-state'),    label: 'Screen 8 / 12 · Mill' },
+      gameover:   { el: document.querySelector('.gameover'),   label: 'Screen 9 / 12 · Game Over' },
+      leaderboard:{ el: document.querySelector('.leaderboard'),label: 'Screen 10 / 12 · Leaderboard' },
+      profile:    { el: document.querySelector('.profile'),    label: 'Screen 11 / 12 · Profile' },
+      rewards:    { el: document.querySelector('.rewards'),    label: 'Screen 12 / 12 · Rewards' },
+      tutorial:   { el: document.querySelector('.tutorial'),   label: 'Screen 13 / 14 · Tutorial' },
+      settings:   { el: document.querySelector('.settings'),   label: 'Screen 14 / 14 · Settings' },
+    };
+    const indicator = document.getElementById('screen-indicator');
+    function go(name) {
+      Object.entries(SCREENS).forEach(([n, s]) => s.el && (s.el.dataset.active = String(n === name)));
+      if (SCREENS[name]) indicator.textContent = SCREENS[name].label;
+    }
+    window.go = go;
+
+    // Hash- or query-based deep-link (used by the canvas view to pin each iframe to one screen)
+    const _params = new URLSearchParams(location.search);
+    const hashScreen = (_params.get('screen') || location.hash.replace(/^#/, '')).trim();
+    const isCanvas = _params.has('canvas') || !!hashScreen;
+    if (hashScreen && SCREENS[hashScreen]) {
+      go(hashScreen);
+    } else if (!hashScreen) {
+      // Splash auto-advance (normal flow only — never when a screen is pinned via URL)
+      setTimeout(() => go('onboarding'), 2000);
+    }
+    // Canvas variant deep-link: ?screen=matchmaking&variant=invite, ?screen=gameover&variant=lose, etc.
+    const variantParam = (_params.get('variant') || '').trim();
+    if (variantParam) {
+      if (hashScreen === 'matchmaking' && ['quick','invite','private','ai'].includes(variantParam)) {
+        // showVariant is defined further down; defer until after init.
+        setTimeout(() => { try { showVariant(variantParam); } catch(e){} }, 0);
+      } else if (hashScreen === 'gameover' && ['win','lose','draw'].includes(variantParam)) {
+        setTimeout(() => { try { setGOState(variantParam); } catch(e){} }, 0);
+      } else if (hashScreen === 'tutorial' && ['placing','mill','moving','flying'].includes(variantParam)) {
+        setTimeout(() => { try { setTutorialStep(variantParam); } catch(e){} }, 0);
+      }
+    }
+    // In canvas mode, suppress the screen-indicator chip (the artboard already labels it)
+    // and neutralize the body's 24px centering padding so the phone sits at 0,0 of the iframe.
+    if (isCanvas) {
+      const ind = document.getElementById('screen-indicator');
+      if (ind) ind.style.display = 'none';
+      const s = document.createElement('style');
+      s.textContent = 'html,body{background:transparent!important;}body{padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;min-height:100vh!important;width:100%!important;}';
+      document.head.appendChild(s);
+    }
+
+    // ----- Onboarding interactions -----
+    const nameInput = document.getElementById('warrior-name');
+    const tiles = document.querySelectorAll('.avatar-tile');
+    const cta = document.getElementById('ob-cta');
+    const state = { name: '', avatar: null };
+
+    function refreshCta() {
+      cta.disabled = !(state.name.trim().length >= 2 && state.avatar);
+    }
+    nameInput.addEventListener('input', e => { state.name = e.target.value; refreshCta(); });
+    tiles.forEach(t => t.addEventListener('click', () => {
+      tiles.forEach(x => { x.classList.remove('selected'); x.setAttribute('aria-checked','false'); });
+      t.classList.add('selected');
+      t.setAttribute('aria-checked','true');
+      state.avatar = t.dataset.avatar;
+      refreshCta();
+    }));
+    cta.addEventListener('click', () => {
+      if (cta.disabled) return;
+      // Personalize the home screen with onboarding choices
+      const display = state.name.trim();
+      document.getElementById('home-username').textContent = '@' + display.toLowerCase().replace(/\s+/g,'_').slice(0, 14);
+      go('home');
+    });
+
+    // ----- Home interactions -----
+    document.querySelectorAll('.home [data-route]').forEach(el => {
+      el.addEventListener('click', () => {
+        const r = el.dataset.route;
+        if (r === 'difficulty')  go('difficulty');
+        else if (r === 'online') go('online');
+        else if (r === 'settings') go('settings');
+        else if (r === 'profile')  go('profile');
+        else if (r === 'leaderboard') go('leaderboard');
+        else console.log('[home] route not built:', r);
+      });
+    });
+
+    // ----- Generic back buttons -----
+    document.querySelectorAll('[data-back]').forEach(el => {
+      el.addEventListener('click', () => go(el.dataset.back));
+    });
+
+    // ----- Online mode → matchmaking variants -----
+    const mmTitle   = document.getElementById('mm-title');
+    const mmTimerEl = document.getElementById('mm-timer');
+    const mmCancel  = document.getElementById('mm-cancel');
+    const mmQuick   = document.querySelector('.mm-quick');
+    const mmInvite  = document.querySelector('.mm-invite');
+    const mmPrivate = document.querySelector('.mm-private');
+    let mmTickHandle = null;
+
+    const mmStatusEl = document.querySelector('.mm-quick .mm-status');
+    function showVariant(which) {
+      const isInvite  = which === 'invite';
+      const isPrivate = which === 'private';
+      mmQuick.hidden   = isInvite || isPrivate;
+      mmInvite.hidden  = !isInvite;
+      mmPrivate.hidden = !isPrivate;
+      if (which === 'ai') {
+        mmTitle.textContent = 'Preparing Match';
+        mmStatusEl.textContent = 'Setting up your opponent…';
+        mmTimerEl.style.display = 'none';
+      } else if (isInvite) {
+        mmTitle.textContent = 'Invite Friend';
+      } else if (isPrivate) {
+        mmTitle.textContent = 'Join Private Match';
+      } else {
+        mmTitle.textContent = 'Finding Opponent';
+        mmStatusEl.textContent = 'Searching for a worthy warrior…';
+        mmTimerEl.style.display = '';
+      }
+    }
+    function startTimer() {
+      stopTimer();
+      let t = 0;
+      mmTimerEl.textContent = '0:00';
+      mmTickHandle = setInterval(() => {
+        t++;
+        const m = Math.floor(t / 60);
+        const s = String(t % 60).padStart(2, '0');
+        mmTimerEl.textContent = m + ':' + s;
+      }, 1000);
+    }
+    function stopTimer() {
+      if (mmTickHandle) { clearInterval(mmTickHandle); mmTickHandle = null; }
+    }
+
+    document.querySelectorAll('.mode-card').forEach(c => c.addEventListener('click', () => {
+      const mode = c.dataset.mode;
+      if (mode === 'quick')       { showVariant('quick');  startTimer(); go('matchmaking'); }
+      else if (mode === 'invite') { showVariant('invite'); stopTimer();  go('matchmaking'); }
+      else                        { console.log('[online] mode not built:', mode); }
+    }));
+    mmCancel.addEventListener('click', () => { stopTimer(); go('online'); });
+
+    // ----- Difficulty interactions -----
+    const diffCards = document.querySelectorAll('.diff-card');
+    const diffCta = document.getElementById('diff-cta');
+    let chosenDifficulty = null;
+    diffCards.forEach(c => c.addEventListener('click', () => {
+      diffCards.forEach(x => { x.classList.remove('selected'); x.setAttribute('aria-checked','false'); });
+      c.classList.add('selected');
+      c.setAttribute('aria-checked','true');
+      chosenDifficulty = c.dataset.difficulty;
+      diffCta.disabled = false;
+    }));
+    diffCta.addEventListener('click', () => {
+      if (diffCta.disabled) return;
+      console.log('[router] difficulty → ai match', chosenDifficulty);
+      showVariant('ai');
+      stopTimer();
+      go('matchmaking');
+      setTimeout(() => { if (SCREENS.matchmaking.el.dataset.active === 'true') showPhaseTransition('Placing', 'placing'); }, 1800);
+    });
+    document.getElementById('diff-back').addEventListener('click', () => go('home'));
+
+    // ----- Screen 7 → Screen 8 (mill demo): tap a pulsing piece -----
+    document.querySelectorAll('.game:not(.mill-state) .taps .node-tap').forEach(c => {
+      c.addEventListener('click', () => {
+        const x = c.getAttribute('cx'), y = c.getAttribute('cy');
+        // Pulsing nodes are at O5(295,295), I1(120,120), M7(76,251).
+        const pulsingPieces = [['76','251'], ['120','120'], ['163.5','207']];
+        if (pulsingPieces.some(([px, py]) => px === x && py === y)) {
+          go('mill');
+        }
+      });
+    });
+
+    // ----- Screen 8: tap a removable piece → back to game -----
+    document.querySelectorAll('.mill-tap').forEach(c => {
+      c.addEventListener('click', () => {
+        console.log('[mill] removed', c.dataset.removed);
+        go('gameover');
+      });
+    });
+
+    // ----- Phase transition overlay -----
+    const ptOverlay = document.getElementById('phase-transition-overlay');
+    const ptName    = document.getElementById('phase-transition-name');
+    function showPhaseTransition(nextPhase, nextScreen) {
+      ptName.textContent = nextPhase;
+      const activeScreen = document.querySelector('.screen[data-active="true"]');
+      if (activeScreen) activeScreen.appendChild(ptOverlay);
+      ptOverlay.classList.add('show');
+      setTimeout(() => { ptOverlay.classList.remove('show'); go(nextScreen); }, 1500);
+    }
+
+    // ----- Game phase action prompts → next phase via transition -----
+    document.getElementById('placing-prompt').style.cursor = 'pointer';
+    document.getElementById('placing-prompt').addEventListener('click', () => showPhaseTransition('Moving', 'game'));
+    document.getElementById('action-prompt').style.cursor = 'pointer';
+    document.getElementById('action-prompt').addEventListener('click', () => showPhaseTransition('Flying', 'flying'));
+    document.getElementById('flying-prompt').style.cursor = 'pointer';
+    document.getElementById('flying-prompt').addEventListener('click', () => go('gameover'));
+    // Mill action prompt → game over
+    document.querySelectorAll('.game.mill-state .action-prompt').forEach(p => {
+      p.style.cursor = 'pointer';
+      p.addEventListener('click', () => go('gameover'));
+    });
+
+    // ----- Tutorial: 4-step variant switcher -----
+    const tutorialEl = document.getElementById('tutorial');
+    const TUT_STEPS = ['placing','mill','moving','flying'];
+    function setTutorialStep(step) {
+      if (!TUT_STEPS.includes(step)) return;
+      tutorialEl.dataset.state = step;
+      tutorialEl.querySelectorAll('.tut-step').forEach(el => el.hidden = el.dataset.step !== step);
+      const isLast = step === 'flying';
+      document.getElementById('tut-next').textContent = isLast ? 'Done' : 'Next';
+    }
+    document.getElementById('tut-next').addEventListener('click', () => {
+      const cur = tutorialEl.dataset.state;
+      const idx = TUT_STEPS.indexOf(cur);
+      if (idx < 0 || idx === TUT_STEPS.length - 1) { go('home'); return; }
+      setTutorialStep(TUT_STEPS[idx + 1]);
+    });
+    document.getElementById('tut-skip').addEventListener('click', () => go('home'));
+    document.getElementById('set-reset-tut').addEventListener('click', () => {
+      setTutorialStep('placing');
+      go('tutorial');
+    });
+
+    // ----- Game Over: variant switcher -----
+    const gameover = document.getElementById('gameover');
+    const RESULTS = {
+      win:  { coins: '+25 coins', balance: '2,460' },
+      lose: { coins: '0 coins',   balance: null    },
+      draw: { coins: '+5 coins',  balance: '2,440' },
+    };
+    function setGOState(v) {
+      gameover.dataset.state = v;
+      document.querySelectorAll('#variant-pills button').forEach(b => b.classList.toggle('active', b.dataset.variant === v));
+      document.getElementById('go-coins').textContent = RESULTS[v].coins;
+      const balRow = document.querySelector('.award-balance');
+      if (RESULTS[v].balance) {
+        document.getElementById('go-balance').textContent = RESULTS[v].balance;
+        balRow.style.display = '';
+      } else {
+        balRow.style.display = 'none';
+      }
+    }
+    document.querySelectorAll('#variant-pills button').forEach(b => {
+      b.addEventListener('click', () => setGOState(b.dataset.variant));
+    });
+    document.getElementById('go-replay').addEventListener('click', () => showPhaseTransition('Placing', 'placing'));
+    document.getElementById('go-home').addEventListener('click', () => go('home'));
+
+    // ----- Confetti generator -----
+    (function buildConfetti() {
+      const wrap = document.getElementById('confetti');
+      const palette = ['#E8A020', '#F4B53A', '#FFD466', '#F5EFE4'];
+      for (let i = 0; i < 70; i++) {
+        const piece = document.createElement('i');
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.background = palette[i % palette.length];
+        const dur = 2.0 + Math.random() * 1.8;
+        piece.style.animationDuration = dur + 's';
+        piece.style.animationDelay = (-Math.random() * dur) + 's';
+        piece.style.width = (5 + Math.random() * 5) + 'px';
+        piece.style.height = (8 + Math.random() * 8) + 'px';
+        piece.style.opacity = (0.65 + Math.random() * 0.35).toFixed(2);
+        wrap.appendChild(piece);
+      }
+    })();
+
+    // ----- Leaderboard tabs + back -----
+    document.querySelectorAll('#lb-tabs .lb-tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('#lb-tabs .lb-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+      });
+    });
+    document.getElementById('lb-back').addEventListener('click', () => go('home'));
+
+    // ----- Personalize leaderboard self row from onboarding -----
+    function personalizeLeaderboard() {
+      const u = localStorage.getItem('mb-username');
+      if (u) {
+        document.getElementById('lb-self-name').textContent = '@' + u.toLowerCase().replace(/\s+/g, '_');
+        document.getElementById('lb-self-avatar').textContent = u[0].toUpperCase();
+      }
+    }
+    personalizeLeaderboard();
+
+    // ----- Profile + Rewards wiring -----
+    document.getElementById('prof-back').addEventListener('click', () => go('home'));
+    document.getElementById('rew-back').addEventListener('click', () => go('home'));
+    document.getElementById('prof-coin-bar').addEventListener('click', () => go('rewards'));
+
+    // Personalize profile from onboarding
+    function personalizeProfile() {
+      const u = localStorage.getItem('mb-username');
+      if (u) {
+        const handle = '@' + u.toLowerCase().replace(/\s+/g, '_');
+        document.getElementById('prof-name').textContent = handle;
+        document.getElementById('prof-topbar-name').textContent = handle;
+        document.getElementById('prof-avatar').textContent = u[0].toUpperCase();
+      }
+    }
+    personalizeProfile();
+  </script>
+
+  <div id="tweaks-panel" style="display:none; position:fixed; bottom:16px; right:16px; width:260px; background:#1F1812; border:1px solid #6E5634; border-radius:10px; padding:14px; font-family:'Poppins',sans-serif; color:#F5EFE4; z-index:1000; box-shadow:0 12px 32px rgba(0,0,0,.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <span style="font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:#E8A020; font-weight:700;">Tweaks</span>
+      <button id="tweaks-close" style="background:none; border:none; color:#F5EFE4; font-size:18px; cursor:pointer; padding:0; line-height:1;">×</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#A89878; margin-bottom:6px;">Gold accent</div>
+      <div id="tw-gold" style="display:flex; gap:6px;">
+        <button data-gold="#E8A020" style="width:32px; height:32px; border-radius:50%; background:#E8A020; border:2px solid #F4B53A; cursor:pointer;"></button>
+        <button data-gold="#C7791C" style="width:32px; height:32px; border-radius:50%; background:#C7791C; border:2px solid transparent; cursor:pointer;"></button>
+        <button data-gold="#F4D27C" style="width:32px; height:32px; border-radius:50%; background:#F4D27C; border:2px solid transparent; cursor:pointer;"></button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px;">
+        <input type="checkbox" id="tw-patterns" checked> Show pattern strips
+      </label>
+    </div>
+    <div>
+      <div style="font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#A89878; margin-bottom:6px;">Jump to screen</div>
+      <select id="tw-start" style="width:100%; padding:6px 8px; background:#2A2018; color:#F5EFE4; border:1px solid #6E5634; border-radius:6px; font-family:inherit; font-size:12px;">
+        <option value="splash">Splash</option>
+        <option value="home">Home</option>
+        <option value="placing">Placing</option>
+        <option value="game">Moving</option>
+        <option value="flying">Flying</option>
+        <option value="mill">Mill</option>
+        <option value="gameover">Game Over</option>
+      </select>
+    </div>
+  </div>
+
+  <script>
+    const TWEAKS = /*EDITMODE-BEGIN*/{
+      "gold": "#E8A020",
+      "patterns": true,
+      "startScreen": "splash"
+    }/*EDITMODE-END*/;
+    const tPanel = document.getElementById('tweaks-panel');
+    function applyTweaks(t){
+      document.documentElement.style.setProperty('--gold', t.gold);
+      document.querySelectorAll('.pattern-strip, .splash-bg-pattern').forEach(el => el.style.display = t.patterns ? '' : 'none');
+    }
+    function setTweak(k, v){ TWEAKS[k]=v; applyTweaks(TWEAKS); try{window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[k]:v}}, '*');}catch(e){} }
+    applyTweaks(TWEAKS);
+    if (!isCanvas && TWEAKS.startScreen && TWEAKS.startScreen !== 'splash' && window.go) {
+      setTimeout(() => window.go(TWEAKS.startScreen), 80);
+    }
+    window.addEventListener('message', (e) => {
+      const d = e.data || {};
+      if (d.type === '__activate_edit_mode') tPanel.style.display = 'block';
+      if (d.type === '__deactivate_edit_mode') tPanel.style.display = 'none';
+    });
+    try{ window.parent.postMessage({type:'__edit_mode_available'}, '*'); }catch(e){}
+    document.getElementById('tweaks-close').addEventListener('click', () => {
+      tPanel.style.display='none';
+      try{ window.parent.postMessage({type:'__edit_mode_dismissed'}, '*'); }catch(e){}
+    });
+    document.querySelectorAll('#tw-gold button').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#tw-gold button').forEach(x => x.style.border='2px solid transparent');
+        b.style.border='2px solid #F4B53A';
+        setTweak('gold', b.dataset.gold);
+      });
+    });
+    document.getElementById('tw-patterns').addEventListener('change', e => setTweak('patterns', e.target.checked));
+    document.getElementById('tw-start').value = TWEAKS.startScreen;
+    document.getElementById('tw-start').addEventListener('change', e => setTweak('startScreen', e.target.value));
+  </script>
+</body>
+</html>

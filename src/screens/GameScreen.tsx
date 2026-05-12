@@ -1,22 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Board } from '../components/Board';
 import { useGameStore } from '../store/gameStore';
 import { useProfileStore } from '../store/profileStore';
 import {
-  PhasePill,
-  TokenP1,
-  TokenP2,
-  Avatar,
-  CoinBar,
-  PrimaryButton,
-  SecondaryButton,
+  PhoneFrame, TokenP1, TokenP2, TierBadge,
+  PrimaryButton, SecondaryButton, CoinIcon,
 } from '../components/ui/Primitives';
 import { useAiOpponent } from '../hooks/useAiOpponent';
 import { coinReward } from '../lib/profile';
 
-interface GameScreenProps {
-  onExit: () => void;
-}
+interface GameScreenProps { onExit: () => void; }
 
 export function GameScreen({ onExit }: GameScreenProps) {
   const state = useGameStore();
@@ -29,168 +22,329 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
   useAiOpponent();
 
-  // Award coins exactly once when the game completes
+  const [phaseToast, setPhaseToast] = useState<string | null>(null);
+  const lastPhaseRef = useMemo(() => ({ current: state.phase }), []); // never resets across re-renders
+
+  // Show a 1.5s phase-transition overlay on placing→moving and moving→flying
+  useEffect(() => {
+    const prev = lastPhaseRef.current;
+    if (prev !== state.phase) {
+      if ((prev === 'placing' && state.phase === 'moving') ||
+          (prev === 'moving' && state.phase === 'flying')) {
+        setPhaseToast(state.phase === 'flying' ? 'Flying' : 'Moving');
+        const t = setTimeout(() => setPhaseToast(null), 1500);
+        lastPhaseRef.current = state.phase;
+        return () => clearTimeout(t);
+      }
+      lastPhaseRef.current = state.phase;
+    }
+  }, [state.phase, lastPhaseRef]);
+
+  // Award coins once at game completion
+  const [awarded, setAwarded] = useState(false);
   useEffect(() => {
     if (!state.winner && !state.isDraw) return;
-    if (!profile) return;
-
-    const gameOver = state.winner || state.isDraw;
-    if (!gameOver) return;
+    if (awarded) return;
+    if (!profile) { setAwarded(true); return; }
 
     const humanWon = state.winner === state.humanPlayer;
     const isLocalOrAi = state.mode === 'local' || state.mode.startsWith('ai_');
 
     if (humanWon && isLocalOrAi) {
       let reward = coinReward(state.mode);
-      if (state.mode.startsWith('ai_')) reward = Math.round(reward); // already correct
       if (profile.streak + 1 >= 3) reward += 5;
       addCoins(reward);
       recordWin();
     } else if (!state.isDraw && state.mode.startsWith('ai_')) {
       recordLoss();
-    } else if (!state.isDraw && state.mode === 'local') {
-      // No streak penalty for losing local pass-and-play
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.winner, state.isDraw]);
+    setAwarded(true);
+  }, [state.winner, state.isDraw, awarded, profile, addCoins, recordWin, recordLoss, state.mode, state.humanPlayer]);
 
-  const phaseLabel: Record<string, string> = {
-    placing: 'Placing',
-    moving: 'Moving',
-    flying: 'Flying',
-    removing: 'Capture!',
-  };
+  const phaseLabel = state.phase === 'removing' ? 'Remove 1 Piece'
+    : state.phase === 'placing' ? 'Placing'
+    : state.phase === 'flying'  ? 'Flying'
+    : 'Moving';
 
-  const prompt = state.winner
-    ? state.winner === state.humanPlayer || state.mode === 'local'
-      ? `${state.winner === 'p1' ? 'Player 1' : 'Player 2'} wins!`
-      : 'You lost — better luck next time!'
-    : state.isDraw
-    ? "It's a draw!"
-    : state.phase === 'removing'
-    ? `Take an opponent's piece (${state.removalsPending} left)`
-    : state.phase === 'placing'
-    ? state.mode === 'local'
-      ? `${state.currentPlayer === 'p1' ? 'Player 1' : 'Player 2'} — tap a node to place`
-      : state.currentPlayer === state.humanPlayer
-      ? 'Tap a node to place your token'
-      : 'Opponent is thinking…'
-    : state.selectedNode === null
-    ? state.currentPlayer === state.humanPlayer || state.mode === 'local'
-      ? 'Select a token to move'
-      : 'Opponent is thinking…'
-    : 'Tap a highlighted spot to move';
+  const isMill = state.phase === 'removing';
+
+  const opponentName = state.mode === 'local' ? 'Player 2' : state.mode.startsWith('ai_') ? 'AI' : '@opponent';
+
+  const prompt = useMemo(() => {
+    if (state.winner || state.isDraw) return '';
+    if (state.phase === 'removing') return ['MILL', 'Remove an opponent piece'];
+    if (state.phase === 'placing') {
+      return state.mode === 'local'
+        ? `${state.currentPlayer === 'p1' ? 'Player 1' : 'Player 2'} — tap to place`
+        : state.currentPlayer === state.humanPlayer ? 'Place your piece' : 'Opponent is thinking…';
+    }
+    if (state.selectedNode === null) {
+      return state.currentPlayer === state.humanPlayer || state.mode === 'local'
+        ? 'Select a piece to move'
+        : 'Opponent is thinking…';
+    }
+    return state.phase === 'flying'
+      ? 'Choose any empty point to fly to'
+      : 'Tap a highlighted spot to move';
+  }, [state.phase, state.selectedNode, state.currentPlayer, state.humanPlayer, state.mode, state.winner, state.isDraw]);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-4 pt-4 pb-2">
-        <button onClick={onExit} className="text-cream/90 text-2xl px-2 py-1" aria-label="Back">‹</button>
-        <PhasePill>{phaseLabel[state.phase]}</PhasePill>
-        {profile ? <CoinBar coins={profile.coins} /> : <span />}
-      </header>
-
-      {/* Player headers + capture trays */}
-      <div className="px-4 mt-1 grid grid-cols-2 gap-3">
-        <PlayerCard
-          name={state.mode === 'local' ? 'Player 1' : profile?.username ?? 'You'}
-          isActive={state.currentPlayer === 'p1'}
-          token="p1"
-          captured={state.capturedBy.p1}
-          onBoard={state.piecesOnBoard.p1}
-          inHand={state.piecesToPlace.p1}
-        />
-        <PlayerCard
-          name={state.mode === 'local' ? 'Player 2' : state.mode.startsWith('ai_') ? 'AI' : 'Opponent'}
-          isActive={state.currentPlayer === 'p2'}
-          token="p2"
-          captured={state.capturedBy.p2}
-          onBoard={state.piecesOnBoard.p2}
-          inHand={state.piecesToPlace.p2}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center">
-        <Board interactive={!state.winner && !state.isDraw} />
-      </div>
-
-      <div className="px-4 pb-6">
-        <div className="card px-4 py-3 text-center">
-          <p className="text-cream/95 text-sm font-medium">{prompt}</p>
+    <PhoneFrame>
+      <div className="screen game" style={{ flex: 1, padding: 0, position: 'relative' }}>
+        {/* Player strip */}
+        <div className="game-strip">
+          <div className={`game-side left ${state.currentPlayer === 'p1' ? '' : 'inactive'}`}>
+            {state.currentPlayer === 'p1' && <span className="active-arrow" />}
+            <TokenP1 size={36} />
+            <PlayerMeta
+              name={profile?.username ?? '@you'}
+              tier={profile?.tier ?? 'free'}
+              phase={state.phase}
+              piecesOnBoard={state.piecesOnBoard.p1}
+              piecesToPlace={state.piecesToPlace.p1}
+              captured={state.capturedBy.p1}
+              isFlying={state.piecesOnBoard.p1 === 3 && state.phase !== 'placing'}
+              who="p1"
+            />
+          </div>
+          <div className="vsep" aria-hidden />
+          <div className={`game-side right ${state.currentPlayer === 'p2' ? '' : 'inactive'}`}>
+            {state.currentPlayer === 'p2' && <span className="active-arrow" />}
+            <TokenP2 size={36} />
+            <PlayerMeta
+              name={opponentName}
+              tier="bronze"
+              phase={state.phase}
+              piecesOnBoard={state.piecesOnBoard.p2}
+              piecesToPlace={state.piecesToPlace.p2}
+              captured={state.capturedBy.p2}
+              isFlying={state.piecesOnBoard.p2 === 3 && state.phase !== 'placing'}
+              who="p2"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Pass-and-play handoff */}
-      {state.showHandoff && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center" onClick={dismissHandoff}>
-          <div className="display-font text-3xl text-gold mb-3">Hand the phone to</div>
-          <div className="display-font text-5xl text-cream mb-6">
-            {state.currentPlayer === 'p1' ? 'Player 1' : 'Player 2'}
-          </div>
-          <div className="mb-6">
+        {/* Phase pill */}
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0 10px' }}>
+          <span className={`game-phase ${isMill ? 'removing' : state.phase}`}>{phaseLabel}</span>
+        </div>
+
+        {/* Board */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '0 24px', flex: 1, alignItems: 'center' }}>
+          <Board interactive={!state.winner && !state.isDraw} />
+        </div>
+
+        {/* Action prompt */}
+        <div className={`action-prompt ${isMill ? 'mill' : ''}`}>
+          {Array.isArray(prompt) ? (
+            <span><span className="em">{prompt[0]}</span>— {prompt[1]}</span>
+          ) : prompt}
+        </div>
+
+        {/* Top-left back button (over phone frame chrome) */}
+        <button
+          onClick={onExit}
+          aria-label="Exit"
+          style={{
+            position: 'absolute', top: 50, left: 12, zIndex: 30,
+            background: 'rgba(0,0,0,.35)', border: '1px solid var(--gold-dark)',
+            borderRadius: 10, width: 36, height: 36,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--gold)', cursor: 'pointer', padding: 0,
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 5 L8 12 L15 19" />
+          </svg>
+        </button>
+
+        {/* Pass-and-play handoff overlay */}
+        {state.showHandoff && (
+          <div
+            onClick={dismissHandoff}
+            style={{
+              position: 'absolute', inset: 0, zIndex: 60,
+              background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(4px)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              padding: 32, textAlign: 'center', cursor: 'pointer',
+            }}
+          >
+            <div style={{ fontWeight: 900, letterSpacing: '0.12em', fontSize: 18, color: 'var(--gold)', textTransform: 'uppercase' }}>
+              Hand the phone to
+            </div>
+            <div style={{ fontWeight: 900, fontSize: 48, color: 'var(--cream)', margin: '8px 0 18px', letterSpacing: '0.08em' }}>
+              {state.currentPlayer === 'p1' ? 'Player 1' : 'Player 2'}
+            </div>
             {state.currentPlayer === 'p1' ? <TokenP1 size={80} /> : <TokenP2 size={80} />}
+            <p style={{ color: 'var(--sand)', marginTop: 16, fontSize: 14 }}>Tap anywhere to continue</p>
           </div>
-          <p className="text-cream/80 mb-6">Tap anywhere to continue</p>
+        )}
+
+        {/* Phase transition overlay */}
+        {phaseToast && (
+          <div className="phase-transition">
+            <span className="pt-label">Phase change</span>
+            <span className="pt-name">{phaseToast}</span>
+          </div>
+        )}
+
+        {/* Game over */}
+        {(state.winner || state.isDraw) && (
+          <GameOverOverlay
+            winner={state.winner}
+            isDraw={state.isDraw}
+            humanPlayer={state.humanPlayer}
+            mode={state.mode}
+            coins={profile?.coins ?? 0}
+            onReplay={() => { setAwarded(false); newGame(state.mode, state.humanPlayer); }}
+            onHome={onExit}
+          />
+        )}
+      </div>
+    </PhoneFrame>
+  );
+}
+
+interface PlayerMetaProps {
+  name: string;
+  tier: string;
+  phase: string;
+  piecesOnBoard: number;
+  piecesToPlace: number;
+  captured: number;
+  isFlying: boolean;
+  who: 'p1' | 'p2';
+}
+function PlayerMeta({ name, tier, phase, piecesOnBoard, piecesToPlace, captured, isFlying, who }: PlayerMetaProps) {
+  const handle = name.startsWith('@') || name.includes(' ') ? name : `@${name.toLowerCase().replace(/\s+/g, '_')}`;
+  return (
+    <div className="player-meta">
+      <div className="name-row">
+        <span className="username">{handle}</span>
+        <TierBadge tier={tier} />
+        {isFlying && <span className="flying-badge">Flying</span>}
+      </div>
+      <span className={`onboard ${isFlying ? 'flying-red' : ''}`}>
+        {phase === 'placing' ? `To place: ${piecesToPlace}` : `On board: ${piecesOnBoard}`}
+      </span>
+      {phase === 'placing' && piecesToPlace > 0 && (
+        <div className="hand-pips" aria-hidden>
+          {Array.from({ length: Math.min(piecesToPlace, 12) }).map((_, i) => (
+            <span key={i} className={`hand-pip ${who === 'p1' ? 'dark' : 'light'}`} />
+          ))}
         </div>
       )}
-
-      {/* Game over */}
-      {(state.winner || state.isDraw) && (
-        <div className="fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
-          <div className="card p-6 w-full max-w-sm text-center">
-            <div className="display-font text-3xl text-gold mb-2">
-              {state.isDraw ? 'Draw' : state.winner === state.humanPlayer || state.mode === 'local' ? 'Victory' : 'Defeat'}
-            </div>
-            <p className="text-cream/90 mb-4">
-              {state.isDraw
-                ? 'Mutual blockade — no winner.'
-                : state.winner === 'p1' ? 'Player 1 wins!' : 'Player 2 wins!'}
-            </p>
-            {!state.isDraw && state.winner === state.humanPlayer && (state.mode === 'local' || state.mode.startsWith('ai_')) && (
-              <p className="text-gold text-sm mb-4">+{coinReward(state.mode)}{profile && profile.streak >= 3 ? ' + 5 streak' : ''} coins awarded</p>
-            )}
-            <div className="space-y-2">
-              <PrimaryButton onClick={() => newGame(state.mode, state.humanPlayer)}>Play again</PrimaryButton>
-              <SecondaryButton onClick={onExit}>Home</SecondaryButton>
-            </div>
-          </div>
+      {phase !== 'placing' && captured > 0 && (
+        <div className="captured" aria-hidden>
+          {Array.from({ length: captured }).map((_, i) => (
+            <span key={i} className={`pip ${who === 'p1' ? 'light' : 'dark'}`} />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-interface PlayerCardProps {
-  name: string;
-  isActive: boolean;
-  token: 'p1' | 'p2';
-  captured: number;
-  onBoard: number;
-  inHand: number;
+interface GameOverProps {
+  winner: 'p1' | 'p2' | null;
+  isDraw: boolean;
+  humanPlayer: 'p1' | 'p2';
+  mode: string;
+  coins: number;
+  onReplay: () => void;
+  onHome: () => void;
 }
-function PlayerCard({ name, isActive, token, captured, onBoard, inHand }: PlayerCardProps) {
+function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, onHome }: GameOverProps) {
+  const isWin = !isDraw && winner === humanPlayer;
+  const isLose = !isDraw && winner && winner !== humanPlayer;
+
+  const variant = isDraw ? 'draw' : isWin ? 'win' : 'lose';
+  const reward = isWin && (mode === 'local' || mode.startsWith('ai_')) ? coinReward(mode as 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online') : 0;
+
+  const title = isDraw ? 'Honourable Draw' : isWin ? 'Victory' : 'Defeat';
+  const tagline = isDraw ? 'A balanced battle'
+    : isWin ? 'Well played, warrior' : 'Better luck next time, warrior';
+
+  const titleStyle: React.CSSProperties = isWin
+    ? { fontSize: 48, color: 'var(--gold)', textShadow: '0 0 22px rgba(232,160,32,.65), 0 4px 8px rgba(0,0,0,.5)' }
+    : isLose
+    ? { fontSize: 48, color: '#C8C8C8', textShadow: '0 0 16px rgba(220,220,220,.3), 0 4px 8px rgba(0,0,0,.5)' }
+    : { fontSize: 36, color: 'var(--sand)', textShadow: '0 4px 8px rgba(0,0,0,.5)' };
+
   return (
-    <div className={`card px-3 py-2 ${isActive ? 'ring-2 ring-gold' : 'opacity-80'}`}>
-      <div className="flex items-center gap-2">
-        <Avatar id={token === 'p1' ? 1 : 4} size={36} />
-        <div className="flex-1 min-w-0">
-          <div className="truncate text-cream text-sm font-semibold">{name}</div>
-          <div className="flex items-center gap-2 text-[10px] text-cream/70">
-            <span>{onBoard} on board</span>
-            <span>{inHand} in hand</span>
+    <div
+      className="screen gameover"
+      data-state={variant}
+      style={{
+        position: 'absolute', inset: 0, zIndex: 70,
+        background: 'linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%)',
+      }}
+    >
+      {isWin && <ConfettiLayer />}
+      <div style={{
+        position: 'relative', zIndex: 2,
+        width: '100%', height: '100%',
+        padding: '88px 24px 24px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
+      }}>
+        <h1 className="h-display" style={{ ...titleStyle, margin: 0 }}>{title}</h1>
+        <p style={{ fontStyle: 'italic', fontSize: 16, color: 'var(--cream)', margin: '12px 0 0', textAlign: 'center' }}>
+          {tagline}
+        </p>
+
+        {reward > 0 && (
+          <div style={{
+            width: 327, marginTop: 28,
+            background: 'var(--card)', border: '1.5px solid var(--gold)',
+            borderRadius: 16, padding: '12px 18px',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
+            boxShadow: '0 0 24px rgba(232,160,32,.18), 0 8px 16px rgba(0,0,0,.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900, fontSize: 22, color: 'var(--gold-bright)', letterSpacing: '0.04em' }}>
+              <span className="coin-icon-md" />
+              <span>+{reward} coins</span>
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--sand)' }}>
+              New balance: <span>{(coins + reward).toLocaleString()}</span>
+            </div>
           </div>
+        )}
+
+        <div style={{ width: 327, display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
+          <PrimaryButton onClick={onReplay}>Play Again</PrimaryButton>
+          <SecondaryButton onClick={onHome}>Home</SecondaryButton>
         </div>
-        {token === 'p1' ? <TokenP1 size={20} /> : <TokenP2 size={20} />}
       </div>
-      <div className="mt-1.5 flex items-center gap-1 min-h-[14px]">
-        {Array.from({ length: captured }).map((_, i) => (
-          <span
-            key={i}
-            className={`inline-block w-2.5 h-2.5 rounded-full ${token === 'p1' ? 'token-p2' : 'token-p1'}`}
-            aria-hidden
-          />
-        ))}
-      </div>
+    </div>
+  );
+}
+
+function ConfettiLayer() {
+  const palette = ['#E8A020', '#F4B53A', '#FFD466', '#F5EFE4'];
+  const pieces = Array.from({ length: 70 }, (_, i) => ({
+    left: `${Math.random() * 100}%`,
+    bg: palette[i % palette.length],
+    dur: (2.0 + Math.random() * 1.8).toFixed(2),
+    delay: (-Math.random() * 3).toFixed(2),
+    w: (5 + Math.random() * 5).toFixed(1),
+    h: (8 + Math.random() * 8).toFixed(1),
+    opacity: (0.65 + Math.random() * 0.35).toFixed(2),
+  }));
+  return (
+    <div className="confetti" aria-hidden>
+      {pieces.map((p, i) => (
+        <i
+          key={i}
+          style={{
+            left: p.left, background: p.bg,
+            animationDuration: `${p.dur}s`,
+            animationDelay: `${p.delay}s`,
+            width: `${p.w}px`, height: `${p.h}px`,
+            opacity: Number(p.opacity),
+          }}
+        />
+      ))}
     </div>
   );
 }
