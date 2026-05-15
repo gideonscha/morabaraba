@@ -92,37 +92,61 @@ export function GameScreen({ onExit }: GameScreenProps) {
     <PhoneFrame>
       <div className="screen game" style={{ flex: 1, padding: 0, position: 'relative' }}>
         {/* Player strip */}
-        <div className="game-strip">
-          <div className={`game-side left ${state.currentPlayer === 'p1' ? '' : 'inactive'}`}>
-            {state.currentPlayer === 'p1' && <span className="active-arrow" />}
-            <TokenP1 size={36} />
-            <PlayerMeta
-              name={profile?.username ?? '@you'}
-              tier={profile?.tier ?? 'free'}
-              phase={state.phase}
-              piecesOnBoard={state.piecesOnBoard.p1}
-              piecesToPlace={state.piecesToPlace.p1}
-              captured={state.capturedBy.p1}
-              isFlying={state.piecesOnBoard.p1 === 3 && state.phase !== 'placing'}
-              who="p1"
-            />
-          </div>
-          <div className="vsep" aria-hidden />
-          <div className={`game-side right ${state.currentPlayer === 'p2' ? '' : 'inactive'}`}>
-            {state.currentPlayer === 'p2' && <span className="active-arrow" />}
-            <TokenP2 size={36} />
-            <PlayerMeta
-              name={opponentName}
-              tier="bronze"
-              phase={state.phase}
-              piecesOnBoard={state.piecesOnBoard.p2}
-              piecesToPlace={state.piecesToPlace.p2}
-              captured={state.capturedBy.p2}
-              isFlying={state.piecesOnBoard.p2 === 3 && state.phase !== 'placing'}
-              who="p2"
-            />
-          </div>
-        </div>
+        {(() => {
+          // Compute the "thinking" side. AI mode: the AI is thinking whenever
+          // aiThinking is true. Online: the opponent is thinking whenever we're
+          // waiting for their turn to land. Local 2P: never (handoff handles it).
+          const aiOpp: 'p1' | 'p2' = state.humanPlayer === 'p1' ? 'p2' : 'p1';
+          const isAi = state.mode.startsWith('ai_');
+          const isOnline = state.mode === 'online';
+          const isLocal = state.mode === 'local';
+          const gameLive = !state.winner && !state.isDraw && !state.showHandoff;
+          const thinkingSide: 'p1' | 'p2' | null =
+            isAi && state.aiThinking && gameLive ? aiOpp
+            : isOnline && gameLive && state.currentPlayer !== state.humanPlayer ? state.currentPlayer
+            : null;
+          const showActive = (side: 'p1' | 'p2') =>
+            !isLocal && state.currentPlayer === side && thinkingSide !== side;
+          const showThinking = (side: 'p1' | 'p2') => thinkingSide === side;
+
+          return (
+            <div className="game-strip">
+              <div className={`game-side left ${state.currentPlayer === 'p1' ? '' : 'inactive'}`}>
+                {showActive('p1') && <span className="active-arrow" />}
+                {showThinking('p1') && <ThinkingDots />}
+                <TokenP1 size={36} />
+                <PlayerMeta
+                  name={profile?.username ?? '@you'}
+                  tier={profile?.tier ?? 'free'}
+                  phase={state.phase}
+                  piecesOnBoard={state.piecesOnBoard.p1}
+                  piecesToPlace={state.piecesToPlace.p1}
+                  captured={state.capturedBy.p1}
+                  isFlying={state.piecesOnBoard.p1 === 3 && state.phase !== 'placing'}
+                  who="p1"
+                  thinking={showThinking('p1')}
+                />
+              </div>
+              <div className="vsep" aria-hidden />
+              <div className={`game-side right ${state.currentPlayer === 'p2' ? '' : 'inactive'}`}>
+                {showActive('p2') && <span className="active-arrow" />}
+                {showThinking('p2') && <ThinkingDots />}
+                <TokenP2 size={36} />
+                <PlayerMeta
+                  name={opponentName}
+                  tier="bronze"
+                  phase={state.phase}
+                  piecesOnBoard={state.piecesOnBoard.p2}
+                  piecesToPlace={state.piecesToPlace.p2}
+                  captured={state.capturedBy.p2}
+                  isFlying={state.piecesOnBoard.p2 === 3 && state.phase !== 'placing'}
+                  who="p2"
+                  thinking={showThinking('p2')}
+                />
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Phase pill */}
         <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0 10px' }}>
@@ -206,6 +230,62 @@ export function GameScreen({ onExit }: GameScreenProps) {
   );
 }
 
+function ThinkingDots() {
+  return (
+    <span
+      aria-label="Thinking"
+      style={{
+        position: 'absolute',
+        top: 4,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'inline-flex',
+        gap: 4,
+        pointerEvents: 'none',
+        filter: 'drop-shadow(0 0 6px rgba(232,160,32,.5))',
+      }}
+    >
+      <i className="think-dot think-d1" />
+      <i className="think-dot think-d2" />
+      <i className="think-dot think-d3" />
+      <style>{`
+        .think-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #E8A020;
+          display: inline-block;
+          opacity: 0;
+          animation-duration: 1800ms;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .think-d1 { animation-name: think-d1; }
+        .think-d2 { animation-name: think-d2; }
+        .think-d3 { animation-name: think-d3; }
+        /* Each dot fades in 200ms after the previous one; all three fade
+           out together at 1200–1400ms, then a 400ms rest before the next
+           cycle. (200/1800 ≈ 11%, 400/1800 ≈ 22%, etc.) */
+        @keyframes think-d1 {
+          0%, 100% { opacity: 0; }
+          11%, 67% { opacity: 1; }
+          78%      { opacity: 0; }
+        }
+        @keyframes think-d2 {
+          0%, 11%, 100% { opacity: 0; }
+          22%, 67%      { opacity: 1; }
+          78%           { opacity: 0; }
+        }
+        @keyframes think-d3 {
+          0%, 22%, 100% { opacity: 0; }
+          33%, 67%      { opacity: 1; }
+          78%           { opacity: 0; }
+        }
+      `}</style>
+    </span>
+  );
+}
+
 interface PlayerMetaProps {
   name: string;
   tier: string;
@@ -215,8 +295,9 @@ interface PlayerMetaProps {
   captured: number;
   isFlying: boolean;
   who: 'p1' | 'p2';
+  thinking?: boolean;
 }
-function PlayerMeta({ name, tier, phase, piecesOnBoard, piecesToPlace, captured, isFlying, who }: PlayerMetaProps) {
+function PlayerMeta({ name, tier, phase, piecesOnBoard, piecesToPlace, captured, isFlying, who, thinking }: PlayerMetaProps) {
   const handle = name.startsWith('@') || name.includes(' ') ? name : `@${name.toLowerCase().replace(/\s+/g, '_')}`;
   return (
     <div className="player-meta">
@@ -225,9 +306,21 @@ function PlayerMeta({ name, tier, phase, piecesOnBoard, piecesToPlace, captured,
         <TierBadge tier={tier} />
         {isFlying && <span className="flying-badge">Flying</span>}
       </div>
-      <span className={`onboard ${isFlying ? 'flying-red' : ''}`}>
-        {phase === 'placing' ? `To place: ${piecesToPlace}` : `On board: ${piecesOnBoard}`}
-      </span>
+      {thinking ? (
+        <span style={{
+          fontFamily: 'Poppins, sans-serif',
+          fontStyle: 'italic',
+          fontSize: 11,
+          color: '#D4A96A',
+          letterSpacing: '0.02em',
+        }}>
+          thinking…
+        </span>
+      ) : (
+        <span className={`onboard ${isFlying ? 'flying-red' : ''}`}>
+          {phase === 'placing' ? `To place: ${piecesToPlace}` : `On board: ${piecesOnBoard}`}
+        </span>
+      )}
       {phase === 'placing' && piecesToPlace > 0 && (
         <div className="hand-pips" aria-hidden>
           {Array.from({ length: Math.min(piecesToPlace, 12) }).map((_, i) => (

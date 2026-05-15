@@ -15,10 +15,12 @@ export interface GameStore extends GameState {
   mode: GameMode;
   humanPlayer: Player;
   showHandoff: boolean;
+  aiThinking: boolean;
 
   setMode: (mode: GameMode, humanPlayer?: Player) => void;
   newGame: (mode: GameMode, humanPlayer?: Player) => void;
   hydrate: (state: GameState) => void;
+  setAiThinking: (thinking: boolean) => void;
 
   place: (nodeIndex: number) => void;
   remove: (nodeIndex: number) => void;
@@ -33,13 +35,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   mode: 'ai_easy',
   humanPlayer: 'p1',
   showHandoff: false,
+  aiThinking: false,
 
   setMode: (mode, humanPlayer = 'p1') => set({ mode, humanPlayer }),
 
   newGame: (mode, humanPlayer = 'p1') =>
-    set({ ...initialState(), mode, humanPlayer, showHandoff: false }),
+    set({ ...initialState(), mode, humanPlayer, showHandoff: false, aiThinking: false }),
 
   hydrate: (state) => set({ ...state }),
+
+  setAiThinking: (aiThinking) => set({ aiThinking }),
 
   place: (nodeIndex) => set((s) => applyPlace(s, nodeIndex) as GameStore),
 
@@ -61,6 +66,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   tapNode: (nodeIndex) => {
     const s = get();
     if (s.winner || s.isDraw) return;
+    if (s.aiThinking) return;
+    if (s.mode.startsWith('ai_') && s.currentPlayer !== s.humanPlayer) return;
 
     if (s.phase === 'placing') {
       const before = s;
