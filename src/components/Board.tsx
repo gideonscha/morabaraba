@@ -46,6 +46,32 @@ export function Board({ interactive = true }: BoardProps) {
             <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4"
                   stroke="#5C3A1E" strokeWidth="1.4" fill="none" strokeLinejoin="miter" />
           </pattern>
+
+          {/* Onyx (P1) sphere — full opacity stops so wood never bleeds through */}
+          <radialGradient id={`tok-p1-${id}`} cx="35%" cy="30%" r="75%">
+            <stop offset="0%"   stopColor="#3a3a3a" stopOpacity="1"/>
+            <stop offset="60%"  stopColor="#1a1a1a" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#000000" stopOpacity="1"/>
+          </radialGradient>
+
+          {/* Bone/cream (P2) sphere — full opacity, no warm tones */}
+          <radialGradient id={`tok-p2-${id}`} cx="35%" cy="30%" r="75%">
+            <stop offset="0%"   stopColor="#ffffff" stopOpacity="1"/>
+            <stop offset="60%"  stopColor="#f5f0e8" stopOpacity="1"/>
+            <stop offset="100%" stopColor="#d8d0c0" stopOpacity="1"/>
+          </radialGradient>
+
+          {/* Specular highlight (same gradient for both — white at 30% opacity at the
+              top-left, fading out by 25% of the radius) */}
+          <radialGradient id={`tok-spec-${id}`} cx="35%" cy="28%" r="22%">
+            <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.30"/>
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0"/>
+          </radialGradient>
+
+          {/* Soft drop shadow for tokens */}
+          <filter id={`tok-shadow-${id}`} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+          </filter>
         </defs>
 
         {/* Wood fill */}
@@ -94,20 +120,36 @@ export function Board({ interactive = true }: BoardProps) {
           );
         })()}
 
-        {/* Tokens */}
+        {/* Tokens — 3D spheres (onyx for P1, bone for P2) */}
         <g>
           {state.board.map((cell, i) => {
             if (!cell) return null;
             const p = NODE_POSITIONS[i];
             const isP1 = cell === 'p1';
             return (
-              <circle
-                key={`tok-${i}`}
-                cx={p.x} cy={p.y} r="14"
-                fill={isP1 ? '#0F0F0F' : '#FAFAFA'}
-                stroke={isP1 ? '#050505' : '#888888'}
-                strokeWidth="0.8"
-              />
+              <g key={`tok-${i}`}>
+                {/* Soft contact shadow under the piece */}
+                <ellipse
+                  cx={p.x} cy={p.y + 12}
+                  rx="11" ry="3"
+                  fill="#000"
+                  opacity="0.7"
+                  filter={`url(#tok-shadow-${id})`}
+                />
+                {/* Sphere body */}
+                <circle
+                  cx={p.x} cy={p.y} r="14"
+                  fill={`url(#tok-${isP1 ? 'p1' : 'p2'}-${id})`}
+                  stroke={isP1 ? '#000000' : '#9a8f78'}
+                  strokeWidth="0.6"
+                />
+                {/* Specular highlight arc (top-left) */}
+                <circle
+                  cx={p.x} cy={p.y} r="14"
+                  fill={`url(#tok-spec-${id})`}
+                  pointerEvents="none"
+                />
+              </g>
             );
           })}
         </g>
