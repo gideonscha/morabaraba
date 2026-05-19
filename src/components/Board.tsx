@@ -16,23 +16,40 @@ export function Board({ interactive = true }: BoardProps) {
 
   // Track recently-captured tokens so we can render a fading "ghost" at
   // their position for ~250ms after they've been cleared from the board.
+  // A capture is a filled→empty transition with NO matching empty→filled
+  // elsewhere in the same tick — that disambiguates captures from slides,
+  // which also clear the source cell (but fill the destination).
   const prevBoardRef = useRef(state.board);
   const [ghosts, setGhosts] = useState<Ghost[]>([]);
   useEffect(() => {
     const prev = prevBoardRef.current;
     const next = state.board;
-    const justGone: Ghost[] = [];
+    let placed = 0;
+    let cleared = 0;
+    const clearedAt: { index: number; cell: Player }[] = [];
     for (let i = 0; i < next.length; i++) {
-      if (prev[i] && !next[i]) {
-        justGone.push({ key: `${i}-${Date.now()}-${Math.random()}`, index: i, cell: prev[i]!, ts: Date.now() });
+      if (!prev[i] && next[i]) placed++;
+      else if (prev[i] && !next[i]) {
+        cleared++;
+        clearedAt.push({ index: i, cell: prev[i]! });
       }
     }
     prevBoardRef.current = next;
-    if (justGone.length > 0) {
-      setGhosts((g) => [...g, ...justGone]);
-      const ids = new Set(justGone.map((g) => g.key));
-      setTimeout(() => setGhosts((g) => g.filter((x) => !ids.has(x.key))), 280);
-    }
+
+    // Slide: one cell emptied, one cell filled → not a capture, no ghost.
+    // Capture: cells emptied without compensating placements.
+    const isSlide = placed === cleared && placed > 0;
+    if (isSlide || clearedAt.length === 0) return;
+
+    const fresh: Ghost[] = clearedAt.map(({ index, cell }) => ({
+      key: `${index}-${Date.now()}-${Math.random()}`,
+      index,
+      cell,
+      ts: Date.now(),
+    }));
+    setGhosts((g) => [...g, ...fresh]);
+    const ids = new Set(fresh.map((g) => g.key));
+    setTimeout(() => setGhosts((g) => g.filter((x) => !ids.has(x.key))), 280);
   }, [state.board]);
 
   const removable =
