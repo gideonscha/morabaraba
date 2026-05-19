@@ -1,7 +1,9 @@
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { NODE_POSITIONS, VIEW_SIZE } from '../lib/boardLayout';
-import { getRemovableNodes, MILLS } from '../lib/gameEngine';
+import { getRemovableNodes, MILLS, type Player } from '../lib/gameEngine';
+
+interface Ghost { key: string; index: number; cell: Player; ts: number }
 
 interface BoardProps {
   interactive?: boolean;
@@ -11,6 +13,27 @@ export function Board({ interactive = true }: BoardProps) {
   const state = useGameStore();
   const tapNode = useGameStore((s) => s.tapNode);
   const id = useId().replace(/[:]/g, '');
+
+  // Track recently-captured tokens so we can render a fading "ghost" at
+  // their position for ~250ms after they've been cleared from the board.
+  const prevBoardRef = useRef(state.board);
+  const [ghosts, setGhosts] = useState<Ghost[]>([]);
+  useEffect(() => {
+    const prev = prevBoardRef.current;
+    const next = state.board;
+    const justGone: Ghost[] = [];
+    for (let i = 0; i < next.length; i++) {
+      if (prev[i] && !next[i]) {
+        justGone.push({ key: `${i}-${Date.now()}-${Math.random()}`, index: i, cell: prev[i]!, ts: Date.now() });
+      }
+    }
+    prevBoardRef.current = next;
+    if (justGone.length > 0) {
+      setGhosts((g) => [...g, ...justGone]);
+      const ids = new Set(justGone.map((g) => g.key));
+      setTimeout(() => setGhosts((g) => g.filter((x) => !ids.has(x.key))), 280);
+    }
+  }, [state.board]);
 
   const removable =
     state.phase === 'removing'
@@ -120,15 +143,20 @@ export function Board({ interactive = true }: BoardProps) {
           );
         })()}
 
-        {/* Tokens — 3D spheres (onyx for P1, bone for P2) */}
+        {/* Live tokens — 3D spheres. Each fresh token gets a drop-in
+            animation; tokens that are part of an active mill pulse. */}
         <g>
           {state.board.map((cell, i) => {
             if (!cell) return null;
             const p = NODE_POSITIONS[i];
             const isP1 = cell === 'p1';
+            const inMill = state.lastMillNodes.includes(i);
             return (
-              <g key={`tok-${i}`}>
-                {/* Soft contact shadow under the piece */}
+              <g
+                key={`tok-${i}-${cell}`}
+                className="token-drop"
+                style={{ transformBox: 'fill-box', transformOrigin: `${p.x}px ${p.y}px` }}
+              >
                 <ellipse
                   cx={p.x} cy={p.y + 12}
                   rx="11" ry="3"
@@ -136,14 +164,42 @@ export function Board({ interactive = true }: BoardProps) {
                   opacity="0.7"
                   filter={`url(#tok-shadow-${id})`}
                 />
-                {/* Sphere body */}
                 <circle
                   cx={p.x} cy={p.y} r="14"
                   fill={`url(#tok-${isP1 ? 'p1' : 'p2'}-${id})`}
                   stroke={isP1 ? '#000000' : '#9a8f78'}
                   strokeWidth="0.6"
+                  className={inMill ? 'token-mill' : undefined}
                 />
-                {/* Specular highlight arc (top-left) */}
+                <circle
+                  cx={p.x} cy={p.y} r="14"
+                  fill={`url(#tok-spec-${id})`}
+                  pointerEvents="none"
+                />
+              </g>
+            );
+          })}
+        </g>
+
+        {/* Capture-out ghosts — fade and shrink at the position they just
+            vacated. Auto-cleared after the animation finishes. */}
+        <g>
+          {ghosts.map((g) => {
+            const p = NODE_POSITIONS[g.index];
+            const isP1 = g.cell === 'p1';
+            return (
+              <g
+                key={g.key}
+                className="token-capture"
+                style={{ transformBox: 'fill-box', transformOrigin: `${p.x}px ${p.y}px` }}
+              >
+                <circle
+                  cx={p.x} cy={p.y} r="14"
+                  fill={`url(#tok-${isP1 ? 'p1' : 'p2'}-${id})`}
+                  stroke={isP1 ? '#000000' : '#9a8f78'}
+                  strokeWidth="0.6"
+                  pointerEvents="none"
+                />
                 <circle
                   cx={p.x} cy={p.y} r="14"
                   fill={`url(#tok-spec-${id})`}

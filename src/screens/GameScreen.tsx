@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { audio } from '../lib/audio';
 import { Board } from '../components/Board';
 import { useGameStore } from '../store/gameStore';
 import { useProfileStore } from '../store/profileStore';
@@ -7,7 +8,9 @@ import {
   PrimaryButton, SecondaryButton, CoinIcon,
 } from '../components/ui/Primitives';
 import { useAiOpponent } from '../hooks/useAiOpponent';
+import { useGameAudio } from '../hooks/useGameAudio';
 import { coinReward } from '../lib/profile';
+import { tweenNumber } from '../lib/animations';
 
 interface GameScreenProps { onExit: () => void; }
 
@@ -21,6 +24,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
   const newGame = useGameStore((s) => s.newGame);
 
   useAiOpponent();
+  useGameAudio();
 
   const [phaseToast, setPhaseToast] = useState<string | null>(null);
   const lastPhaseRef = useMemo(() => ({ current: state.phase }), []); // never resets across re-renders
@@ -381,30 +385,20 @@ function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, o
         padding: '88px 24px 24px',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
       }}>
-        <h1 className="h-display" style={{ ...titleStyle, margin: 0 }}>{title}</h1>
-        <p style={{ fontStyle: 'italic', fontSize: 16, color: 'var(--cream)', margin: '12px 0 0', textAlign: 'center' }}>
+        <h1 className="h-display go-title-anim" style={{ ...titleStyle, margin: 0 }}>{title}</h1>
+        <p
+          className="fade-up-tag"
+          style={{ fontStyle: 'italic', fontSize: 16, color: 'var(--cream)', margin: '12px 0 0', textAlign: 'center' }}
+        >
           {tagline}
         </p>
 
-        {reward > 0 && (
-          <div style={{
-            width: 327, marginTop: 28,
-            background: 'var(--card)', border: '1.5px solid var(--gold)',
-            borderRadius: 16, padding: '12px 18px',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
-            boxShadow: '0 0 24px rgba(232,160,32,.18), 0 8px 16px rgba(0,0,0,.3)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900, fontSize: 22, color: 'var(--gold-bright)', letterSpacing: '0.04em' }}>
-              <span className="coin-icon-md" />
-              <span>+{reward} coins</span>
-            </div>
-            <div style={{ fontSize: 14, color: 'var(--sand)' }}>
-              New balance: <span>{(coins + reward).toLocaleString()}</span>
-            </div>
-          </div>
-        )}
+        {reward > 0 && <CoinAward reward={reward} balance={coins + reward} />}
 
-        <div style={{ width: 327, display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
+        <div
+          className="fade-up-cta"
+          style={{ width: 327, display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}
+        >
           <PrimaryButton onClick={onReplay}>Play Again</PrimaryButton>
           <SecondaryButton onClick={onHome}>Home</SecondaryButton>
         </div>
@@ -438,6 +432,46 @@ function ConfettiLayer() {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function CoinAward({ reward, balance }: { reward: number; balance: number }) {
+  const [count, setCount] = useState(0);
+  const [bal, setBal] = useState(balance - reward);
+  const [spin, setSpin] = useState(false);
+
+  useEffect(() => {
+    // Slide-in delay before counting (matches the motion.div delay below)
+    const startDelay = setTimeout(() => {
+      audio.playSound('coin');
+      setSpin(true);
+      const cleanupCount = tweenNumber(0, reward, 1000, setCount);
+      const cleanupBal   = tweenNumber(balance - reward, balance, 1000, setBal);
+      const stopSpin = setTimeout(() => setSpin(false), 420);
+      return () => { cleanupCount(); cleanupBal(); clearTimeout(stopSpin); };
+    }, 600);
+    return () => clearTimeout(startDelay);
+  }, [reward, balance]);
+
+  return (
+    <div
+      className="fade-up-award"
+      style={{
+        width: 327, marginTop: 28,
+        background: 'var(--card)', border: '1.5px solid var(--gold)',
+        borderRadius: 16, padding: '12px 18px',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
+        boxShadow: '0 0 24px rgba(232,160,32,.18), 0 8px 16px rgba(0,0,0,.3)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900, fontSize: 22, color: 'var(--gold-bright)', letterSpacing: '0.04em' }}>
+        <span className={`coin-icon-md ${spin ? 'coin-spin' : ''}`} />
+        <span>+{count} coins</span>
+      </div>
+      <div style={{ fontSize: 14, color: 'var(--sand)' }}>
+        New balance: <span>{bal.toLocaleString()}</span>
+      </div>
     </div>
   );
 }

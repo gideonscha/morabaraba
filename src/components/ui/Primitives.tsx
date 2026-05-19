@@ -1,5 +1,6 @@
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import type { ReactNode, ButtonHTMLAttributes, MouseEvent } from 'react';
 import { AvatarIcon, AVATAR_DEFS } from './AvatarIcons';
+import { audio } from '../../lib/audio';
 
 /* ============================================================
    Phone frame — wraps every screen, gives the iOS-style chrome
@@ -76,18 +77,55 @@ export function TierBadge({ tier }: { tier: string }) {
    Buttons
    ============================================================ */
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode };
-export function PrimaryButton({ children, className = '', ...rest }: BtnProps) {
-  return <button className={`btn btn-primary ${className}`} {...rest}>{children}</button>;
+
+function withSfx(onClick?: (e: MouseEvent<HTMLButtonElement>) => void) {
+  return (e: MouseEvent<HTMLButtonElement>) => {
+    audio.init();
+    audio.playSound('button');
+    onClick?.(e);
+  };
 }
-export function SecondaryButton({ children, className = '', ...rest }: BtnProps) {
-  return <button className={`btn btn-secondary ${className}`} {...rest}>{children}</button>;
+
+export function PrimaryButton({ children, className = '', onClick, ...rest }: BtnProps) {
+  return (
+    <button
+      className={`btn btn-primary btn-press ${className}`}
+      onClick={withSfx(onClick)}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
 }
-export function IconButton({ children, ...rest }: BtnProps) {
-  return <button className="icon-btn" {...rest}>{children}</button>;
+export function SecondaryButton({ children, className = '', onClick, ...rest }: BtnProps) {
+  return (
+    <button
+      className={`btn btn-secondary btn-press ${className}`}
+      onClick={withSfx(onClick)}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
+export function IconButton({ children, onClick, ...rest }: BtnProps) {
+  return (
+    <button
+      className="icon-btn btn-press"
+      onClick={withSfx(onClick)}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
 }
 export function BackArrow(props: { onClick?: () => void; label?: string }) {
   return (
-    <button className="back-arrow" onClick={props.onClick} aria-label={props.label ?? 'Back'}>
+    <button
+      className="back-arrow btn-press"
+      onClick={() => { audio.init(); audio.playSound('button'); props.onClick?.(); }}
+      aria-label={props.label ?? 'Back'}
+    >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"/>

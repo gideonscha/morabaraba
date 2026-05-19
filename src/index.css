@@ -629,6 +629,96 @@ html, body, #root {
     to   { opacity: 1; transform: scale(1); }
   }
 
+  /* ----- Button press scale (transform-only, 60fps safe) ----- */
+  .btn-press {
+    transition: transform 50ms ease-out;
+  }
+  .btn-press:active {
+    transform: scale(0.96);
+  }
+
+  /* ----- Board token animations ----- */
+  @keyframes token-drop {
+    0%   { transform: translateY(-20px) scaleY(1);    opacity: 0; }
+    60%  { transform: translateY(0)     scaleY(0.95); opacity: 1; }
+    100% { transform: translateY(0)     scaleY(1);    opacity: 1; }
+  }
+  .token-drop { animation: token-drop 250ms cubic-bezier(0.34, 1.56, 0.64, 1) both; transform-box: fill-box; transform-origin: center; }
+
+  @keyframes token-mill-pulse {
+    0%, 100% { transform: scale(1); }
+    25%      { transform: scale(1.1); }
+    50%      { transform: scale(1); }
+    75%      { transform: scale(1.1); }
+  }
+  .token-mill { animation: token-mill-pulse 400ms ease-in-out 2; transform-box: fill-box; transform-origin: center; }
+
+  @keyframes token-capture {
+    0%   { transform: scale(1);    opacity: 1; }
+    40%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(0);    opacity: 0; }
+  }
+  .token-capture { animation: token-capture 250ms ease-in both; transform-box: fill-box; transform-origin: center; }
+
+  @keyframes token-bounce-arrive {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .token-arrive { animation: token-bounce-arrive 100ms ease-out 1; transform-box: fill-box; transform-origin: center; }
+
+  /* ----- Invalid shake ----- */
+  @keyframes invalid-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(3px); }
+    40% { transform: translateX(-3px); }
+    60% { transform: translateX(2px); }
+    80% { transform: translateX(-2px); }
+  }
+  .invalid-shake { animation: invalid-shake 200ms ease-out 1; }
+
+  /* ----- Flying phase activation flash ----- */
+  @keyframes flying-flash {
+    0%   { background-color: rgba(204,34,0,0); }
+    25%  { background-color: rgba(204,34,0,0.5); }
+    100% { background-color: rgba(204,34,0,0); }
+  }
+  .flying-flash { animation: flying-flash 600ms ease-out 1; }
+
+  /* ----- Mill-line draw ----- */
+  @keyframes mill-line-draw {
+    0%   { stroke-dashoffset: 200; opacity: 0; }
+    20%  { opacity: 1; }
+    100% { stroke-dashoffset: 0;   opacity: 1; }
+  }
+  .mill-line-anim {
+    stroke-dasharray: 200;
+    animation: mill-line-draw 400ms ease-out both;
+  }
+
+  /* ----- Game-over title / tagline / button / award reveals ----- */
+  @keyframes go-title-pop {
+    0%   { transform: scale(0.5); opacity: 0; }
+    65%  { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+  .go-title-anim { animation: go-title-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+  @keyframes fade-up {
+    0%   { transform: translateY(8px); opacity: 0; }
+    100% { transform: translateY(0);   opacity: 1; }
+  }
+  .fade-up-tag    { animation: fade-up 300ms ease-out 250ms both; }
+  .fade-up-award  { animation: fade-up 400ms ease-out 450ms both; }
+  .fade-up-cta    { animation: fade-up 350ms ease-out 700ms both; }
+
+  /* ----- Coin icon spin ----- */
+  @keyframes coin-spin {
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(360deg); }
+  }
+  .coin-spin { animation: coin-spin 400ms ease-in-out 1; }
+
   /* ----- Game-over confetti ----- */
   .confetti {
     position: absolute;

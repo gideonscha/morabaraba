@@ -8,6 +8,7 @@ import {
   type GameState,
   type Player,
 } from '../lib/gameEngine';
+import { audio } from '../lib/audio';
 
 export type GameMode = 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online';
 
@@ -70,6 +71,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (s.mode.startsWith('ai_') && s.currentPlayer !== s.humanPlayer) return;
 
     if (s.phase === 'placing') {
+      if (s.board[nodeIndex] !== null) { audio.playSound('invalid'); return; }
       const before = s;
       const next = applyPlace(before, nodeIndex);
       const requiresHandoff =
@@ -82,6 +84,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (s.phase === 'removing') {
+      const opponent = s.currentPlayer === 'p1' ? 'p2' : 'p1';
+      if (s.board[nodeIndex] !== opponent) { audio.playSound('invalid'); return; }
       get().remove(nodeIndex);
       return;
     }
@@ -95,6 +99,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         get().move(nodeIndex);
         return;
       }
+      audio.playSound('invalid');
+      return;
     }
   },
 

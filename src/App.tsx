@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useProfileStore } from './store/profileStore';
 import { useGameStore } from './store/gameStore';
+import { useAudioSettings } from './store/audioStore';
 import { useOnlineSync } from './hooks/useOnlineSync';
+import { audio } from './lib/audio';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -53,6 +55,26 @@ export default function App() {
     asPlayer: room?.asPlayer ?? null,
     enabled: route === 'game' && !!room,
   });
+
+  // Background music: play on lobby/meta screens, pause during games.
+  const musicEnabled = useAudioSettings((s) => s.musicEnabled);
+  const hydrateAudio = useAudioSettings((s) => s.hydrateFromProfile);
+  useEffect(() => {
+    if (!profile) return;
+    // The local profile object doesn't carry these flags by default; if the
+    // server returned them they ride in on the same object. Either way,
+    // a missing flag means "leave the local preference alone."
+    const p = profile as unknown as { sound_enabled?: boolean; music_enabled?: boolean };
+    hydrateAudio({ sound_enabled: p.sound_enabled, music_enabled: p.music_enabled });
+  }, [profile, hydrateAudio]);
+  useEffect(() => {
+    const gameLike = route === 'game' || route === 'matchmaking';
+    if (!musicEnabled || gameLike) audio.stopMusic();
+    else audio.playMusic();
+  }, [route, musicEnabled]);
+
+  // Tear down on unmount
+  useEffect(() => () => { audio.stopMusic(); }, []);
 
   if (route === 'splash') return <SplashScreen />;
   if (route === 'onboarding') return <OnboardingScreen onDone={() => setRoute('home')} />;

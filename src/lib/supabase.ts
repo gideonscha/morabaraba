@@ -22,6 +22,8 @@ export interface DBProfile {
   wins: number;
   losses: number;
   streak: number;
+  sound_enabled?: boolean;
+  music_enabled?: boolean;
 }
 
 export interface DBRoom {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { PhoneFrame, TopBar } from '../components/ui/Primitives';
 import { useProfileStore } from '../store/profileStore';
-
-const SOUND_KEY = 'morabaraba.sound';
-const MUSIC_KEY = 'morabaraba.music';
+import { useAudioSettings } from '../store/audioStore';
+import { audio } from '../lib/audio';
+import { supabase, SUPABASE_ENABLED } from '../lib/supabase';
 
 const REGIONS: { code: string; flag: string; label: string }[] = [
   { code: 'ZA', flag: '🇿🇦', label: 'South Africa' },
@@ -15,20 +15,29 @@ const REGIONS: { code: string; flag: string; label: string }[] = [
 export function SettingsScreen({ onBack, onTutorial }: { onBack: () => void; onTutorial: () => void }) {
   const profile = useProfileStore((s) => s.profile);
   const updateProfile = useProfileStore((s) => s.updateProfile);
-  const [sound, setSound] = useState(() => localStorage.getItem(SOUND_KEY) !== 'off');
-  const [music, setMusic] = useState(() => localStorage.getItem(MUSIC_KEY) !== 'off');
+  const sound = useAudioSettings((s) => s.soundEnabled);
+  const music = useAudioSettings((s) => s.musicEnabled);
+  const setSoundPref = useAudioSettings((s) => s.setSound);
+  const setMusicPref = useAudioSettings((s) => s.setMusic);
   const [showRegions, setShowRegions] = useState(false);
   const currentRegion = REGIONS.find((r) => r.code === profile?.region) ?? REGIONS[0];
 
+  const persistAudio = async (patch: { sound_enabled?: boolean; music_enabled?: boolean }) => {
+    if (!SUPABASE_ENABLED || !supabase || !profile?.id) return;
+    await supabase.from('profiles').update(patch).eq('id', profile.id);
+  };
+
   const toggleSound = () => {
     const next = !sound;
-    setSound(next);
-    localStorage.setItem(SOUND_KEY, next ? 'on' : 'off');
+    setSoundPref(next);
+    if (next) audio.playSound('button');
+    persistAudio({ sound_enabled: next });
   };
   const toggleMusic = () => {
     const next = !music;
-    setMusic(next);
-    localStorage.setItem(MUSIC_KEY, next ? 'on' : 'off');
+    setMusicPref(next);
+    audio.setMusicEnabled(next);
+    persistAudio({ music_enabled: next });
   };
   const pickRegion = (code: string) => {
     updateProfile({ region: code });
