@@ -56,22 +56,39 @@ export default function App() {
     enabled: route === 'game' && !!room,
   });
 
-  // Background music: play on lobby/meta screens, pause during games.
+  // Background music: starts on the first user interaction (browser autoplay
+  // policy requires a gesture) and keeps playing across every screen,
+  // including gameplay — only the in-Settings toggle stops it.
   const musicEnabled = useAudioSettings((s) => s.musicEnabled);
   const hydrateAudio = useAudioSettings((s) => s.hydrateFromProfile);
   useEffect(() => {
     if (!profile) return;
-    // The local profile object doesn't carry these flags by default; if the
-    // server returned them they ride in on the same object. Either way,
-    // a missing flag means "leave the local preference alone."
     const p = profile as unknown as { sound_enabled?: boolean; music_enabled?: boolean };
     hydrateAudio({ sound_enabled: p.sound_enabled, music_enabled: p.music_enabled });
   }, [profile, hydrateAudio]);
+
+  // One-shot pointer listener: the first tap anywhere unlocks audio and
+  // kicks off the music. After that the listener removes itself.
   useEffect(() => {
-    const gameLike = route === 'game' || route === 'matchmaking';
-    if (!musicEnabled || gameLike) audio.stopMusic();
-    else audio.playMusic();
-  }, [route, musicEnabled]);
+    const unlock = () => {
+      audio.init();
+      audio.playMusic();
+      document.removeEventListener('pointerdown', unlock);
+      document.removeEventListener('keydown', unlock);
+    };
+    document.addEventListener('pointerdown', unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+    return () => {
+      document.removeEventListener('pointerdown', unlock);
+      document.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
+  // React to the music-enabled toggle in Settings.
+  useEffect(() => {
+    if (musicEnabled) audio.playMusic();
+    else audio.stopMusic();
+  }, [musicEnabled]);
 
   // Tear down on unmount
   useEffect(() => () => { audio.stopMusic(); }, []);
