@@ -11,20 +11,29 @@ import { audio } from '../lib/audio';
  * removal empties one cell; mill detection populates `lastMillNodes`).
  */
 export function useGameAudio() {
-  const state = useGameStore();
+  // Subscribe to individual slices only — using `useGameStore()` with no
+  // selector returns the whole state object, which changes reference on
+  // every set() and forces this hook to re-render on every store mutation.
+  const board = useGameStore((s) => s.board);
+  const phase = useGameStore((s) => s.phase);
+  const lastMillNodes = useGameStore((s) => s.lastMillNodes);
+  const selectedNode = useGameStore((s) => s.selectedNode);
+  const winner = useGameStore((s) => s.winner);
+  const isDraw = useGameStore((s) => s.isDraw);
+  const humanPlayer = useGameStore((s) => s.humanPlayer);
+
   const prev = useRef({
-    board: state.board,
-    phase: state.phase,
-    lastMillNodes: state.lastMillNodes,
-    selectedNode: state.selectedNode,
-    winner: state.winner as 'p1' | 'p2' | null,
-    isDraw: state.isDraw,
-    humanPlayer: state.humanPlayer,
+    board,
+    phase,
+    lastMillNodes,
+    selectedNode,
+    winner: winner as 'p1' | 'p2' | null,
+    isDraw,
+    humanPlayer,
   });
 
   useEffect(() => {
     const p = prev.current;
-    const board = state.board;
 
     let placed = 0;
     let cleared = 0;
@@ -37,7 +46,7 @@ export function useGameAudio() {
     }
 
     const wasMill = p.lastMillNodes.length > 0;
-    const isMill = state.lastMillNodes.length > 0;
+    const isMill = lastMillNodes.length > 0;
     const newMill = !wasMill && isMill;
 
     // Identify which kind of action this tick represents.
@@ -56,42 +65,42 @@ export function useGameAudio() {
     if (newMill) audio.playSound('mill');
 
     // Selection — only fire when selecting (null→node), not on deselect.
-    if (p.selectedNode === null && state.selectedNode !== null && !isPlace && !isSlide) {
+    if (p.selectedNode === null && selectedNode !== null && !isPlace && !isSlide) {
       audio.playSound('select');
     }
 
     // Phase transitions worth a sting.
-    if (p.phase !== state.phase) {
+    if (p.phase !== phase) {
       const major =
-        (p.phase === 'placing' && state.phase === 'moving') ||
-        (p.phase === 'moving'  && state.phase === 'flying') ||
-        (p.phase === 'placing' && state.phase === 'flying');
+        (p.phase === 'placing' && phase === 'moving') ||
+        (p.phase === 'moving'  && phase === 'flying') ||
+        (p.phase === 'placing' && phase === 'flying');
       if (major) audio.playSound('phase');
     }
 
     // End of game.
-    if (!p.winner && !p.isDraw && (state.winner || state.isDraw)) {
-      if (state.isDraw)                              audio.playSound('draw');
-      else if (state.winner === state.humanPlayer)   audio.playSound('victory');
+    if (!p.winner && !p.isDraw && (winner || isDraw)) {
+      if (isDraw)                              audio.playSound('draw');
+      else if (winner === humanPlayer)   audio.playSound('victory');
       else                                           audio.playSound('defeat');
     }
 
     prev.current = {
-      board: state.board,
-      phase: state.phase,
-      lastMillNodes: state.lastMillNodes,
-      selectedNode: state.selectedNode,
-      winner: state.winner as 'p1' | 'p2' | null,
-      isDraw: state.isDraw,
-      humanPlayer: state.humanPlayer,
+      board: board,
+      phase: phase,
+      lastMillNodes: lastMillNodes,
+      selectedNode: selectedNode,
+      winner: winner as 'p1' | 'p2' | null,
+      isDraw: isDraw,
+      humanPlayer: humanPlayer,
     };
   }, [
-    state.board,
-    state.phase,
-    state.lastMillNodes,
-    state.selectedNode,
-    state.winner,
-    state.isDraw,
-    state.humanPlayer,
+    board,
+    phase,
+    lastMillNodes,
+    selectedNode,
+    winner,
+    isDraw,
+    humanPlayer,
   ]);
 }

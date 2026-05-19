@@ -19,7 +19,15 @@ const randomIn = ([lo, hi]: [number, number]) => lo + Math.random() * (hi - lo);
 export function useAiOpponent() {
   const inFlight = useRef(false);
 
-  const state = useGameStore();
+  const mode = useGameStore((s) => s.mode);
+  const humanPlayer = useGameStore((s) => s.humanPlayer);
+  const currentPlayer = useGameStore((s) => s.currentPlayer);
+  const phase = useGameStore((s) => s.phase);
+  const winner = useGameStore((s) => s.winner);
+  const isDraw = useGameStore((s) => s.isDraw);
+  const showHandoff = useGameStore((s) => s.showHandoff);
+  const board = useGameStore((s) => s.board);
+  const removalsPending = useGameStore((s) => s.removalsPending);
   const place = useGameStore((s) => s.place);
   const remove = useGameStore((s) => s.remove);
   const select = useGameStore((s) => s.select);
@@ -27,20 +35,17 @@ export function useAiOpponent() {
   const setAiThinking = useGameStore((s) => s.setAiThinking);
 
   useEffect(() => {
-    if (!state.mode.startsWith('ai_')) return;
-    if (state.winner || state.isDraw) return;
-    if (state.showHandoff) return;
-    // AI plays whichever side is NOT humanPlayer. In `removing` phase the
-    // current player is the side that just formed the mill — if that's the
-    // AI, we still dispatch.
-    if (state.currentPlayer === state.humanPlayer) return;
+    if (!mode.startsWith('ai_')) return;
+    if (winner || isDraw) return;
+    if (showHandoff) return;
+    if (currentPlayer === humanPlayer) return;
     if (inFlight.current) return;
 
     const difficulty: Difficulty =
-      state.mode === 'ai_easy' ? 'easy' :
-      state.mode === 'ai_medium' ? 'medium' : 'hard';
+      mode === 'ai_easy' ? 'easy' :
+      mode === 'ai_medium' ? 'medium' : 'hard';
 
-    const isMillRemoval = state.phase === 'removing';
+    const isMillRemoval = phase === 'removing';
     const delay = randomIn(isMillRemoval ? MILL_RANGE : RANGES[difficulty]);
 
     inFlight.current = true;
@@ -48,13 +53,15 @@ export function useAiOpponent() {
 
     const timer = setTimeout(() => {
       try {
-        const action = chooseAction(state, difficulty);
+        // Re-read state imperatively so the timer always acts on the
+        // freshest snapshot, not the closure captured at scheduling time.
+        const fresh = useGameStore.getState();
+        const action = chooseAction(fresh, difficulty);
         if (!action) return;
         if (action.type === 'place') place(action.index);
         else if (action.type === 'remove') remove(action.index);
         else {
           select(action.from);
-          // run move in microtask so selectedNode/validMoves are committed
           queueMicrotask(() => move(action.to));
         }
       } finally {
@@ -64,26 +71,27 @@ export function useAiOpponent() {
     }, delay);
 
     return () => {
+      // Cancel the pending think but do NOT touch aiThinking here — the
+      // timer's finally block owns that flag. Calling set() in cleanup
+      // would mutate the store, change subscribed slices, re-run this
+      // effect, and the cycle would never converge.
       clearTimeout(timer);
       inFlight.current = false;
-      // Clear the flag if the effect re-runs mid-think (e.g. game reset).
-      setAiThinking(false);
     };
   }, [
-    state.mode,
-    state.humanPlayer,
-    state.currentPlayer,
-    state.phase,
-    state.winner,
-    state.isDraw,
-    state.showHandoff,
-    state.board,
-    state.removalsPending,
+    mode,
+    humanPlayer,
+    currentPlayer,
+    phase,
+    winner,
+    isDraw,
+    showHandoff,
+    board,
+    removalsPending,
     place,
     remove,
     select,
     move,
     setAiThinking,
-    state,
   ]);
 }
