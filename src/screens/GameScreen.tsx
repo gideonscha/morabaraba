@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { audio } from '../lib/audio';
 import { Board } from '../components/Board';
 import { useGameStore } from '../store/gameStore';
@@ -27,22 +27,34 @@ export function GameScreen({ onExit }: GameScreenProps) {
   useGameAudio();
 
   const [phaseToast, setPhaseToast] = useState<string | null>(null);
-  const lastPhaseRef = useMemo(() => ({ current: state.phase }), []); // never resets across re-renders
+  const toastTimerRef = useRef<number | null>(null);
+  const shownPhasesRef = useRef<Set<'moving' | 'flying'>>(new Set());
 
-  // Show a 1.5s phase-transition overlay on placing→moving and moving→flying
+  // Show a 1.5s phase-transition overlay the FIRST time the game enters
+  // moving or flying. Once flying engages, state.phase oscillates between
+  // 'moving' and 'flying' every turn (the engine recomputes phase from
+  // the current player's piece count) — without a once-per-phase guard
+  // the toast would re-fire endlessly, and a cleanup-driven dismiss
+  // would get cancelled by the next oscillation.
   useEffect(() => {
-    const prev = lastPhaseRef.current;
-    if (prev !== state.phase) {
-      if ((prev === 'placing' && state.phase === 'moving') ||
-          (prev === 'moving' && state.phase === 'flying')) {
-        setPhaseToast(state.phase === 'flying' ? 'Flying' : 'Moving');
-        const t = setTimeout(() => setPhaseToast(null), 1500);
-        lastPhaseRef.current = state.phase;
-        return () => clearTimeout(t);
-      }
-      lastPhaseRef.current = state.phase;
-    }
-  }, [state.phase, lastPhaseRef]);
+    const p = state.phase;
+    // New game / replay: clear the once-per-phase tracker.
+    if (p === 'placing') { shownPhasesRef.current.clear(); return; }
+    if (p !== 'moving' && p !== 'flying') return;
+    if (shownPhasesRef.current.has(p)) return;
+    shownPhasesRef.current.add(p);
+
+    setPhaseToast(p === 'flying' ? 'Flying' : 'Moving');
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(() => {
+      setPhaseToast(null);
+      toastTimerRef.current = null;
+    }, 1500);
+  }, [state.phase]);
+
+  useEffect(() => () => {
+    if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
+  }, []);
 
   // Award coins once at game completion
   const [awarded, setAwarded] = useState(false);
