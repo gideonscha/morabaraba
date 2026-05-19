@@ -78,23 +78,30 @@ class AudioManager {
     if (this.ctx?.state === 'suspended') this.ctx.resume().catch(() => {});
   }
 
-  /** Public SFX playback. No-op if sound disabled or audio not initialised. */
+  /** Public SFX playback. No-op if sound disabled or audio not initialised.
+   *  Wrapped in try/catch as the LAST line of defence — audio failures
+   *  (iOS Safari quirks, decode errors, OOM during synth) must never bubble
+   *  into React's render tree and blank the screen. */
   playSound(name: SfxName): void {
-    const { soundEnabled } = useAudioSettings.getState();
-    if (!soundEnabled) return;
-    if (!this.ctx || !this.sfxGain) return;
-    this.resumeIfNeeded();
+    try {
+      const { soundEnabled } = useAudioSettings.getState();
+      if (!soundEnabled) return;
+      if (!this.ctx || !this.sfxGain) return;
+      this.resumeIfNeeded();
 
-    const cached = this.buffers.get(name);
-    if (cached) {
-      this.playBuffer(cached, SFX_CFG[name].volume);
-      return;
+      const cached = this.buffers.get(name);
+      if (cached) {
+        this.playBuffer(cached, SFX_CFG[name].volume);
+        return;
+      }
+      // Kick off async load; play synth fallback immediately so the
+      // first invocation isn't silent while the MP3 is fetching.
+      this.loadSfx(name);
+      const synth = SFX_CFG[name].synth();
+      this.playBuffer(synth, SFX_CFG[name].volume);
+    } catch (e) {
+      console.warn('[audio] playSound failed:', name, e);
     }
-    // Kick off async load; play synth fallback immediately so the
-    // first invocation isn't silent while the MP3 is fetching.
-    this.loadSfx(name);
-    const synth = SFX_CFG[name].synth();
-    this.playBuffer(synth, SFX_CFG[name].volume);
   }
 
   private playBuffer(buf: AudioBuffer, vol: number): void {
