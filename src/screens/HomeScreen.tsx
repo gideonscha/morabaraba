@@ -40,10 +40,13 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
 
           <PatternStrip className="my-1" />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', alignItems: 'center' }}>
-            <PrimaryButton onClick={goAi}>Play AI</PrimaryButton>
-            <SecondaryButton onClick={goLocal}>Local Play</SecondaryButton>
-            <SecondaryButton onClick={goOnline}>Online Play</SecondaryButton>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', alignItems: 'center' }}>
+            <ModeButton variant="primary" onClick={goAi}
+              name="Play the Ancestors" tagline="Challenge the wisdom of generations." />
+            <ModeButton variant="secondary" onClick={goLocal}
+              name="Kasi Clash" tagline="Two players. One phone. One winner." />
+            <ModeButton variant="secondary" onClick={goOnline}
+              name="King of the Kraal" tagline="Take on players across Mzansi." />
             <SecondaryButton onClick={goLeaderboard}>Leaderboard</SecondaryButton>
           </div>
 
@@ -73,3 +76,34 @@ const footLinkStyle: React.CSSProperties = {
   border: 0,
   fontFamily: 'inherit',
 };
+
+interface ModeButtonProps {
+  variant: 'primary' | 'secondary';
+  onClick: () => void;
+  name: string;
+  tagline: string;
+}
+
+/**
+ * Mode buttons stack the name (existing primary/secondary button styling)
+ * over a smaller Poppins tagline in sand colour. The button itself keeps
+ * its original size and styling — only the tagline is added beneath.
+ */
+function ModeButton({ variant, onClick, name, tagline }: ModeButtonProps) {
+  const Btn = variant === 'primary' ? PrimaryButton : SecondaryButton;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '100%' }}>
+      <Btn onClick={onClick}>{name}</Btn>
+      <div style={{
+        fontFamily: "'Poppins', sans-serif",
+        fontSize: 12,
+        fontStyle: 'italic',
+        color: 'var(--sand)',
+        letterSpacing: '0.02em',
+        textAlign: 'center',
+      }}>
+        {tagline}
+      </div>
+    </div>
+  );
+}

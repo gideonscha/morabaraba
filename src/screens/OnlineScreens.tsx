@@ -89,7 +89,7 @@ export function OnlineMenuScreen({ onBack, onMatched }: OnlineProps) {
     return (
       <PhoneFrame>
         <div className="screen" style={{ padding: '60px 24px 32px', flex: 1 }}>
-          <ScreenHeader title="Online Play" onBack={onBack} />
+          <ScreenHeader title="King of the Kraal" onBack={onBack} />
           <div style={{
             background: 'var(--card)', border: '1.5px solid var(--gold)',
             borderRadius: 'var(--radius-card)', padding: 24, textAlign: 'center',

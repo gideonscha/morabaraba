@@ -84,7 +84,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
   const isMill = state.phase === 'removing';
 
-  const opponentName = state.mode === 'local' ? 'Player 2' : state.mode.startsWith('ai_') ? 'AI' : '@opponent';
+  const opponentName = state.mode === 'local' ? 'Player 2' : state.mode.startsWith('ai_') ? 'Ancestors' : '@opponent';
 
   const prompt = useMemo(() => {
     if (state.winner || state.isDraw) return '';

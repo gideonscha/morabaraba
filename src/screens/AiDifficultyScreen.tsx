@@ -9,9 +9,9 @@ interface Props { onBack: () => void; onStart: () => void; }
 type Diff = 'easy' | 'medium' | 'hard';
 
 const DIFFICULTIES: { id: Diff; label: string; sub: string; reward: number }[] = [
-  { id: 'easy',   label: 'Easy',   sub: 'Learn the game',      reward: 5 },
-  { id: 'medium', label: 'Medium', sub: 'A worthy challenge',  reward: 10 },
-  { id: 'hard',   label: 'Hard',   sub: 'For masters only',    reward: 20 },
+  { id: 'easy',   label: 'Easy',   sub: 'A young elder, still learning the lines', reward: 5 },
+  { id: 'medium', label: 'Medium', sub: 'A seasoned voice of the kraal',           reward: 10 },
+  { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves',                 reward: 20 },
 ];
 
 export function AiDifficultyScreen({ onBack, onStart }: Props) {
@@ -35,15 +35,28 @@ export function AiDifficultyScreen({ onBack, onStart }: Props) {
               <path d="M15 5 L8 12 L15 19" />
             </svg>
           </IconButton>
-          <h1 style={{
-            textAlign: 'center', margin: 0,
-            fontWeight: 900, textTransform: 'uppercase',
-            color: 'var(--gold)', fontSize: 22, letterSpacing: '0.16em',
-            lineHeight: 1.1,
-            textShadow: '0 2px 6px rgba(0,0,0,.5)',
-          }}>
-            Choose Difficulty
-          </h1>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <h1 style={{
+              textAlign: 'center', margin: 0,
+              fontWeight: 900, textTransform: 'uppercase',
+              color: 'var(--gold)', fontSize: 22, letterSpacing: '0.16em',
+              lineHeight: 1.1,
+              textShadow: '0 2px 6px rgba(0,0,0,.5)',
+            }}>
+              Play the Ancestors
+            </h1>
+            <p style={{
+              margin: 0,
+              fontFamily: "'Poppins', sans-serif",
+              fontStyle: 'italic',
+              fontSize: 12,
+              color: 'var(--sand)',
+              letterSpacing: '0.02em',
+              textAlign: 'center',
+            }}>
+              Challenge the wisdom of generations.
+            </p>
+          </div>
           <span />
         </div>
 
