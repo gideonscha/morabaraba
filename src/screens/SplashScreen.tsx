@@ -1,5 +1,4 @@
 import { PhoneFrame } from '../components/ui/Primitives';
-import { MorabarabaDisc } from '../components/ui/Logo';
 
 export function SplashScreen() {
   return (
@@ -12,14 +11,12 @@ export function SplashScreen() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'splash-rise 900ms cubic-bezier(.2,.7,.2,1) both' }}>
-          <MorabarabaDisc size={280} markSize={168} pulse />
-          <div style={{
-            marginTop: 24, fontWeight: 900, fontSize: 30, letterSpacing: '0.18em',
-            color: 'var(--gold)', lineHeight: 1,
-            textShadow: '0 2px 8px rgba(0,0,0,.5)',
-          }}>
-            MORABARABA
-          </div>
+          <img
+            src="/logo-morabaraba.png"
+            alt="Morabaraba"
+            width={300}
+            style={{ width: 300, height: 'auto', display: 'block' }}
+          />
           <div style={{
             marginTop: 14, fontStyle: 'italic', fontWeight: 400, fontSize: 16,
             color: 'var(--cream)', letterSpacing: '0.02em', opacity: 0.92,

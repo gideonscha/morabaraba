@@ -2,7 +2,6 @@ import { useProfileStore } from '../store/profileStore';
 import {
   PhoneFrame, TopBar, PrimaryButton, SecondaryButton, PatternStrip, CoinBarLarge,
 } from '../components/ui/Primitives';
-import { MorabarabaDisc } from '../components/ui/Logo';
 
 interface Props {
   goAi: () => void;
@@ -25,18 +24,12 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
         <TopBar username={profile.username} tier={profile.tier} coins={profile.coins} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 24px 24px', gap: 18 }}>
-          <MorabarabaDisc size={140} markSize={86} />
-          <div style={{
-            fontWeight: 900,
-            fontSize: 22,
-            letterSpacing: '0.18em',
-            color: 'var(--gold)',
-            lineHeight: 1,
-            marginTop: 2,
-            textShadow: '0 2px 6px rgba(0,0,0,.5)',
-          }}>
-            MORABARABA
-          </div>
+          <img
+            src="/logo-morabaraba.png"
+            alt="Morabaraba"
+            width={230}
+            style={{ width: 230, height: 'auto', display: 'block' }}
+          />
 
           <PatternStrip className="my-1" />
 
