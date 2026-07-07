@@ -12,6 +12,7 @@ import { GameScreen } from './screens/GameScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { RewardsScreen } from './screens/RewardsScreen';
+import { KraalScreen } from './screens/KraalScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TutorialScreen } from './screens/TutorialScreen';
 import { OnlineMenuScreen, MatchmakingScreen } from './screens/OnlineScreens';
@@ -25,6 +26,7 @@ type Route =
   | 'leaderboard'
   | 'profile'
   | 'rewards'
+  | 'kraal'
   | 'settings'
   | 'tutorial'
   | 'online'
@@ -109,6 +111,7 @@ export default function App() {
         goTutorial={() => setRoute('tutorial')}
         goSettings={() => setRoute('settings')}
         goRewards={() => setRoute('rewards')}
+        goKraal={() => setRoute('kraal')}
       />
     );
   }
@@ -117,6 +120,7 @@ export default function App() {
   if (route === 'leaderboard') return <LeaderboardScreen onBack={home} />;
   if (route === 'profile') return <ProfileScreen onBack={home} onRewards={() => setRoute('rewards')} />;
   if (route === 'rewards') return <RewardsScreen onBack={home} />;
+  if (route === 'kraal') return <KraalScreen onBack={home} />;
   if (route === 'settings') return <SettingsScreen onBack={home} onTutorial={() => setRoute('tutorial')} />;
   if (route === 'tutorial') return <TutorialScreen onBack={home} />;
   if (route === 'online') {

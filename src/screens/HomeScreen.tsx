@@ -1,4 +1,6 @@
 import { useProfileStore } from '../store/profileStore';
+import { useHerdStore } from '../store/herdStore';
+import { herdHealth, HEALTH_LABEL, careCompletedToday, todayString } from '../lib/herd';
 import {
   PhoneFrame, TopBar, PrimaryButton, SecondaryButton, PatternStrip, CoinBarLarge,
 } from '../components/ui/Primitives';
@@ -12,11 +14,21 @@ interface Props {
   goTutorial: () => void;
   goSettings: () => void;
   goRewards: () => void;
+  goKraal: () => void;
 }
 
-export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, goTutorial, goSettings, goRewards }: Props) {
+const HEALTH_DOT: Record<string, string> = {
+  thriving: '#4CAF50', healthy: '#CDDC39', hungry: '#FF9800', neglected: '#F44336',
+};
+
+export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, goTutorial, goSettings, goRewards, goKraal }: Props) {
   const profile = useProfileStore((s) => s.profile);
+  const herd = useHerdStore((s) => s.herd);
   if (!profile) return null;
+
+  const today = todayString();
+  const health = herdHealth(herd, today);
+  const tended = careCompletedToday(herd, today);
 
   return (
     <PhoneFrame>
@@ -44,6 +56,22 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
           </div>
 
           <CoinBarLarge coins={profile.coins} onClick={goRewards} />
+
+          <button onClick={goKraal} className="btn-press" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'rgba(0,0,0,.28)', border: '1.5px solid var(--gold-dark)',
+            borderRadius: 999, padding: '8px 16px',
+            color: 'var(--cream)', fontWeight: 700, fontSize: 13,
+            cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '0.03em',
+          }}>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>🐄</span>
+            {tended ? 'Herd tended for today' : 'Tend Your Herd'}
+            <span style={{
+              width: 9, height: 9, borderRadius: '50%',
+              background: HEALTH_DOT[health],
+              boxShadow: `0 0 7px ${HEALTH_DOT[health]}`,
+            }} title={HEALTH_LABEL[health]} />
+          </button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, padding: '14px 0 22px' }}>
