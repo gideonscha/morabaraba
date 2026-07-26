@@ -4,6 +4,7 @@ import {
 } from '../components/ui/Primitives';
 import { SUPABASE_ENABLED, supabase } from '../lib/supabase';
 import { useProfileStore } from '../store/profileStore';
+import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
 
 type Tab = 'today' | 'week' | 'all';
 
@@ -19,7 +20,7 @@ interface Row {
   streak: number;
 }
 
-export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
+export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; onPrizes: () => void }) {
   const profile = useProfileStore((s) => s.profile);
   const [tab, setTab] = useState<Tab>('week');
   const [rows, setRows] = useState<Row[]>([]);
@@ -52,7 +53,10 @@ export function LeaderboardScreen({ onBack }: { onBack: () => void }) {
       <div className="screen leaderboard" style={{ flex: 1 }}>
         <TopBar back={onBack} username={profile?.username ?? '@you'} tier={profile?.tier ?? 'free'} coins={profile?.coins ?? 0} />
 
-        <div style={{ padding: '18px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: '12px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <KraalPrizeBanner onOpen={onPrizes} />
+          </div>
           <h2 style={{
             fontWeight: 900, fontSize: 28, color: 'var(--gold)',
             letterSpacing: '0.06em', textTransform: 'uppercase',

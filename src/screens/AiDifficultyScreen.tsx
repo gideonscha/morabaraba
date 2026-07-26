@@ -3,8 +3,9 @@ import {
   PhoneFrame, PrimaryButton, PatternStrip, IconButton, CoinIcon,
 } from '../components/ui/Primitives';
 import { useGameStore } from '../store/gameStore';
+import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
 
-interface Props { onBack: () => void; onStart: () => void; }
+interface Props { onBack: () => void; onStart: () => void; onPrizes: () => void; }
 
 type Diff = 'easy' | 'medium' | 'hard';
 
@@ -14,7 +15,7 @@ const DIFFICULTIES: { id: Diff; label: string; sub: string; reward: number }[] =
   { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves',                 reward: 20 },
 ];
 
-export function AiDifficultyScreen({ onBack, onStart }: Props) {
+export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
   const newGame = useGameStore((s) => s.newGame);
   const [chosen, setChosen] = useState<Diff | null>(null);
 
@@ -27,7 +28,10 @@ export function AiDifficultyScreen({ onBack, onStart }: Props) {
   return (
     <PhoneFrame>
       <div className="screen difficulty"
-           style={{ padding: '60px 24px 32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+           style={{ padding: '20px 24px 32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+          <KraalPrizeBanner onOpen={onPrizes} />
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr 40px', alignItems: 'center', marginBottom: 28 }}>
           <IconButton onClick={onBack} aria-label="Back">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"

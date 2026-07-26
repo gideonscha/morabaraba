@@ -7,10 +7,12 @@ import { SUPABASE_ENABLED, supabase } from '../lib/supabase';
 import { ensureAuthAndProfile } from '../lib/profile';
 import { createRoom, joinRoomByCode, quickMatch } from '../lib/online';
 import { useGameStore } from '../store/gameStore';
+import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
 
 interface OnlineProps {
   onBack: () => void;
   onMatched: (roomId: string, asPlayer: 'p1' | 'p2', code: string) => void;
+  onPrizes: () => void;
 }
 
 function ScreenHeader({ title, onBack }: { title: string; onBack: () => void }) {
@@ -74,7 +76,7 @@ function ModeCard({
   );
 }
 
-export function OnlineMenuScreen({ onBack, onMatched }: OnlineProps) {
+export function OnlineMenuScreen({ onBack, onMatched, onPrizes }: OnlineProps) {
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const newGame = useGameStore((s) => s.newGame);
@@ -141,8 +143,11 @@ export function OnlineMenuScreen({ onBack, onMatched }: OnlineProps) {
 
   return (
     <PhoneFrame>
-      <div className="screen" style={{ padding: '60px 24px 32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <ScreenHeader title="Online Play" onBack={onBack} />
+      <div className="screen" style={{ padding: '20px 24px 32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+          <KraalPrizeBanner onOpen={onPrizes} />
+        </div>
+        <ScreenHeader title="King of the Kraal" onBack={onBack} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 18 }}>
           <ModeCard
             name="Quick Match"

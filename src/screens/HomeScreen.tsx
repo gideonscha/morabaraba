@@ -2,8 +2,9 @@ import { useProfileStore } from '../store/profileStore';
 import { useHerdStore } from '../store/herdStore';
 import { herdHealth, HEALTH_LABEL, careCompletedToday, todayString } from '../lib/herd';
 import {
-  PhoneFrame, TopBar, PrimaryButton, SecondaryButton, PatternStrip, CoinBarLarge,
+  PhoneFrame, TopBar, PrimaryButton, SecondaryButton, PatternStrip,
 } from '../components/ui/Primitives';
+import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
 
 interface Props {
   goAi: () => void;
@@ -35,7 +36,8 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
       <div className="screen home" style={{ flex: 1 }}>
         <TopBar username={profile.username} tier={profile.tier} coins={profile.coins} />
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 24px 24px', gap: 18 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 24px 24px', gap: 14 }}>
+          <KraalPrizeBanner onOpen={goRewards} />
           <img
             src="/logo-morabaraba.png"
             alt="Morabaraba"
@@ -54,8 +56,6 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
               name="King of the Kraal" tagline="Take on players across Mzansi." />
             <SecondaryButton onClick={goLeaderboard}>Leaderboard</SecondaryButton>
           </div>
-
-          <CoinBarLarge coins={profile.coins} onClick={goRewards} />
 
           <button onClick={goKraal} className="btn-press" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,

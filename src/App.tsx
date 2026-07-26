@@ -11,7 +11,7 @@ import { AiDifficultyScreen } from './screens/AiDifficultyScreen';
 import { GameScreen } from './screens/GameScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
-import { RewardsScreen } from './screens/RewardsScreen';
+import { PrizeCentreScreen } from './screens/PrizeCentreScreen';
 import { KraalScreen } from './screens/KraalScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { TutorialScreen } from './screens/TutorialScreen';
@@ -115,11 +115,11 @@ export default function App() {
       />
     );
   }
-  if (route === 'ai-pick') return <AiDifficultyScreen onBack={home} onStart={() => setRoute('game')} />;
+  if (route === 'ai-pick') return <AiDifficultyScreen onBack={home} onStart={() => setRoute('game')} onPrizes={() => setRoute('rewards')} />;
   if (route === 'game') return <GameScreen onExit={home} />;
-  if (route === 'leaderboard') return <LeaderboardScreen onBack={home} />;
+  if (route === 'leaderboard') return <LeaderboardScreen onBack={home} onPrizes={() => setRoute('rewards')} />;
   if (route === 'profile') return <ProfileScreen onBack={home} onRewards={() => setRoute('rewards')} />;
-  if (route === 'rewards') return <RewardsScreen onBack={home} />;
+  if (route === 'rewards') return <PrizeCentreScreen onBack={home} onPlay={() => setRoute('ai-pick')} />;
   if (route === 'kraal') return <KraalScreen onBack={home} />;
   if (route === 'settings') return <SettingsScreen onBack={home} onTutorial={() => setRoute('tutorial')} />;
   if (route === 'tutorial') return <TutorialScreen onBack={home} />;
@@ -127,6 +127,7 @@ export default function App() {
     return (
       <OnlineMenuScreen
         onBack={home}
+        onPrizes={() => setRoute('rewards')}
         onMatched={(id, asPlayer, code) => {
           setRoom({ id, asPlayer, code });
           setRoute('matchmaking');
