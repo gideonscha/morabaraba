@@ -149,6 +149,12 @@ export function CoinBarLarge({
     >
       <CoinIcon size={26} />
       <span className="num">{coins.toLocaleString()}</span>
+      <span style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
+        color: 'var(--sand)', marginRight: 2,
+      }}>
+        coins
+      </span>
       <span className="progress"><span style={{ width: `${progressPct}%` }} /></span>
     </div>
   );
@@ -171,6 +177,12 @@ export function TopBar({
       <span className="topbar-coins">
         <CoinIcon />
         <span>{coins.toLocaleString()}</span>
+        <span style={{
+          fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+          color: 'var(--sand)', alignSelf: 'center',
+        }}>
+          coins
+        </span>
       </span>
     </div>
   );

@@ -198,6 +198,12 @@ function HeroCard({ draw, entries, coins, onPlay }: {
       <div style={{ marginTop: 12, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <PrimaryButton onClick={onPlay} style={{ width: '100%' }}>Play to Earn Entries</PrimaryButton>
         <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--sand)' }}>{draw.cta}</span>
+        <span style={{
+          fontSize: 12, fontWeight: 700, fontStyle: 'italic', color: 'var(--gold)',
+          letterSpacing: '0.03em',
+        }}>
+          Collect gold coins. Stand to win.
+        </span>
       </div>
     </div>
   );

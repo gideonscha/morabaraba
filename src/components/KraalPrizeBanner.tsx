@@ -54,6 +54,11 @@ export function KraalPrizeBanner({ onOpen }: { onOpen: () => void }) {
             ⏰ {countdownLabel(grand.closesAt)}
           </span>
         </span>
+        <span style={{
+          fontSize: 10, fontStyle: 'italic', color: 'var(--gold)', letterSpacing: '0.03em',
+        }}>
+          Collect gold coins. Stand to win.
+        </span>
       </span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)"
            strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
