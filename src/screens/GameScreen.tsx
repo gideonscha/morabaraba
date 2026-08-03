@@ -68,10 +68,10 @@ export function GameScreen({ onExit }: GameScreenProps) {
 
     // Flat client-confirmed scoring: win 3 / draw 1 / loss 0.
     if (humanWon && isLocalOrAi) {
-      addCoins(coinReward(state.mode));
+      addCoins(coinReward(state.mode), `win_${state.mode}` as 'win_ai_easy' | 'win_ai_medium' | 'win_ai_hard' | 'win_local');
       recordWin();
     } else if (state.isDraw && isLocalOrAi) {
-      addCoins(DRAW_COIN_REWARD);
+      addCoins(DRAW_COIN_REWARD, 'draw_match');
     } else if (!state.isDraw && state.mode.startsWith('ai_')) {
       recordLoss();
     }

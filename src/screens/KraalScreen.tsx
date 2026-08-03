@@ -60,7 +60,7 @@ export function KraalScreen({ onBack }: { onBack: () => void }) {
     }
     // Care day completed — award coins, celebrate.
     const coins = events.reduce((sum, e) => sum + e.coins, 0);
-    if (coins > 0) addCoins(coins);
+    if (coins > 0) addCoins(coins, 'herd_care');
     const milestone = events.some((e) => e.type === 'kraal' || e.type === 'rare' || e.type === 'bull');
     audio.playSound(milestone ? 'mill' : 'coin');
     setToasts(events);

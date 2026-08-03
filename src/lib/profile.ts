@@ -12,6 +12,35 @@ export interface LocalProfile {
   losses: number;
   streak: number;
   id?: string;
+  // Points system (points = coins earned; client-confirmed single currency).
+  lifetime_points?: number;      // never resets
+  monthly_points?: number;       // resets each calendar month
+  month_key?: string;            // 'YYYY-MM' the monthly_points belong to
+  best_monthly_score?: number;   // highest completed OR current monthly total
+  highest_rank?: number | null;  // best month-end leaderboard finish
+}
+
+export function currentMonthKey(now: Date = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * Apply a coin earn to the points counters, rolling the monthly total
+ * over when the calendar month has changed. Pure — returns the patch.
+ */
+export function applyPointsEarn(
+  p: Pick<LocalProfile, 'lifetime_points' | 'monthly_points' | 'month_key' | 'best_monthly_score'>,
+  amount: number,
+  monthKey: string = currentMonthKey(),
+): Pick<LocalProfile, 'lifetime_points' | 'monthly_points' | 'month_key' | 'best_monthly_score'> {
+  const rolled = p.month_key !== monthKey;
+  const monthly = (rolled ? 0 : (p.monthly_points ?? 0)) + amount;
+  return {
+    lifetime_points: (p.lifetime_points ?? 0) + amount,
+    monthly_points: monthly,
+    month_key: monthKey,
+    best_monthly_score: Math.max(p.best_monthly_score ?? 0, monthly),
+  };
 }
 
 export function loadLocalProfile(): LocalProfile | null {

@@ -63,8 +63,24 @@ export function ProfileScreen({ onBack, onRewards }: { onBack: () => void; onRew
             <Stat value={profile.losses} label="Losses" />
             <Stat value={`${winRate}%`} label="Win Rate" />
             <Stat value={profile.streak} label="Streak" />
-            <Stat value="—" label="Rank" />
-            <Stat value={profile.coins} label="Coins Earned" />
+          </div>
+
+          {/* Permanent achievements — never reset by the monthly rollover */}
+          <div style={{
+            width: 320, marginTop: 10,
+            display: 'flex', flexDirection: 'column', gap: 8,
+          }}>
+            <h3 style={{
+              fontWeight: 900, fontSize: 12, color: 'var(--gold)', margin: 0,
+              letterSpacing: '0.12em', textTransform: 'uppercase', textAlign: 'center',
+            }}>
+              Achievements
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              <Stat small value={profile.lifetime_points ?? 0} label="Lifetime Points" />
+              <Stat small value={profile.best_monthly_score ?? 0} label="Best Month" />
+              <Stat small value={profile.highest_rank ? `#${profile.highest_rank}` : '—'} label="Highest Rank" />
+            </div>
           </div>
 
           {!editing ? (
@@ -89,18 +105,19 @@ export function ProfileScreen({ onBack, onRewards }: { onBack: () => void; onRew
   );
 }
 
-function Stat({ value, label }: { value: string | number; label: string }) {
+function Stat({ value, label, small }: { value: string | number; label: string; small?: boolean }) {
   return (
     <div style={{
-      width: 155, height: 72, background: 'var(--card)', borderRadius: 12,
-      padding: '10px 14px',
+      width: small ? undefined : 155, height: small ? 64 : 72,
+      background: 'var(--card)', borderRadius: 12,
+      padding: small ? '8px 10px' : '10px 14px',
       display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
       border: '1px solid rgba(232,160,32,.18)',
     }}>
-      <span style={{ fontWeight: 900, fontSize: 24, color: 'var(--gold)', letterSpacing: '0.02em', lineHeight: 1 }}>
+      <span style={{ fontWeight: 900, fontSize: small ? 18 : 24, color: 'var(--gold)', letterSpacing: '0.02em', lineHeight: 1 }}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </span>
-      <span style={{ fontSize: 11, color: 'var(--sand)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      <span style={{ fontSize: small ? 9 : 11, color: 'var(--sand)', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
         {label}
       </span>
     </div>

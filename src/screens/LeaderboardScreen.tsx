@@ -5,8 +5,7 @@ import {
 import { SUPABASE_ENABLED, supabase } from '../lib/supabase';
 import { useProfileStore } from '../store/profileStore';
 import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
-
-type Tab = 'today' | 'week' | 'all';
+import { PERFORMANCE_PODIUM, formatRand } from '../lib/prizes';
 
 interface Row {
   id: string;
@@ -14,27 +13,29 @@ interface Row {
   avatar_id: number;
   tier: string;
   region: string;
-  wins_today: number;
-  wins_week: number;
-  wins_all_time: number;
-  streak: number;
+  monthly_points: number;
+  rank: number;
 }
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; onPrizes: () => void }) {
   const profile = useProfileStore((s) => s.profile);
-  const [tab, setTab] = useState<Tab>('week');
   const [rows, setRows] = useState<Row[]>([]);
+  const [myRank, setMyRank] = useState<{ monthly_points: number; rank: number } | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!SUPABASE_ENABLED || !supabase) return;
     let cancelled = false;
     setLoading(true);
-    const col = tab === 'today' ? 'wins_today' : tab === 'week' ? 'wins_week' : 'wins_all_time';
     supabase
-      .from('leaderboard')
+      .from('monthly_leaderboard')
       .select('*')
-      .order(col, { ascending: false })
+      .order('rank', { ascending: true })
       .limit(50)
       .then(({ data, error }) => {
         if (cancelled) return;
@@ -42,11 +43,22 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
         setRows((data ?? []) as Row[]);
         setLoading(false);
       });
+    supabase.rpc('my_monthly_rank').then(({ data, error }) => {
+      if (cancelled || error) return;
+      const r = Array.isArray(data) ? data[0] : data;
+      if (r) setMyRank(r as { monthly_points: number; rank: number });
+    });
     return () => { cancelled = true; };
-  }, [tab]);
+  }, []);
 
-  const winsKey = tab === 'today' ? 'wins_today' : tab === 'week' ? 'wins_week' : 'wins_all_time';
+  const now = new Date();
+  const monthLabel = `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
   const inList = profile?.id ? rows.find((r) => r.id === profile.id) : null;
+
+  // Own standing: server rank when available, else local monthly points
+  // with an unknown rank (offline / not yet signed in).
+  const ownPoints = myRank?.monthly_points ?? profile?.monthly_points ?? 0;
+  const ownRank: number | null = myRank?.rank ?? (inList ? inList.rank : null);
 
   return (
     <PhoneFrame>
@@ -57,38 +69,41 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <KraalPrizeBanner onOpen={onPrizes} />
           </div>
-          <h2 style={{
-            fontWeight: 900, fontSize: 28, color: 'var(--gold)',
-            letterSpacing: '0.06em', textTransform: 'uppercase',
-            textAlign: 'center', margin: '4px 0 0',
-            textShadow: '0 0 14px rgba(232,160,32,.4)',
-          }}>
-            Leaderboard
-          </h2>
-
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            {([
-              { id: 'today', label: 'Today' },
-              { id: 'week',  label: 'This Week' },
-              { id: 'all',   label: 'All Time' },
-            ] as { id: Tab; label: string }[]).map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                style={{
-                  fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  padding: '8px 14px', borderRadius: 999,
-                  background: tab === t.id ? 'var(--gold)' : 'var(--card)',
-                  color: tab === t.id ? '#1A0E08' : 'var(--cream)',
-                  border: `1px solid ${tab === t.id ? 'var(--gold-bright)' : 'rgba(232,160,32,.35)'}`,
-                  flex: 1, maxWidth: 100,
-                  cursor: 'pointer', fontFamily: 'inherit',
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{
+              fontWeight: 900, fontSize: 28, color: 'var(--gold)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              margin: '4px 0 0',
+              textShadow: '0 0 14px rgba(232,160,32,.4)',
+            }}>
+              Leaderboard
+            </h2>
+            <p style={{ margin: '2px 0 0', fontSize: 12.5, color: 'var(--sand)', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
+              {monthLabel}
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 11.5, fontStyle: 'italic', color: 'var(--cream)' }}>
+              Top 3 this month win {PERFORMANCE_PODIUM.map((p) => formatRand(p.valueRand)).join(' / ')} airtime
+            </p>
           </div>
+
+          {/* Own standing — always visible, per spec */}
+          {profile && (
+            <div style={{
+              width: 327, alignSelf: 'center', boxSizing: 'border-box',
+              background: 'rgba(232,160,32,.1)', border: '1.5px solid var(--gold)',
+              borderRadius: 12, padding: '10px 16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              boxShadow: '0 0 16px rgba(232,160,32,.2)',
+            }}>
+              <span style={{ fontSize: 12.5, color: 'var(--cream)', fontWeight: 700, letterSpacing: '0.04em' }}>
+                Your Rank: <strong style={{ color: 'var(--gold-bright)', fontSize: 16 }}>{ownRank ? `#${ownRank}` : '—'}</strong>
+              </span>
+              <span style={{ fontSize: 12.5, color: 'var(--cream)', fontWeight: 700 }}>
+                <strong style={{ color: 'var(--gold-bright)', fontSize: 16 }}>{ownPoints.toLocaleString()}</strong>
+                <span style={{ fontSize: 10, color: 'var(--sand)', fontWeight: 600 }}> pts this month</span>
+              </span>
+            </div>
+          )}
 
           <PatternStrip />
 
@@ -105,40 +120,25 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
             {loading && <p style={{ color: 'var(--sand)', fontSize: 12 }}>Loading…</p>}
             {!loading && rows.length === 0 && SUPABASE_ENABLED && (
-              <p style={{ color: 'var(--sand)', fontSize: 12 }}>No matches yet — be the first to win!</p>
+              <p style={{ color: 'var(--sand)', fontSize: 12 }}>No points yet this month — be the first on the board!</p>
             )}
-            {rows.map((row, i) => (
-              <LeaderRow key={row.id} rank={i + 1} row={row} winsKey={winsKey} self={row.id === profile?.id} />
+            {rows.map((row) => (
+              <LeaderRow key={row.id} row={row} self={row.id === profile?.id} />
             ))}
-            {profile?.id && !inList && rows.length > 0 && (
-              <>
-                <div style={{
-                  height: 1, width: 327, alignSelf: 'center',
-                  margin: '6px auto 2px',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(232,160,32,.55) 50%, transparent 100%)',
-                }} aria-hidden />
-                <div style={{
-                  fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: 'var(--gold)', textAlign: 'center', marginTop: -2,
-                }}>Your standing</div>
-                <LeaderRow rank={51} row={{
-                  id: profile.id, username: profile.username, avatar_id: profile.avatar_id,
-                  tier: profile.tier, region: profile.region,
-                  wins_today: 0, wins_week: 0, wins_all_time: profile.wins, streak: profile.streak,
-                }} winsKey={winsKey} self />
-              </>
-            )}
           </div>
+
+          <p style={{ fontSize: 10.5, color: 'var(--sand)', textAlign: 'center', margin: '4px 0 0', opacity: 0.8 }}>
+            Resets at 00:00 on the 1st of every month. Lifetime points and best
+            finishes are saved to your profile forever.
+          </p>
         </div>
       </div>
     </PhoneFrame>
   );
 }
 
-function LeaderRow({
-  rank, row, winsKey, self,
-}: { rank: number; row: Row; winsKey: keyof Row; self?: boolean }) {
-  const rankClass: Record<number, string> = { 1: 'top1', 2: 'top2', 3: 'top3' };
+function LeaderRow({ row, self }: { row: Row; self?: boolean }) {
+  const rank = row.rank;
   const isTop = rank <= 3;
   const ribbon = rank === 1
     ? 'linear-gradient(180deg, #FFD466, #C8881C)'
@@ -159,7 +159,7 @@ function LeaderRow({
     }}>
       <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: ribbon, boxShadow: rank === 1 ? '2px 0 8px rgba(232,160,32,.4)' : undefined }} />
       <span style={{
-        fontWeight: 900, fontSize: 20,
+        fontWeight: 900, fontSize: rank > 99 ? 14 : 20,
         color: isTop ? 'var(--gold)' : 'var(--sand)',
         textAlign: 'center',
       }}>
@@ -179,7 +179,7 @@ function LeaderRow({
       </span>
       <TierBadge tier={row.tier} />
       <span style={{ fontWeight: 900, fontSize: 16, color: 'var(--gold)', letterSpacing: '0.04em' }}>
-        {row[winsKey] as number}<span style={{ fontSize: 10, color: 'var(--sand)', fontWeight: 600 }}> W</span>
+        {row.monthly_points.toLocaleString()}<span style={{ fontSize: 10, color: 'var(--sand)', fontWeight: 600 }}> pts</span>
       </span>
     </div>
   );
