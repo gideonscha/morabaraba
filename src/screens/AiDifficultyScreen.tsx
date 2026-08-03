@@ -3,6 +3,7 @@ import {
   PhoneFrame, PrimaryButton, PatternStrip, IconButton, CoinIcon,
 } from '../components/ui/Primitives';
 import { useGameStore } from '../store/gameStore';
+import { coinReward } from '../lib/profile';
 import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
 
 interface Props { onBack: () => void; onStart: () => void; onPrizes: () => void; }
@@ -11,10 +12,11 @@ type Diff = 'easy' | 'medium' | 'hard';
 
 // Rewards are flat across difficulties per client-confirmed scoring
 // (win 3 / draw 1 / loss 0 — no weighting by difficulty or match type).
-const DIFFICULTIES: { id: Diff; label: string; sub: string; reward: number }[] = [
-  { id: 'easy',   label: 'Easy',   sub: 'A young elder, still learning the lines', reward: 3 },
-  { id: 'medium', label: 'Medium', sub: 'A seasoned voice of the kraal',           reward: 3 },
-  { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves',                 reward: 3 },
+// The amount itself comes from admin-editable config via coinReward().
+const DIFFICULTIES: { id: Diff; label: string; sub: string }[] = [
+  { id: 'easy',   label: 'Easy',   sub: 'A young elder, still learning the lines' },
+  { id: 'medium', label: 'Medium', sub: 'A seasoned voice of the kraal' },
+  { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves' },
 ];
 
 export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
@@ -121,7 +123,7 @@ export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
                   whiteSpace: 'nowrap',
                 }}>
                   <CoinIcon size={16} />
-                  {d.reward} per win
+                  {coinReward(`ai_${d.id}` as 'ai_easy' | 'ai_medium' | 'ai_hard')} per win
                 </span>
               </button>
             );

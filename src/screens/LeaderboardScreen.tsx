@@ -5,7 +5,7 @@ import {
 import { SUPABASE_ENABLED, supabase } from '../lib/supabase';
 import { useProfileStore } from '../store/profileStore';
 import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
-import { PERFORMANCE_PODIUM, formatRand } from '../lib/prizes';
+import { performancePodium, formatRand } from '../lib/prizes';
 
 interface Row {
   id: string;
@@ -82,7 +82,7 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
               {monthLabel}
             </p>
             <p style={{ margin: '6px 0 0', fontSize: 11.5, fontStyle: 'italic', color: 'var(--cream)' }}>
-              Top 3 this month win {PERFORMANCE_PODIUM.map((p) => formatRand(p.valueRand)).join(' / ')} airtime
+              Top 3 this month win {performancePodium().map((p) => formatRand(p.valueRand)).join(' / ')} airtime
             </p>
           </div>
 

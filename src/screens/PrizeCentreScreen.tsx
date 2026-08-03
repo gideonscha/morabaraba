@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { PhoneFrame, TopBar, PrimaryButton, PatternStrip, CoinIcon, TierBadge } from '../components/ui/Primitives';
 import { useProfileStore } from '../store/profileStore';
 import {
-  getDraws, demoEntries, formatRand, countdownTo, PERFORMANCE_PODIUM,
+  getDraws, demoEntries, formatRand, countdownTo, performancePodium,
   type DrawKind, type PrizeDraw,
 } from '../lib/prizes';
 
@@ -83,7 +83,7 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
                 Leaderboard Podium
               </h3>
               <div style={{ display: 'flex', gap: 8 }}>
-                {PERFORMANCE_PODIUM.map((p, i) => (
+                {performancePodium().map((p, i) => (
                   <div key={p.place} style={{
                     flex: 1, textAlign: 'center', padding: '10px 4px',
                     background: i === 0 ? 'rgba(232,160,32,.16)' : 'rgba(0,0,0,.22)',

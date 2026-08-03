@@ -12,6 +12,8 @@
  * The UI consumes the same shapes, so the swap is contained here.
  */
 
+import { getConfig } from './remoteConfig';
+
 export type DrawKind = 'daily' | 'weekly' | 'grand';
 
 export interface PrizeDraw {
@@ -56,12 +58,13 @@ export function nextGrandDraw(now: Date): Date {
 }
 
 export function getDraws(now: Date = new Date()): PrizeDraw[] {
+  const values = getConfig().prize_values;
   return [
     {
       kind: 'daily',
       icon: '🏆',
       name: "Today's Kraal Prize",
-      valueRand: 50,
+      valueRand: values.daily,
       closesAt: nextDailyDraw(now),
       cta: 'Play a match to earn entries',
     },
@@ -69,7 +72,7 @@ export function getDraws(now: Date = new Date()): PrizeDraw[] {
       kind: 'weekly',
       icon: '🏅',
       name: 'Weekly Kraal Prize',
-      valueRand: 300,
+      valueRand: values.weekly,
       closesAt: nextWeeklyDraw(now),
       cta: 'Win matches to stack entries',
     },
@@ -77,7 +80,7 @@ export function getDraws(now: Date = new Date()): PrizeDraw[] {
       kind: 'grand',
       icon: '🐂',
       name: 'Grand Kraal Prize',
-      valueRand: 1000,
+      valueRand: values.grand,
       closesAt: nextGrandDraw(now),
       cta: 'Every coin earned is a chance',
     },
@@ -93,15 +96,18 @@ export function getDraws(now: Date = new Date()): PrizeDraw[] {
  */
 export function demoEntries(profile: { wins: number; coins: number } | null, _kind: DrawKind): number {
   if (!profile) return 0;
-  return Math.floor(profile.coins / 10);
+  return Math.floor(profile.coins / getConfig().entries.coins_per_entry);
 }
 
 /** Client-confirmed monthly leaderboard performance rewards (airtime). */
-export const PERFORMANCE_PODIUM = [
-  { place: '1st', valueRand: 300 },
-  { place: '2nd', valueRand: 200 },
-  { place: '3rd', valueRand: 50 },
-] as const;
+export function performancePodium(): { place: string; valueRand: number }[] {
+  const p = getConfig().podium;
+  return [
+    { place: '1st', valueRand: p.first },
+    { place: '2nd', valueRand: p.second },
+    { place: '3rd', valueRand: p.third },
+  ];
+}
 
 export interface CountdownParts {
   days: number;

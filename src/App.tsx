@@ -3,6 +3,7 @@ import { useProfileStore } from './store/profileStore';
 import { useGameStore } from './store/gameStore';
 import { useAudioSettings } from './store/audioStore';
 import { useOnlineSync } from './hooks/useOnlineSync';
+import { loadRemoteConfig } from './lib/remoteConfig';
 import { audio } from './lib/audio';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -41,7 +42,7 @@ export default function App() {
   const [route, setRoute] = useState<Route>('splash');
   const [room, setRoom] = useState<{ id: string; code: string; asPlayer: 'p1' | 'p2' } | null>(null);
 
-  useEffect(() => { init(); }, [init]);
+  useEffect(() => { init(); loadRemoteConfig(); }, [init]);
 
   useEffect(() => {
     if (!hydrated) return;

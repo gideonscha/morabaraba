@@ -1,4 +1,5 @@
 import { supabase, SUPABASE_ENABLED, type DBProfile } from './supabase';
+import { getConfig } from './remoteConfig';
 
 const LOCAL_KEY = 'morabaraba.localProfile';
 
@@ -105,12 +106,15 @@ export async function fetchProfileRemote(userId: string): Promise<DBProfile | nu
  * Client-confirmed scoring (Jacqui, 30 Jul 2026): win 3 / draw 1 /
  * loss 0 coins, flat across online, AI (any difficulty), and
  * pass-and-play — no weighting by difficulty or match type.
+ * Values are admin-editable via app_config; defaults match the above.
  */
 export function coinReward(_mode: 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online'): number {
-  return 3;
+  return getConfig().scoring.win;
 }
 
-export const DRAW_COIN_REWARD = 1;
+export function drawCoinReward(): number {
+  return getConfig().scoring.draw;
+}
 
 export async function awardCoinsRemote(
   userId: string,
