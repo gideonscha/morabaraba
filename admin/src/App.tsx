@@ -4,14 +4,18 @@ import { supabase, CONFIGURED } from './lib/supabase';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Players } from './pages/Players';
+import { Draws } from './pages/Draws';
+import { Payouts } from './pages/Payouts';
 import { Config } from './pages/Config';
 import { Audit } from './pages/Audit';
 
-type Page = 'dashboard' | 'players' | 'config' | 'audit';
+type Page = 'dashboard' | 'players' | 'draws' | 'payouts' | 'config' | 'audit';
 
 const PAGES: { id: Page; label: string }[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'players', label: 'Players' },
+  { id: 'draws', label: 'Draws' },
+  { id: 'payouts', label: 'Payouts' },
   { id: 'config', label: 'Game Config' },
   { id: 'audit', label: 'Audit Log' },
 ];
@@ -80,6 +84,8 @@ export default function App() {
       <main className="main">
         {page === 'dashboard' && <Dashboard />}
         {page === 'players' && <Players />}
+        {page === 'draws' && <Draws />}
+        {page === 'payouts' && <Payouts />}
         {page === 'config' && <Config />}
         {page === 'audit' && <Audit />}
       </main>

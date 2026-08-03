@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useProfileStore } from '../store/profileStore';
-import { getDraws, demoEntries, formatRand, countdownLabel } from '../lib/prizes';
+import { getDraws, demoEntries, formatRand, countdownLabel, fetchMyEntries } from '../lib/prizes';
 import { audio } from '../lib/audio';
 
 /**
@@ -9,15 +9,17 @@ import { audio } from '../lib/audio';
  */
 export function KraalPrizeBanner({ onOpen }: { onOpen: () => void }) {
   const profile = useProfileStore((s) => s.profile);
+  const [realGrand, setRealGrand] = useState<number | null>(null);
   // Re-render each minute so the countdown label stays fresh.
   const [, tick] = useState(0);
   useEffect(() => {
     const t = setInterval(() => tick((n) => n + 1), 60_000);
+    fetchMyEntries().then((e) => { if (e) setRealGrand(e.grand); });
     return () => clearInterval(t);
   }, []);
 
   const grand = getDraws().find((d) => d.kind === 'grand')!;
-  const entries = demoEntries(profile, 'grand');
+  const entries = realGrand ?? demoEntries(profile, 'grand');
 
   return (
     <button

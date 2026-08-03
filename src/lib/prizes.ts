@@ -13,8 +13,38 @@
  */
 
 import { getConfig } from './remoteConfig';
+import { supabase, SUPABASE_ENABLED } from './supabase';
 
 export type DrawKind = 'daily' | 'weekly' | 'grand';
+
+export interface MyEntries { daily: number; weekly: number; grand: number }
+
+let entriesCache: { value: MyEntries; at: number } | null = null;
+
+/**
+ * Real server-side entry counts for the signed-in player (my_draw_entries
+ * RPC, 60s cache). Returns null when offline / signed out — callers fall
+ * back to demoEntries().
+ */
+export async function fetchMyEntries(): Promise<MyEntries | null> {
+  if (!SUPABASE_ENABLED || !supabase) return null;
+  if (entriesCache && Date.now() - entriesCache.at < 60_000) return entriesCache.value;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return null;
+    const { data, error } = await supabase.rpc('my_draw_entries');
+    if (error || !data) return null;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    const value: MyEntries = {
+      daily: Number(row.daily) || 0,
+      weekly: Number(row.weekly) || 0,
+      grand: Number(row.grand) || 0,
+    };
+    entriesCache = { value, at: Date.now() };
+    return value;
+  } catch { return null; }
+}
 
 export interface PrizeDraw {
   kind: DrawKind;

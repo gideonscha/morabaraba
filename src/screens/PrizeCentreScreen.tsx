@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { PhoneFrame, TopBar, PrimaryButton, PatternStrip, CoinIcon, TierBadge } from '../components/ui/Primitives';
 import { useProfileStore } from '../store/profileStore';
 import {
-  getDraws, demoEntries, formatRand, countdownTo, performancePodium,
-  type DrawKind, type PrizeDraw,
+  getDraws, demoEntries, formatRand, countdownTo, performancePodium, fetchMyEntries,
+  type DrawKind, type PrizeDraw, type MyEntries,
 } from '../lib/prizes';
 
 const TABS: { kind: DrawKind; icon: string; label: string }[] = [
@@ -17,9 +17,17 @@ interface Props { onBack: () => void; onPlay: () => void; }
 export function PrizeCentreScreen({ onBack, onPlay }: Props) {
   const profile = useProfileStore((s) => s.profile);
   const [tab, setTab] = useState<DrawKind>('grand');
+  const [realEntries, setRealEntries] = useState<MyEntries | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMyEntries().then((e) => { if (!cancelled && e) setRealEntries(e); });
+    return () => { cancelled = true; };
+  }, []);
 
   if (!profile) return null;
   const draw = getDraws().find((d) => d.kind === tab)!;
+  const entries = realEntries ? realEntries[tab] : demoEntries(profile, tab);
 
   return (
     <PhoneFrame>
@@ -63,7 +71,7 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
 
           <HeroCard
             draw={draw}
-            entries={demoEntries(profile, tab)}
+            entries={entries}
             coins={profile.coins}
             onPlay={onPlay}
           />
