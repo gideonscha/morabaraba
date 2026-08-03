@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { PhoneFrame, TopBar, PrimaryButton, PatternStrip, CoinIcon, TierBadge } from '../components/ui/Primitives';
 import { useProfileStore } from '../store/profileStore';
 import {
-  getDraws, demoEntries, formatRand, countdownTo,
+  getDraws, demoEntries, formatRand, countdownTo, PERFORMANCE_PODIUM,
   type DrawKind, type PrizeDraw,
 } from '../lib/prizes';
 
@@ -68,6 +68,45 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
             onPlay={onPlay}
           />
 
+          {/* Monthly performance podium — separate from the random draw */}
+          {tab === 'grand' && (
+            <div style={{
+              width: 327, boxSizing: 'border-box',
+              background: 'var(--card)', border: '1.5px solid var(--gold)',
+              borderRadius: 16, padding: '14px 18px',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}>
+              <h3 style={{
+                fontWeight: 900, fontSize: 14, color: 'var(--gold)', margin: 0,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+              }}>
+                Leaderboard Podium
+              </h3>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {PERFORMANCE_PODIUM.map((p, i) => (
+                  <div key={p.place} style={{
+                    flex: 1, textAlign: 'center', padding: '10px 4px',
+                    background: i === 0 ? 'rgba(232,160,32,.16)' : 'rgba(0,0,0,.22)',
+                    border: `1px solid ${i === 0 ? 'var(--gold-bright)' : 'var(--gold-dark)'}`,
+                    borderRadius: 12,
+                  }}>
+                    <div style={{ fontSize: 18, lineHeight: 1 }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+                    <div style={{ fontWeight: 900, fontSize: 16, color: 'var(--gold-bright)', marginTop: 3 }}>
+                      {formatRand(p.valueRand)}
+                    </div>
+                    <div style={{ fontSize: 9.5, color: 'var(--sand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                      {p.place} · airtime
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: 0, fontSize: 11.5, color: 'var(--cream)', lineHeight: 1.35 }}>
+                Top 3 on the monthly leaderboard win airtime — skill rewards,
+                separate from the random draws.
+              </p>
+            </div>
+          )}
+
           {/* How it works */}
           <div style={{
             width: 327, boxSizing: 'border-box',
@@ -82,10 +121,10 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
               How it works
             </h3>
             {[
-              ['🎮', 'Play matches and tend your herd to earn coins.'],
-              ['🎟️', 'Coins earned convert into draw entries automatically.'],
-              ['📅', 'Draws close daily, weekly, and monthly.'],
-              ['📲', 'Prizes paid as airtime, data, or cash via your network.'],
+              ['🎮', 'Play matches to earn gold coins: 3 for a win, 1 for a draw.'],
+              ['🎟️', 'Every 10 coins earned = 1 entry into each draw (max 20 entries a day).'],
+              ['📅', 'Draws close at 11:59 PM — daily, Sunday night, and month-end.'],
+              ['📲', 'Winners notified by 10:00 the next morning. Prizes paid as airtime.'],
             ].map(([icon, text]) => (
               <div key={text} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <span style={{ fontSize: 15, lineHeight: 1.3 }}>{icon}</span>

@@ -9,10 +9,12 @@ interface Props { onBack: () => void; onStart: () => void; onPrizes: () => void;
 
 type Diff = 'easy' | 'medium' | 'hard';
 
+// Rewards are flat across difficulties per client-confirmed scoring
+// (win 3 / draw 1 / loss 0 — no weighting by difficulty or match type).
 const DIFFICULTIES: { id: Diff; label: string; sub: string; reward: number }[] = [
-  { id: 'easy',   label: 'Easy',   sub: 'A young elder, still learning the lines', reward: 5 },
-  { id: 'medium', label: 'Medium', sub: 'A seasoned voice of the kraal',           reward: 10 },
-  { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves',                 reward: 20 },
+  { id: 'easy',   label: 'Easy',   sub: 'A young elder, still learning the lines', reward: 3 },
+  { id: 'medium', label: 'Medium', sub: 'A seasoned voice of the kraal',           reward: 3 },
+  { id: 'hard',   label: 'Hard',   sub: 'The ancients themselves',                 reward: 3 },
 ];
 
 export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {

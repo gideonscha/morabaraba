@@ -9,7 +9,7 @@ import {
 } from '../components/ui/Primitives';
 import { useAiOpponent } from '../hooks/useAiOpponent';
 import { useGameAudio } from '../hooks/useGameAudio';
-import { coinReward } from '../lib/profile';
+import { coinReward, DRAW_COIN_REWARD } from '../lib/profile';
 import { tweenNumber } from '../lib/animations';
 
 interface GameScreenProps { onExit: () => void; }
@@ -66,11 +66,12 @@ export function GameScreen({ onExit }: GameScreenProps) {
     const humanWon = state.winner === state.humanPlayer;
     const isLocalOrAi = state.mode === 'local' || state.mode.startsWith('ai_');
 
+    // Flat client-confirmed scoring: win 3 / draw 1 / loss 0.
     if (humanWon && isLocalOrAi) {
-      let reward = coinReward(state.mode);
-      if (profile.streak + 1 >= 3) reward += 5;
-      addCoins(reward);
+      addCoins(coinReward(state.mode));
       recordWin();
+    } else if (state.isDraw && isLocalOrAi) {
+      addCoins(DRAW_COIN_REWARD);
     } else if (!state.isDraw && state.mode.startsWith('ai_')) {
       recordLoss();
     }
@@ -369,7 +370,10 @@ function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, o
   const isLose = !isDraw && winner && winner !== humanPlayer;
 
   const variant = isDraw ? 'draw' : isWin ? 'win' : 'lose';
-  const reward = isWin && (mode === 'local' || mode.startsWith('ai_')) ? coinReward(mode as 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online') : 0;
+  const isLocalOrAi = mode === 'local' || mode.startsWith('ai_');
+  const reward = isWin && isLocalOrAi
+    ? coinReward(mode as 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online')
+    : isDraw && isLocalOrAi ? DRAW_COIN_REWARD : 0;
 
   const title = isDraw ? 'Honourable Draw' : isWin ? 'Victory' : 'Defeat';
   const tagline = isDraw ? 'A balanced battle'

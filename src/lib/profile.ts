@@ -72,15 +72,16 @@ export async function fetchProfileRemote(userId: string): Promise<DBProfile | nu
   return data as DBProfile | null;
 }
 
-export function coinReward(mode: 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online'): number {
-  switch (mode) {
-    case 'ai_easy': return 5;
-    case 'ai_medium': return 10;
-    case 'ai_hard': return 20;
-    case 'local': return 15;
-    case 'online': return 25;
-  }
+/**
+ * Client-confirmed scoring (Jacqui, 30 Jul 2026): win 3 / draw 1 /
+ * loss 0 coins, flat across online, AI (any difficulty), and
+ * pass-and-play — no weighting by difficulty or match type.
+ */
+export function coinReward(_mode: 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online'): number {
+  return 3;
 }
+
+export const DRAW_COIN_REWARD = 1;
 
 export async function awardCoinsRemote(
   userId: string,

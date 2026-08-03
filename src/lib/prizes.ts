@@ -27,25 +27,32 @@ export function formatRand(v: number): string {
   return `R${v.toLocaleString('en-ZA')}`;
 }
 
+/*
+ * Client-confirmed schedule (Jacqui, 30 Jul 2026): draws close 11:59 PM —
+ * daily every night, weekly Sunday night, monthly on the last day of the
+ * month. Midnight is the period boundary ("everything from 12:00 AM
+ * belongs to the next one"), so each close is modelled as the following
+ * midnight. Winner notification goes out 10:00 the next morning
+ * (server-side concern, not handled here).
+ */
+
 /** Next local midnight. */
 export function nextDailyDraw(now: Date): Date {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
   return d;
 }
 
-/** Next Sunday 19:00 local (if it's Sunday before 19:00, today). */
+/** End of Sunday = next Monday 00:00 local. */
 export function nextWeeklyDraw(now: Date): Date {
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0);
-  const day = d.getDay(); // 0 = Sunday
-  let add = (7 - day) % 7;
-  if (add === 0 && now.getTime() >= d.getTime()) add = 7;
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  const add = ((8 - d.getDay()) % 7) || 7; // days until next Monday
   d.setDate(d.getDate() + add);
   return d;
 }
 
-/** First of next month, 12:00 local. */
+/** End of the month's last day = first of next month, 00:00 local. */
 export function nextGrandDraw(now: Date): Date {
-  return new Date(now.getFullYear(), now.getMonth() + 1, 1, 12, 0, 0);
+  return new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0);
 }
 
 export function getDraws(now: Date = new Date()): PrizeDraw[] {
@@ -78,18 +85,23 @@ export function getDraws(now: Date = new Date()): PrizeDraw[] {
 }
 
 /**
- * DEMO entry count — deterministic from local profile stats so the
- * number visibly grows as the player plays, without a real ledger.
- * Production: SELECT count(*) FROM entries WHERE profile_id = ...
+ * DEMO entry count — client-confirmed rule is 1 entry into EACH pool per
+ * 10 coins earned, capped at 20 entries/day. Without a server ledger we
+ * can't track "earned during this window", so the demo uses the current
+ * balance as a proxy, identical across pools.
+ * Production: SELECT count(*) FROM entries WHERE profile_id = ... AND draw_id = ...
  */
-export function demoEntries(profile: { wins: number; coins: number } | null, kind: DrawKind): number {
+export function demoEntries(profile: { wins: number; coins: number } | null, _kind: DrawKind): number {
   if (!profile) return 0;
-  const base = profile.wins * 5 + Math.floor(profile.coins / 10);
-  // Longer-window draws accumulate more entries.
-  if (kind === 'daily') return Math.max(1, Math.floor(base / 6));
-  if (kind === 'weekly') return Math.max(1, Math.floor(base / 2));
-  return Math.max(1, base);
+  return Math.floor(profile.coins / 10);
 }
+
+/** Client-confirmed monthly leaderboard performance rewards (airtime). */
+export const PERFORMANCE_PODIUM = [
+  { place: '1st', valueRand: 300 },
+  { place: '2nd', valueRand: 200 },
+  { place: '3rd', valueRand: 50 },
+] as const;
 
 export interface CountdownParts {
   days: number;
