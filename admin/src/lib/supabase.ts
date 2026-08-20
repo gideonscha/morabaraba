@@ -1,18 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
+import { demoClient } from './demo';
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const DEMO = import.meta.env.VITE_DEMO_MODE === '1';
 
-if (!url || !anonKey) {
+if (!DEMO && (!url || !anonKey)) {
   // Surfaced in the UI by App.tsx; keeps the module import side-effect free.
   console.error('Missing VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY');
 }
 
-export const supabase = createClient(url ?? 'http://localhost', anonKey ?? 'missing', {
+// Instantiating with a dummy URL is side-effect free — supabase-js only
+// connects on first use, and in demo mode nothing ever calls it.
+const realClient = createClient(url ?? 'http://localhost', anonKey ?? 'missing', {
   auth: { persistSession: true, autoRefreshToken: true },
 });
 
-export const CONFIGURED = Boolean(url && anonKey);
+export const supabase = DEMO ? (demoClient as unknown as typeof realClient) : realClient;
+
+export const CONFIGURED = DEMO || Boolean(url && anonKey);
 
 export interface AdminProfileRow {
   id: string;
