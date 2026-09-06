@@ -4,6 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { useAudioSettings } from './store/audioStore';
 import { useOnlineSync } from './hooks/useOnlineSync';
 import { loadRemoteConfig } from './lib/remoteConfig';
+import { captureSubscriberArrival } from './lib/subscriber';
 import { audio } from './lib/audio';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -41,6 +42,16 @@ export default function App() {
 
   const [route, setRoute] = useState<Route>('splash');
   const [room, setRoom] = useState<{ id: string; code: string; asPlayer: 'p1' | 'p2' } | null>(null);
+
+  // Telco hand-off: /welcome (Content URL) or /return (Return URL).
+  // Captured once on boot; the address bar is cleaned to '/'.
+  const [arrival] = useState(() => captureSubscriberArrival());
+  const [showWelcome, setShowWelcome] = useState(arrival?.via === 'welcome');
+  useEffect(() => {
+    if (!showWelcome) return;
+    const t = setTimeout(() => setShowWelcome(false), 6000);
+    return () => clearTimeout(t);
+  }, [showWelcome]);
 
   useEffect(() => { init(); loadRemoteConfig(); }, [init]);
 
@@ -101,8 +112,27 @@ export default function App() {
 
   const home = () => { setRoom(null); setRoute('home'); };
 
+  const welcomeToast = showWelcome ? (
+    <div
+      onClick={() => setShowWelcome(false)}
+      role="status"
+      style={{
+        position: 'fixed', left: 16, right: 16, top: 12, zIndex: 60,
+        background: 'var(--card)', border: '1.5px solid var(--gold)', borderRadius: 14,
+        padding: '12px 16px', color: 'var(--cream)', fontSize: 14, lineHeight: 1.4,
+        textAlign: 'center', boxShadow: '0 6px 18px rgba(0,0,0,.45)',
+        animation: 'fade-up 300ms ease-out both',
+      }}
+    >
+      🐂 <strong style={{ color: 'var(--gold-bright)' }}>Welcome to the Kraal!</strong> Your
+      subscription is active — play, collect gold coins, stand to win.
+    </div>
+  ) : null;
+
   if (route === 'home') {
     return (
+      <>
+      {welcomeToast}
       <HomeScreen
         goAi={() => setRoute('ai-pick')}
         goLocal={() => { newGame('local', 'p1'); setRoute('game'); }}
@@ -114,6 +144,7 @@ export default function App() {
         goRewards={() => setRoute('rewards')}
         goKraal={() => setRoute('kraal')}
       />
+      </>
     );
   }
   if (route === 'ai-pick') return <AiDifficultyScreen onBack={home} onStart={() => setRoute('game')} onPrizes={() => setRoute('rewards')} />;
