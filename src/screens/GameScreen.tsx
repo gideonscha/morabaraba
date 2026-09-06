@@ -56,6 +56,25 @@ export function GameScreen({ onExit }: GameScreenProps) {
     if (toastTimerRef.current !== null) window.clearTimeout(toastTimerRef.current);
   }, []);
 
+  // One-time coaching hint the first time a player ever reaches the moving
+  // phase on their own turn. Dismisses on tap, on selecting a piece, or
+  // after 8s. Remembered per device.
+  const COACH_KEY = 'morabaraba.hint.move';
+  const [showCoach, setShowCoach] = useState(false);
+  useEffect(() => {
+    if (state.phase !== 'moving' && state.phase !== 'flying') return;
+    const humansTurn = state.mode === 'local' || state.currentPlayer === state.humanPlayer;
+    if (!humansTurn || state.winner || state.isDraw) return;
+    let seen = false;
+    try { seen = localStorage.getItem(COACH_KEY) === '1'; } catch { /* ignore */ }
+    if (seen) return;
+    try { localStorage.setItem(COACH_KEY, '1'); } catch { /* ignore */ }
+    setShowCoach(true);
+    const t = window.setTimeout(() => setShowCoach(false), 8000);
+    return () => window.clearTimeout(t);
+  }, [state.phase, state.currentPlayer, state.humanPlayer, state.mode, state.winner, state.isDraw]);
+  useEffect(() => { if (state.selectedNode !== null) setShowCoach(false); }, [state.selectedNode]);
+
   // Award coins once at game completion
   const [awarded, setAwarded] = useState(false);
   useEffect(() => {
@@ -97,12 +116,12 @@ export function GameScreen({ onExit }: GameScreenProps) {
     }
     if (state.selectedNode === null) {
       return state.currentPlayer === state.humanPlayer || state.mode === 'local'
-        ? 'Select a piece to move'
+        ? (state.phase === 'flying' ? 'Tap a glowing cow — it can fly anywhere' : 'Tap a glowing cow to move it')
         : 'Opponent is thinking…';
     }
     return state.phase === 'flying'
-      ? 'Choose any empty point to fly to'
-      : 'Tap a highlighted spot to move';
+      ? 'Now tap any empty point to fly there'
+      : 'Now tap a gold dot to move there';
   }, [state.phase, state.selectedNode, state.currentPlayer, state.humanPlayer, state.mode, state.winner, state.isDraw]);
 
   return (
@@ -174,6 +193,14 @@ export function GameScreen({ onExit }: GameScreenProps) {
         <div style={{ display: 'flex', justifyContent: 'center', padding: '0 24px', flex: 1, alignItems: 'center' }}>
           <Board interactive={!state.winner && !state.isDraw} />
         </div>
+
+        {/* First-time moving-phase coach hint */}
+        {showCoach && (
+          <div className="coach-hint" onClick={() => setShowCoach(false)} role="status">
+            <span className="em">Your cows are all placed.</span> Tap a <span className="em">glowing cow</span>,
+            then tap a <span className="em">gold dot</span> to move it there.
+          </div>
+        )}
 
         {/* Action prompt */}
         <div className={`action-prompt ${isMill ? 'mill' : ''}`}>

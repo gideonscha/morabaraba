@@ -102,15 +102,26 @@ export function hasLegalMoves(
   player: Player,
   phase: Phase
 ): boolean {
+  return getMovablePieces(board, player, phase).length > 0;
+}
+
+/**
+ * Indices of `player`'s pieces that have at least one legal move. Used
+ * to highlight actionable pieces during the moving/flying phases.
+ */
+export function getMovablePieces(
+  board: Cell[],
+  player: Player,
+  phase: Phase
+): number[] {
   const playerNodes = board
     .map((cell, i) => (cell === player ? i : -1))
     .filter(i => i !== -1);
 
   if (phase === 'flying') {
-    return board.some(c => c === null);
+    return board.some(c => c === null) ? playerNodes : [];
   }
-
-  return playerNodes.some(
+  return playerNodes.filter(
     node => ADJACENCY[node].some(adj => board[adj] === null)
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { NODE_POSITIONS, VIEW_SIZE } from '../lib/boardLayout';
-import { getRemovableNodes, MILLS, type Player } from '../lib/gameEngine';
+import { getRemovableNodes, getMovablePieces, MILLS, type Player } from '../lib/gameEngine';
 
 interface Ghost { key: string; index: number; cell: Player; ts: number }
 
@@ -68,6 +68,14 @@ export function Board({ interactive = true }: BoardProps) {
     if (state.showHandoff) return;
     tapNode(i);
   };
+
+  // Which pieces to halo: only on a human's turn in the moving/flying
+  // phases, before a piece has been selected.
+  const humansTurn = state.mode === 'local' || state.currentPlayer === state.humanPlayer;
+  const showMovable =
+    interactive && humansTurn && !state.showHandoff && !state.aiThinking &&
+    state.selectedNode === null && (state.phase === 'moving' || state.phase === 'flying');
+  const movable = showMovable ? getMovablePieces(state.board, state.currentPlayer, state.phase) : [];
 
   return (
     <div className="w-full flex justify-center">
@@ -224,6 +232,15 @@ export function Board({ interactive = true }: BoardProps) {
                 />
               </g>
             );
+          })}
+        </g>
+
+        {/* Movable-piece halos — every piece the player can legally move,
+            shown until they pick one. */}
+        <g>
+          {movable.map((i) => {
+            const p = NODE_POSITIONS[i];
+            return <circle key={`mv-${i}`} className="movable-ring" cx={p.x} cy={p.y} r="18" />;
           })}
         </g>
 

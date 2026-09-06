@@ -123,7 +123,7 @@ export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
                   whiteSpace: 'nowrap',
                 }}>
                   <CoinIcon size={16} />
-                  {coinReward(`ai_${d.id}` as 'ai_easy' | 'ai_medium' | 'ai_hard')} per win
+                  {coinReward(`ai_${d.id}` as 'ai_easy' | 'ai_medium' | 'ai_hard')} Coins per win
                 </span>
               </button>
             );

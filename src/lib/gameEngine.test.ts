@@ -4,6 +4,7 @@ import {
   getRemovableNodes,
   getValidMoves,
   hasLegalMoves,
+  getMovablePieces,
   checkWinConditions,
   type Cell,
 } from './gameEngine';
@@ -109,6 +110,29 @@ describe('getValidMoves', () => {
     const moves = getValidMoves(board, 1, 'p1', 'flying');
     expect(moves).toEqual(expect.arrayContaining([5, 15]));
     expect(moves.length).toBe(2);
+  });
+});
+
+describe('getMovablePieces', () => {
+  test('lists only pieces with an empty adjacent point when moving', () => {
+    const board: Cell[] = Array(24).fill('p2');
+    board[0] = 'p1'; // neighbours 1 and 7
+    board[2] = 'p1'; // neighbours 1 and 3
+    board[1] = null;
+    board[12] = 'p1'; // fully boxed in
+    expect(getMovablePieces(board, 'p1', 'moving').sort()).toEqual([0, 2]);
+  });
+
+  test('every piece is movable when flying and any point is empty', () => {
+    const board: Cell[] = Array(24).fill(null);
+    board[0] = 'p1'; board[5] = 'p1'; board[20] = 'p1';
+    expect(getMovablePieces(board, 'p1', 'flying').sort((a, b) => a - b)).toEqual([0, 5, 20]);
+  });
+
+  test('nothing is movable on a full board', () => {
+    const board: Cell[] = Array(24).fill('p1');
+    expect(getMovablePieces(board, 'p1', 'moving')).toEqual([]);
+    expect(getMovablePieces(board, 'p1', 'flying')).toEqual([]);
   });
 });
 
