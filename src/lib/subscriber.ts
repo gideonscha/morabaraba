@@ -4,8 +4,9 @@
  * Worldplay uses ONE Content URL for both newly-subscribed and returning
  * subscribers (Jeremy, 9 Sep 2026) — that URL is /welcome. /return is kept
  * as an alias so either works. We cannot tell new from returning at the
- * URL level; that distinction comes from the parameters Worldplay appends
- * (still to be confirmed) and, later, the wbi_subscribers table.
+ * URL level; that distinction comes from the wbi_subscribers table.
+ * Parameters per the Worldplay Web DOI Interface spec §3 "DOI Return":
+ * `tn` is the TelNo / MSISDN (Jeremy, 10 Sep 2026).
  *
  * Captures whatever parameters the telco appends, remembers them on the
  * device, and cleans the address bar so the PWA behaves normally after.
@@ -35,7 +36,7 @@ export function captureSubscriberArrival(): SubscriberArrival | null {
 
   const arrival: SubscriberArrival = {
     via: path === '/welcome' ? 'welcome' : 'return',
-    msisdn: params.msisdn ?? params.telno ?? params.tel ?? params.cli,
+    msisdn: params.tn ?? params.telno ?? params.msisdn ?? params.tel ?? params.cli, // Worldplay sends `tn`
     token: params.token ?? params.ai ?? params.t,
     refId: params.refid ?? params.ref ?? params.rn,
     params,
