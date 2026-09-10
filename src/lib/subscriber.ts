@@ -1,6 +1,11 @@
 /**
- * Subscriber arrival via the WBI Content URL (/welcome — a user who has
- * just subscribed) or Return URL (/return — an existing subscriber).
+ * Subscriber arrival from the telco hand-off.
+ *
+ * Worldplay uses ONE Content URL for both newly-subscribed and returning
+ * subscribers (Jeremy, 9 Sep 2026) — that URL is /welcome. /return is kept
+ * as an alias so either works. We cannot tell new from returning at the
+ * URL level; that distinction comes from the parameters Worldplay appends
+ * (still to be confirmed) and, later, the wbi_subscribers table.
  *
  * Captures whatever parameters the telco appends, remembers them on the
  * device, and cleans the address bar so the PWA behaves normally after.

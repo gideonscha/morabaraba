@@ -43,8 +43,9 @@ export default function App() {
   const [route, setRoute] = useState<Route>('splash');
   const [room, setRoom] = useState<{ id: string; code: string; asPlayer: 'p1' | 'p2' } | null>(null);
 
-  // Telco hand-off: /welcome (Content URL) or /return (Return URL).
-  // Captured once on boot; the address bar is cleaned to '/'.
+  // Telco hand-off: Worldplay sends new AND returning subscribers to
+  // /welcome (single Content URL); /return is an alias. Captured once on
+  // boot; the address bar is cleaned to '/'.
   const [arrival] = useState(() => captureSubscriberArrival());
   const [showWelcome, setShowWelcome] = useState(arrival?.via === 'welcome');
   useEffect(() => {
