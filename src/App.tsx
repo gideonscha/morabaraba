@@ -4,7 +4,7 @@ import { useGameStore } from './store/gameStore';
 import { useAudioSettings } from './store/audioStore';
 import { useOnlineSync } from './hooks/useOnlineSync';
 import { loadRemoteConfig } from './lib/remoteConfig';
-import { captureSubscriberArrival } from './lib/subscriber';
+import { captureSubscriberArrival, reportArrival } from './lib/subscriber';
 import { audio } from './lib/audio';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -47,12 +47,17 @@ export default function App() {
   // /welcome (single Content URL); /return is an alias. Captured once on
   // boot; the address bar is cleaned to '/'.
   const [arrival] = useState(() => captureSubscriberArrival());
-  const [showWelcome, setShowWelcome] = useState(arrival?.via === 'welcome');
+  const [showWelcome, setShowWelcome] = useState(Boolean(arrival && arrival.status !== 'unknown'));
   useEffect(() => {
     if (!showWelcome) return;
-    const t = setTimeout(() => setShowWelcome(false), 6000);
+    const t = setTimeout(() => setShowWelcome(false), arrival?.status === 'confirmed' ? 6000 : 9000);
     return () => clearTimeout(t);
-  }, [showWelcome]);
+  }, [showWelcome, arrival]);
+  // Report the DOI outcome once the local profile is known (links MSISDN ↔ player).
+  useEffect(() => {
+    if (!arrival || !hydrated) return;
+    reportArrival(arrival, profile?.id);
+  }, [arrival, hydrated, profile?.id]);
 
   useEffect(() => { init(); loadRemoteConfig(); }, [init]);
 
@@ -125,8 +130,16 @@ export default function App() {
         animation: 'fade-up 300ms ease-out both',
       }}
     >
-      🐂 <strong style={{ color: 'var(--gold-bright)' }}>Welcome to the Kraal!</strong> Your
-      subscription is active — play, collect gold coins, stand to win.
+      {arrival?.status === 'confirmed' ? (
+        <>🐂 <strong style={{ color: 'var(--gold-bright)' }}>Welcome to the Kraal!</strong> Your
+        subscription is active — play, collect gold coins, stand to win.</>
+      ) : arrival?.status === 'declined' ? (
+        <>🐄 <strong style={{ color: 'var(--gold-bright)' }}>No problem.</strong> Your subscription
+        wasn't confirmed, but you're welcome to play. You can subscribe any time.</>
+      ) : (
+        <>🐄 <strong style={{ color: 'var(--gold-bright)' }}>Something went wrong</strong> confirming
+        your subscription{arrival?.errorMessage ? ` (${arrival.errorMessage})` : ''}. You can still play — please try subscribing again later.</>
+      )}
     </div>
   ) : null;
 
