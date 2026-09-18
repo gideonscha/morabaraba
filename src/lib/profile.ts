@@ -91,6 +91,31 @@ export async function upsertProfile(p: LocalProfile, userId: string): Promise<DB
   return data as DBProfile;
 }
 
+export type RemoteProfileError = 'username_taken' | 'invalid_username' | 'unavailable';
+
+/**
+ * Create/refresh the server profile row and classify failures so the UI
+ * can react (e.g. ask for another name) instead of silently continuing
+ * with a server identity that does not exist.
+ */
+export async function createRemoteProfile(
+  p: LocalProfile, userId: string,
+): Promise<{ profile: DBProfile | null; error: RemoteProfileError | null }> {
+  if (!SUPABASE_ENABLED || !supabase) return { profile: null, error: 'unavailable' };
+  const { data, error } = await supabase
+    .from('profiles')
+    .upsert({ id: userId, username: p.username, avatar_id: p.avatar_id, region: p.region }, { onConflict: 'id' })
+    .select('*')
+    .single();
+  if (error) {
+    console.warn('createRemoteProfile:', error.code, error.message);
+    if (error.code === '23505') return { profile: null, error: 'username_taken' };   // unique_violation
+    if (error.code === '23514') return { profile: null, error: 'invalid_username' }; // check_violation
+    return { profile: null, error: 'unavailable' };
+  }
+  return { profile: data as DBProfile, error: null };
+}
+
 export async function fetchProfileRemote(userId: string): Promise<DBProfile | null> {
   if (!SUPABASE_ENABLED || !supabase) return null;
   const { data, error } = await supabase

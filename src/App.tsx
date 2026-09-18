@@ -48,11 +48,13 @@ export default function App() {
   // boot; the address bar is cleaned to '/'.
   const [arrival] = useState(() => captureSubscriberArrival());
   const [showWelcome, setShowWelcome] = useState(Boolean(arrival && arrival.status !== 'unknown'));
+  // Dismiss timer starts only once the player is on Home — a brand-new
+  // subscriber goes through onboarding first and must still see it.
   useEffect(() => {
-    if (!showWelcome) return;
-    const t = setTimeout(() => setShowWelcome(false), arrival?.status === 'confirmed' ? 6000 : 9000);
+    if (!showWelcome || route !== 'home') return;
+    const t = setTimeout(() => setShowWelcome(false), arrival?.status === 'confirmed' ? 8000 : 10000);
     return () => clearTimeout(t);
-  }, [showWelcome, arrival]);
+  }, [showWelcome, arrival, route]);
   // Report the DOI outcome once the local profile is known (links MSISDN ↔ player).
   useEffect(() => {
     if (!arrival || !hydrated) return;

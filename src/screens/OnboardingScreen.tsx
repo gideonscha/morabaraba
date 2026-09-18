@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useProfileStore } from '../store/profileStore';
 import { PhoneFrame, PatternStrip, PrimaryButton, AvatarPicker } from '../components/ui/Primitives';
-import { ensureAuthAndProfile, upsertProfile } from '../lib/profile';
+import { ensureAuthAndProfile, createRemoteProfile } from '../lib/profile';
 
 interface Props {
   onDone: () => void;
@@ -14,7 +14,9 @@ export function OnboardingScreen({ onDone }: Props) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const canSubmit = name.trim().length >= 2 && avatarId > 0;
+  // Mirrors the server rule (profiles_username_check: 3–15 characters).
+  const cleanLen = name.trim().length;
+  const canSubmit = cleanLen >= 3 && cleanLen <= 15 && avatarId > 0;
 
   const handleSubmit = async () => {
     if (!canSubmit || busy) return;
@@ -33,8 +35,17 @@ export function OnboardingScreen({ onDone }: Props) {
     try {
       const { id } = await ensureAuthAndProfile();
       if (id) {
-        const remote = await upsertProfile(local, id);
-        setProfile({ ...local, ...(remote ?? {}), id });
+        const { profile: remote, error } = await createRemoteProfile(local, id);
+        if (error === 'username_taken') {
+          setErr('That warrior name is already taken — please choose another.');
+          return;
+        }
+        if (error === 'invalid_username') {
+          setErr('Names must be 3–15 characters.');
+          return;
+        }
+        // Server unavailable: play locally without claiming a server identity.
+        setProfile(remote ? { ...local, ...remote, id } : local);
       } else {
         setProfile(local);
       }
@@ -68,7 +79,7 @@ export function OnboardingScreen({ onDone }: Props) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              maxLength={18}
+              maxLength={15}
               autoComplete="off"
               placeholder="Enter your warrior name"
             />
