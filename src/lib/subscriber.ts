@@ -70,8 +70,22 @@ export function parseDoiReturn(params: Record<string, string>): Omit<SubscriberA
   };
 }
 
-/** Call once on boot. Returns the arrival if this load came via the hand-off URL. */
+let captured: SubscriberArrival | null | undefined;
+
+/**
+ * Returns the arrival if this page load came via the hand-off URL.
+ * Evaluated once per page load and memoised: it has side effects
+ * (storage + cleaning the address bar), so repeated calls — e.g. React
+ * strict-mode double-invoking a state initialiser — must not see a
+ * different answer the second time.
+ */
 export function captureSubscriberArrival(): SubscriberArrival | null {
+  if (captured !== undefined) return captured;
+  captured = captureOnce();
+  return captured;
+}
+
+function captureOnce(): SubscriberArrival | null {
   if (typeof location === 'undefined') return null;
   const path = location.pathname.replace(/\/+$/, '').toLowerCase();
   if (path !== '/welcome' && path !== '/return') return null;

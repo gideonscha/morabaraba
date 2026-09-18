@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reportClientError } from '../lib/crashReport';
 
 interface Props { children: ReactNode }
 interface State { error: Error | null }
@@ -10,6 +11,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack);
+    reportClientError(error, info.componentStack ?? null);
   }
 
   private reset = () => {

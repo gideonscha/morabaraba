@@ -4,6 +4,12 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // Build identity for crash reports (Vercel sets VERCEL_GIT_COMMIT_SHA).
+  define: {
+    __APP_COMMIT__: JSON.stringify(
+      String((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.VERCEL_GIT_COMMIT_SHA ?? 'dev').slice(0, 12),
+    ),
+  },
   plugins: [
     react(),
     VitePWA({
