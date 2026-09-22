@@ -6,7 +6,12 @@ import {
   hasLegalMoves,
   getMovablePieces,
   checkWinConditions,
+  applyPlace,
+  applyRemove,
+  applySelect,
+  initialState,
   type Cell,
+  type GameState,
 } from './gameEngine';
 
 describe('detectNewMills', () => {
@@ -148,5 +153,75 @@ describe('hasLegalMoves', () => {
     board[0] = 'p1';
     board[1] = null;
     expect(hasLegalMoves(board, 'p1', 'moving')).toBe(true);
+  });
+});
+
+
+// ---------------------------------------------------------------------
+// Blockade wins (bug reported by Jacqui, 22 Sep 2026: last placement
+// left her with no legal move and the game just sat in "Moving").
+// ---------------------------------------------------------------------
+function boardFrom(p1: number[], p2: number[]): Cell[] {
+  const b: Cell[] = Array(24).fill(null);
+  for (const i of p1) b[i] = 'p1';
+  for (const i of p2) b[i] = 'p2';
+  return b;
+}
+
+describe('blockade at the end of placing', () => {
+  // Node 16's only neighbours are 17 and 23. If both are p2 and 16 is the
+  // only empty point, p1 cannot move anywhere.
+  const P1 = [0, 1, 2, 4, 5, 6, 7, 8, 10, 11, 12];
+  const P2 = [9, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23];
+
+  test('applyPlace: the last placement can hand the mover a lost position', () => {
+    const state: GameState = {
+      ...initialState(),
+      board: boardFrom(P1, P2),
+      phase: 'placing',
+      currentPlayer: 'p2',
+      piecesToPlace: { p1: 0, p2: 1 },
+      piecesOnBoard: { p1: 11, p2: 11 },
+    };
+    const next = applyPlace(state, 3); // no mill at 3: 2 and 11 are p1
+    expect(next.phase).toBe('moving');
+    expect(next.winner).toBe('p2');
+    expect(next.isDraw).toBe(false);
+  });
+
+  test('applyRemove: a capture that ends placing is checked against the incoming mover', () => {
+    // Full board; p1 holds 16, whose neighbours are p2. Removing 16 leaves
+    // p1 with pieces everywhere but nowhere to go.
+    const board = boardFrom([...P1, 16, 3], P2);
+    const state: GameState = {
+      ...initialState(),
+      board,
+      phase: 'removing',
+      previousPhase: 'placing',
+      currentPlayer: 'p2',
+      removalsPending: 1,
+      piecesToPlace: { p1: 0, p2: 0 },
+      piecesOnBoard: { p1: 13, p2: 11 },
+    };
+    const next = applyRemove(state, 16);
+    expect(next.winner).toBe('p2');
+    expect(next.phase).toBe('moving');
+  });
+
+  test('only the player to move matters', () => {
+    const board = boardFrom([...P1, 3], P2); // 16 empty, p1 blocked, p2 can move 17→16
+    expect(checkWinConditions(board, { p1: 12, p2: 11 }, 'moving', 'p1').winner).toBe('p2');
+    expect(checkWinConditions(board, { p1: 12, p2: 11 }, 'moving', 'p2').winner).toBeNull();
+  });
+
+  test('applySelect refuses a piece that has no legal move', () => {
+    const board = boardFrom([...P1, 3], P2);
+    board[16] = null; board[9] = null; // p1 at 8 or 10 could move into 9
+    const state: GameState = {
+      ...initialState(), board, phase: 'moving', previousPhase: 'moving', currentPlayer: 'p1',
+      piecesToPlace: { p1: 0, p2: 0 }, piecesOnBoard: { p1: 12, p2: 10 },
+    };
+    expect(applySelect(state, 0).selectedNode).toBeNull();   // 0's neighbours 1 and 7 are p1
+    expect(applySelect(state, 8).selectedNode).toBe(8);       // 8 → 9 is open
   });
 });

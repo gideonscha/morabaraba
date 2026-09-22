@@ -5,6 +5,7 @@ import {
   applyRemove,
   applySelect,
   applyMove,
+  getValidMoves,
   type GameState,
   type Player,
 } from '../lib/gameEngine';
@@ -92,6 +93,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (s.phase === 'moving' || s.phase === 'flying') {
       if (s.board[nodeIndex] === s.currentPlayer) {
+        if (getValidMoves(s.board, nodeIndex, s.currentPlayer, s.phase).length === 0) {
+          audio.playSound('invalid'); // that cow is boxed in
+          return;
+        }
         get().select(nodeIndex);
         return;
       }

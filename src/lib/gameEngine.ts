@@ -126,10 +126,20 @@ export function getMovablePieces(
   );
 }
 
+/**
+ * Win/draw check after a turn resolves.
+ *
+ * `phase` is the phase the game is entering. When `toMove` is given, the
+ * blockade rule is applied the way the game is actually played: only the
+ * player about to move needs a legal move — if they have none, they lose,
+ * regardless of whether the opponent is also stuck. Without `toMove` the
+ * legacy symmetric check is used (both blocked = draw).
+ */
 export function checkWinConditions(
   board: Cell[],
   piecesOnBoard: Record<Player, number>,
-  phase: Phase
+  phase: Phase,
+  toMove?: Player
 ): { winner: Player | null; isDraw: boolean } {
   if (piecesOnBoard.p1 <= 2 && phase !== 'placing') {
     return { winner: 'p2', isDraw: false };
@@ -139,6 +149,14 @@ export function checkWinConditions(
   }
 
   if (phase === 'placing') return { winner: null, isDraw: false };
+
+  if (toMove) {
+    const moverPhase: Phase = piecesOnBoard[toMove] === 3 ? 'flying' : 'moving';
+    if (!hasLegalMoves(board, toMove, moverPhase)) {
+      return { winner: opponentOf(toMove), isDraw: false };
+    }
+    return { winner: null, isDraw: false };
+  }
 
   const p1CanMove = hasLegalMoves(board, 'p1', phase === 'flying' && piecesOnBoard.p1 === 3 ? 'flying' : phase);
   const p2CanMove = hasLegalMoves(board, 'p2', phase === 'flying' && piecesOnBoard.p2 === 3 ? 'flying' : phase);
@@ -218,6 +236,9 @@ export function applyPlace(state: GameState, nodeIndex: number): GameState {
     ? (piecesOnBoard[next] === 3 ? 'flying' : 'moving')
     : 'placing';
 
+  // The last placement can leave the incoming mover with no legal move.
+  const win = checkWinConditions(board, piecesOnBoard, nextPhase, next);
+
   return {
     ...state,
     board,
@@ -229,6 +250,8 @@ export function applyPlace(state: GameState, nodeIndex: number): GameState {
     selectedNode: null,
     validMoves: [],
     lastMillNodes: [],
+    winner: win.winner,
+    isDraw: win.isDraw,
   };
 }
 
@@ -262,8 +285,19 @@ export function applyRemove(state: GameState, nodeIndex: number): GameState {
   const next = opponentOf(state.currentPlayer);
   const previousPhase = state.previousPhase;
 
-  // Check win after removal
-  const win = checkWinConditions(board, piecesOnBoard, previousPhase);
+  // After a placing-phase mill, transition to moving if both are done placing
+  const bothDonePlacing =
+    state.piecesToPlace.p1 === 0 && state.piecesToPlace.p2 === 0;
+
+  let nextPhase: Phase = previousPhase;
+  if (previousPhase === 'placing' && bothDonePlacing) {
+    nextPhase = piecesOnBoard[next] === 3 ? 'flying' : 'moving';
+  } else if (previousPhase === 'moving' || previousPhase === 'flying') {
+    nextPhase = piecesOnBoard[next] === 3 ? 'flying' : 'moving';
+  }
+
+  // Check win against the phase being entered and the player about to move
+  const win = checkWinConditions(board, piecesOnBoard, nextPhase, next);
   if (win.winner || win.isDraw) {
     return {
       ...state,
@@ -273,20 +307,10 @@ export function applyRemove(state: GameState, nodeIndex: number): GameState {
       removalsPending: 0,
       winner: win.winner,
       isDraw: win.isDraw,
-      phase: previousPhase,
+      phase: nextPhase,
+      previousPhase: nextPhase,
       lastMillNodes: state.lastMillNodes,
     };
-  }
-
-  // After placing-phase mill, may need to transition to moving if both done
-  const bothDonePlacing =
-    state.piecesToPlace.p1 === 0 && state.piecesToPlace.p2 === 0;
-
-  let nextPhase: Phase = previousPhase;
-  if (previousPhase === 'placing' && bothDonePlacing) {
-    nextPhase = piecesOnBoard[next] === 3 ? 'flying' : 'moving';
-  } else if (previousPhase === 'moving' || previousPhase === 'flying') {
-    nextPhase = piecesOnBoard[next] === 3 ? 'flying' : 'moving';
   }
 
   return {
@@ -308,6 +332,7 @@ export function applySelect(state: GameState, nodeIndex: number): GameState {
   if (state.phase !== 'moving' && state.phase !== 'flying') return state;
   if (state.board[nodeIndex] !== state.currentPlayer) return state;
   const moves = getValidMoves(state.board, nodeIndex, state.currentPlayer, state.phase);
+  if (moves.length === 0) return state; // immovable piece — nothing to select
   return {
     ...state,
     selectedNode: nodeIndex,
@@ -344,7 +369,7 @@ export function applyMove(state: GameState, toIndex: number): GameState {
   const next = opponentOf(state.currentPlayer);
   const nextPhase: Phase = state.piecesOnBoard[next] === 3 ? 'flying' : 'moving';
 
-  const win = checkWinConditions(board, state.piecesOnBoard, nextPhase);
+  const win = checkWinConditions(board, state.piecesOnBoard, nextPhase, next);
   return {
     ...state,
     board,
