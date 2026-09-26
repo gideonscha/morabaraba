@@ -111,3 +111,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   dismissHandoff: () => set({ showHandoff: false }),
 }));
+
+// Dev-only: expose the store to the browser automation used for
+// reproductions (e.g. driving the board to a specific position). Vite
+// strips this from production builds.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { __game?: typeof useGameStore }).__game = useGameStore;
+}

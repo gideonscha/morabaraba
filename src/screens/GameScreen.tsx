@@ -75,12 +75,20 @@ export function GameScreen({ onExit }: GameScreenProps) {
   }, [state.phase, state.currentPlayer, state.humanPlayer, state.mode, state.winner, state.isDraw]);
   useEffect(() => { if (state.selectedNode !== null) setShowCoach(false); }, [state.selectedNode]);
 
-  // Award coins once at game completion
-  const [awarded, setAwarded] = useState(false);
+  // Award coins once at game completion.
+  //
+  // The guard is a ref, set BEFORE touching the profile store, and the
+  // effect deliberately does not depend on `profile`: addCoins() updates
+  // the store synchronously, which re-renders this screen before a
+  // useState flag could be committed — with a state-based guard the
+  // effect re-ran and awarded again, forever (React #185; reported by
+  // Jacqui on iPhone, 26 Sep 2026).
+  const awardedRef = useRef(false);
   useEffect(() => {
     if (!state.winner && !state.isDraw) return;
-    if (awarded) return;
-    if (!profile) { setAwarded(true); return; }
+    if (awardedRef.current) return;
+    awardedRef.current = true;
+    if (!useProfileStore.getState().profile) return;
 
     const humanWon = state.winner === state.humanPlayer;
     const isLocalOrAi = state.mode === 'local' || state.mode.startsWith('ai_');
@@ -94,8 +102,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
     } else if (!state.isDraw && state.mode.startsWith('ai_')) {
       recordLoss();
     }
-    setAwarded(true);
-  }, [state.winner, state.isDraw, awarded, profile, addCoins, recordWin, recordLoss, state.mode, state.humanPlayer]);
+  }, [state.winner, state.isDraw, addCoins, recordWin, recordLoss, state.mode, state.humanPlayer]);
 
   const phaseLabel = state.phase === 'removing' ? 'Remove 1 Piece'
     : state.phase === 'placing' ? 'Placing'
@@ -265,7 +272,7 @@ export function GameScreen({ onExit }: GameScreenProps) {
             humanPlayer={state.humanPlayer}
             mode={state.mode}
             coins={profile?.coins ?? 0}
-            onReplay={() => { setAwarded(false); newGame(state.mode, state.humanPlayer); }}
+            onReplay={() => { awardedRef.current = false; newGame(state.mode, state.humanPlayer); }}
             onHome={onExit}
           />
         )}
