@@ -41,7 +41,7 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
           <h2 style={{
             fontWeight: 900, fontSize: 24, color: 'var(--gold)',
             letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0,
-            textShadow: '0 0 14px rgba(232,160,32,.4)', textAlign: 'center',
+            textShadow: '0 0 14px rgba(var(--gold-rgb),.4)', textAlign: 'center',
           }}>
             Kraal Prize Centre
           </h2>
@@ -94,7 +94,7 @@ export function PrizeCentreScreen({ onBack, onPlay }: Props) {
                 {performancePodium().map((p, i) => (
                   <div key={p.place} style={{
                     flex: 1, textAlign: 'center', padding: '10px 4px',
-                    background: i === 0 ? 'rgba(232,160,32,.16)' : 'rgba(0,0,0,.22)',
+                    background: i === 0 ? 'rgba(var(--gold-rgb),.16)' : 'rgba(0,0,0,.22)',
                     border: `1px solid ${i === 0 ? 'var(--gold-bright)' : 'var(--gold-dark)'}`,
                     borderRadius: 12,
                   }}>
@@ -178,18 +178,18 @@ function HeroCard({ draw, entries, coins, onPlay }: {
     <div style={{
       width: 327, boxSizing: 'border-box',
       background: isGrand
-        ? 'linear-gradient(180deg, rgba(232,160,32,.20) 0%, var(--card) 55%)'
+        ? 'linear-gradient(180deg, rgba(var(--gold-rgb),.20) 0%, var(--card) 55%)'
         : 'var(--card)',
       border: `1.5px solid ${isGrand ? 'var(--gold-bright)' : 'var(--gold)'}`,
       borderRadius: 18, padding: '18px 18px 16px',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
       boxShadow: isGrand
-        ? '0 0 28px rgba(232,160,32,.35), 0 8px 18px rgba(0,0,0,.35)'
-        : '0 0 18px rgba(232,160,32,.15), 0 6px 14px rgba(0,0,0,.3)',
+        ? '0 0 28px rgba(var(--gold-rgb),.35), 0 8px 18px rgba(0,0,0,.35)'
+        : '0 0 18px rgba(var(--gold-rgb),.15), 0 6px 14px rgba(0,0,0,.3)',
     }}>
       <div style={{
         fontSize: isGrand ? 52 : 40, lineHeight: 1,
-        filter: isGrand ? 'drop-shadow(0 0 14px rgba(232,160,32,.75))' : 'drop-shadow(0 0 8px rgba(232,160,32,.4))',
+        filter: isGrand ? 'drop-shadow(0 0 14px rgba(var(--gold-rgb),.75))' : 'drop-shadow(0 0 8px rgba(var(--gold-rgb),.4))',
       }}>
         {draw.icon}
       </div>
@@ -211,7 +211,7 @@ function HeroCard({ draw, entries, coins, onPlay }: {
       {/* Dominant prize value */}
       <div style={{
         fontWeight: 900, fontSize: 46, lineHeight: 1.05, color: 'var(--gold-bright)',
-        textShadow: '0 0 22px rgba(232,160,32,.55), 0 3px 6px rgba(0,0,0,.4)',
+        textShadow: '0 0 22px rgba(var(--gold-rgb),.55), 0 3px 6px rgba(0,0,0,.4)',
         letterSpacing: '0.02em',
       }}>
         {formatRand(draw.valueRand)}

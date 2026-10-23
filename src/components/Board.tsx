@@ -87,12 +87,12 @@ export function Board({ interactive = true }: BoardProps) {
       >
         <defs>
           <radialGradient id={`wood-${id}`} cx="50%" cy="45%" r="70%">
-            <stop offset="0%" stopColor="#C9913A" />
-            <stop offset="100%" stopColor="#A0722A" />
+            <stop offset="0%" style={{ stopColor: 'var(--board-1)' }} />
+            <stop offset="100%" style={{ stopColor: 'var(--board-2)' }} />
           </radialGradient>
           <pattern id={`chev-${id}`} width="16" height="8" patternUnits="userSpaceOnUse">
             <path d="M0 6.4 L4 1.6 L8 6.4 L12 1.6 L16 6.4"
-                  stroke="#5C3A1E" strokeWidth="1.4" fill="none" strokeLinejoin="miter" />
+                  style={{ stroke: 'var(--board-deco)' }} strokeWidth="1.4" fill="none" strokeLinejoin="miter" />
           </pattern>
 
           {/* Onyx (P1) sphere — full opacity stops so wood never bleeds through */}
@@ -104,9 +104,9 @@ export function Board({ interactive = true }: BoardProps) {
 
           {/* Bone/cream (P2) sphere — full opacity, no warm tones */}
           <radialGradient id={`tok-p2-${id}`} cx="35%" cy="30%" r="75%">
-            <stop offset="0%"   stopColor="#ffffff" stopOpacity="1"/>
-            <stop offset="60%"  stopColor="#f5f0e8" stopOpacity="1"/>
-            <stop offset="100%" stopColor="#d8d0c0" stopOpacity="1"/>
+            <stop offset="0%"   style={{ stopColor: 'var(--tok-p2-0)' }} stopOpacity="1"/>
+            <stop offset="60%"  style={{ stopColor: 'var(--tok-p2-1)' }} stopOpacity="1"/>
+            <stop offset="100%" style={{ stopColor: 'var(--tok-p2-2)' }} stopOpacity="1"/>
           </radialGradient>
 
           {/* Specular highlight (same gradient for both — white at 30% opacity at the
@@ -129,16 +129,16 @@ export function Board({ interactive = true }: BoardProps) {
         <path
           d={`M0 0 H${VIEW_SIZE} V${VIEW_SIZE} H0 Z M16 16 V${VIEW_SIZE - 16} H${VIEW_SIZE - 16} V16 Z`}
           fill={`url(#chev-${id})`}
-          fillOpacity="0.2"
+          style={{ fillOpacity: 'var(--board-deco-opacity)' }}
           fillRule="evenodd"
         />
         <rect x="0.75" y="0.75" width={VIEW_SIZE - 1.5} height={VIEW_SIZE - 1.5} rx="5.5"
-              fill="none" stroke="#5C3A1E" strokeOpacity="0.5" strokeWidth="1.5" />
+              fill="none" style={{ stroke: 'var(--board-line)' }} strokeOpacity="0.5" strokeWidth="1.5" />
         <rect x="15.5" y="15.5" width={VIEW_SIZE - 31} height={VIEW_SIZE - 31} rx="3"
-              fill="none" stroke="#5C3A1E" strokeOpacity="0.5" strokeWidth="1" />
+              fill="none" style={{ stroke: 'var(--board-line)' }} strokeOpacity="0.5" strokeWidth="1" />
 
         {/* Three concentric squares + midpoint connectors. NO diagonals. */}
-        <g stroke="#5C3A1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <g style={{ stroke: 'var(--board-line)' }} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none">
           <rect x="32" y="32" width="263" height="263" />
           <rect x="76" y="76" width="175" height="175" />
           <rect x="120" y="120" width="87" height="87" />
@@ -149,7 +149,7 @@ export function Board({ interactive = true }: BoardProps) {
         </g>
 
         {/* Node sockets */}
-        <g fill="#5C3A1E">
+        <g style={{ fill: 'var(--board-socket)' }}>
           {NODE_POSITIONS.map((p, i) => (
             <circle key={`hole-${i}`} cx={p.x} cy={p.y} r="6" />
           ))}
@@ -192,7 +192,7 @@ export function Board({ interactive = true }: BoardProps) {
                 <circle
                   cx={p.x} cy={p.y} r="14"
                   fill={`url(#tok-${isP1 ? 'p1' : 'p2'}-${id})`}
-                  stroke={isP1 ? '#000000' : '#9a8f78'}
+                  style={{ stroke: isP1 ? '#000000' : 'var(--tok-p2-stroke)' }}
                   strokeWidth="0.6"
                   className={inMill ? 'token-mill' : undefined}
                 />
@@ -221,7 +221,7 @@ export function Board({ interactive = true }: BoardProps) {
                 <circle
                   cx={p.x} cy={p.y} r="14"
                   fill={`url(#tok-${isP1 ? 'p1' : 'p2'}-${id})`}
-                  stroke={isP1 ? '#000000' : '#9a8f78'}
+                  style={{ stroke: isP1 ? '#000000' : 'var(--tok-p2-stroke)' }}
                   strokeWidth="0.6"
                   pointerEvents="none"
                 />
@@ -259,9 +259,8 @@ export function Board({ interactive = true }: BoardProps) {
                 key={`vm-${i}`}
                 className="pulse"
                 cx={p.x} cy={p.y} r="6"
-                fill="#E8A020"
                 fillOpacity="0.5"
-                style={{ animationDelay: `-${(idx * 0.15).toFixed(2)}s` }}
+                style={{ fill: 'var(--gold)', animationDelay: `-${(idx * 0.15).toFixed(2)}s` }}
               />
             );
           })}

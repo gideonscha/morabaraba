@@ -28,14 +28,14 @@ export function KraalPrizeBanner({ onOpen }: { onOpen: () => void }) {
       style={{
         width: 327, maxWidth: '100%', boxSizing: 'border-box',
         display: 'flex', alignItems: 'center', gap: 10,
-        background: 'linear-gradient(90deg, rgba(232,160,32,.16) 0%, rgba(0,0,0,.3) 60%)',
+        background: 'linear-gradient(90deg, rgba(var(--gold-rgb),.16) 0%, rgba(0,0,0,.3) 60%)',
         border: '1.5px solid var(--gold)',
         borderRadius: 14, padding: '8px 12px',
         cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-        boxShadow: '0 0 16px rgba(232,160,32,.18), 0 3px 8px rgba(0,0,0,.3)',
+        boxShadow: '0 0 16px rgba(var(--gold-rgb),.18), 0 3px 8px rgba(0,0,0,.3)',
       }}
     >
-      <span style={{ fontSize: 26, lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(232,160,32,.6))' }}>
+      <span style={{ fontSize: 26, lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(var(--gold-rgb),.6))' }}>
         {grand.icon}
       </span>
       <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>

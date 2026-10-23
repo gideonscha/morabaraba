@@ -49,13 +49,13 @@ export function MorabarabaDisc({
         height: size,
         borderRadius: '50%',
         background:
-          'radial-gradient(circle at 50% 45%, rgba(232,160,32,.18) 0%, transparent 60%),' +
+          'radial-gradient(circle at 50% 45%, rgba(var(--gold-rgb),.18) 0%, transparent 60%),' +
           'radial-gradient(circle at 50% 50%, var(--wood-1) 0%, var(--wood-2) 100%)',
         border: `${size >= 200 ? 2.5 : 2}px solid var(--gold)`,
         boxShadow:
           `inset 0 0 0 ${size >= 200 ? 6 : 4}px rgba(0,0,0,.18),` +
-          `inset 0 0 0 ${size >= 200 ? 8 : 6}px rgba(232,160,32,.5),` +
-          `0 0 ${size >= 200 ? 60 : 32}px rgba(232,160,32,${size >= 200 ? .35 : .25}),` +
+          `inset 0 0 0 ${size >= 200 ? 8 : 6}px rgba(var(--gold-rgb),.5),` +
+          `0 0 ${size >= 200 ? 60 : 32}px rgba(var(--gold-rgb),${size >= 200 ? .35 : .25}),` +
           `0 ${size >= 200 ? 20 : 10}px ${size >= 200 ? 40 : 20}px rgba(0,0,0,${size >= 200 ? .5 : .4})`,
         display: 'flex',
         alignItems: 'center',

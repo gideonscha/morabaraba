@@ -85,7 +85,7 @@ export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
                   cursor: 'pointer',
                   fontFamily: 'inherit',
                   boxShadow: selected
-                    ? 'inset 0 0 0 1px rgba(244,181,58,.4), inset 0 0 22px rgba(232,160,32,.25), 0 0 0 2px rgba(232,160,32,.18), 0 0 22px rgba(232,160,32,.4), 0 6px 14px rgba(0,0,0,.35)'
+                    ? 'inset 0 0 0 1px rgba(var(--gold-bright-rgb),.4), inset 0 0 22px rgba(var(--gold-rgb),.25), 0 0 0 2px rgba(var(--gold-rgb),.18), 0 0 22px rgba(var(--gold-rgb),.4), 0 6px 14px rgba(0,0,0,.35)'
                     : '0 2px 0 rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.3)',
                   transition: 'border-color .18s, box-shadow .18s, transform .18s',
                   display: 'grid',
@@ -101,7 +101,7 @@ export function AiDifficultyScreen({ onBack, onStart, onPrizes }: Props) {
                   letterSpacing: '0.18em', fontSize: 22,
                   color: selected ? 'var(--gold-bright)' : 'var(--gold)',
                   lineHeight: 1,
-                  textShadow: selected ? '0 0 12px rgba(232,160,32,.5)' : undefined,
+                  textShadow: selected ? '0 0 12px rgba(var(--gold-rgb),.5)' : undefined,
                 }}>
                   {d.label}
                 </span>

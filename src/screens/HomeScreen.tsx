@@ -5,6 +5,7 @@ import {
   PhoneFrame, TopBar, PrimaryButton, SecondaryButton, PatternStrip,
 } from '../components/ui/Primitives';
 import { KraalPrizeBanner } from '../components/KraalPrizeBanner';
+import { BRAND } from '../brand';
 
 interface Props {
   goAi: () => void;
@@ -39,22 +40,22 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 24px 24px', gap: 14 }}>
           <KraalPrizeBanner onOpen={goRewards} />
           <img
-            src="/logo-morabaraba.png"
-            alt="Morabaraba"
-            width={230}
-            style={{ width: 230, height: 'auto', display: 'block' }}
+            src={BRAND.logo}
+            alt={BRAND.name}
+            width={BRAND.logoWidthHome}
+            style={{ width: BRAND.logoWidthHome, height: 'auto', display: 'block' }}
           />
 
           <PatternStrip className="my-1" />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', alignItems: 'center' }}>
             <ModeButton variant="primary" onClick={goAi}
-              name="Play the Ancestors" tagline="Challenge the wisdom of generations." />
+              name={BRAND.modes.ai.name} tagline={BRAND.modes.ai.tagline} />
             <ModeButton variant="secondary" onClick={goLocal}
-              name="Kasi Clash" tagline="Two players. One phone. One winner." />
+              name={BRAND.modes.local.name} tagline={BRAND.modes.local.tagline} />
             <ModeButton variant="secondary" onClick={goOnline}
-              name="King of the Kraal" tagline="Take on players across Mzansi." />
-            <SecondaryButton onClick={goLeaderboard}>Leaderboard</SecondaryButton>
+              name={BRAND.modes.online.name} tagline={BRAND.modes.online.tagline} />
+            <SecondaryButton onClick={goLeaderboard}>{BRAND.leaderboardTitle}</SecondaryButton>
           </div>
 
           <button onClick={goKraal} className="btn-press" style={{
@@ -76,9 +77,9 @@ export function HomeScreen({ goAi, goLocal, goOnline, goLeaderboard, goProfile, 
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, padding: '14px 0 22px' }}>
           <button onClick={goProfile} style={footLinkStyle}>Profile</button>
-          <span style={{ width: 1, height: 14, background: 'rgba(212,169,106,.35)' }} />
+          <span style={{ width: 1, height: 14, background: 'rgba(var(--sand-rgb),.35)' }} />
           <button onClick={goTutorial} style={footLinkStyle}>Tutorial</button>
-          <span style={{ width: 1, height: 14, background: 'rgba(212,169,106,.35)' }} />
+          <span style={{ width: 1, height: 14, background: 'rgba(var(--sand-rgb),.35)' }} />
           <button onClick={goSettings} style={footLinkStyle}>Settings</button>
         </div>
       </div>

@@ -44,7 +44,7 @@ export function TutorialScreen({ onBack }: { onBack: () => void }) {
                 border: '1.5px solid var(--sand)',
                 background: active ? 'var(--gold)' : 'transparent',
                 borderColor: active ? 'var(--gold)' : 'var(--sand)',
-                boxShadow: active ? '0 0 8px rgba(232,160,32,.6)' : 'none',
+                boxShadow: active ? '0 0 8px rgba(var(--gold-rgb),.6)' : 'none',
                 transition: 'background .2s, border-color .2s',
               }} />
             );
@@ -53,7 +53,7 @@ export function TutorialScreen({ onBack }: { onBack: () => void }) {
 
         <div style={{
           width: 327, minHeight: 400,
-          background: '#8B3A14',
+          background: 'var(--card)',
           border: '1.5px solid var(--gold)',
           borderRadius: 'var(--radius-card)',
           padding: '24px 22px',

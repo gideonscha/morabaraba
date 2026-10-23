@@ -65,7 +65,7 @@ export function SettingsScreen({ onBack, onTutorial }: { onBack: () => void; onT
           </h1>
 
           <div style={{
-            width: 327, background: '#8B3A14',
+            width: 327, background: 'var(--card)',
             borderRadius: 'var(--radius-card)', overflow: 'hidden',
             boxShadow: '0 4px 0 rgba(0,0,0,.2), 0 10px 24px rgba(0,0,0,.35)',
           }}>
@@ -101,10 +101,10 @@ export function SettingsScreen({ onBack, onTutorial }: { onBack: () => void; onT
                     style={{
                       width: '100%', padding: '10px 16px',
                       display: 'flex', alignItems: 'center', gap: 8,
-                      background: r.code === currentRegion.code ? 'rgba(232,160,32,.12)' : 'transparent',
+                      background: r.code === currentRegion.code ? 'rgba(var(--gold-rgb),.12)' : 'transparent',
                       color: 'var(--cream)', border: 0, cursor: 'pointer',
                       fontFamily: 'inherit', fontSize: 13,
-                      borderBottom: '1px solid rgba(232,160,32,.18)',
+                      borderBottom: '1px solid rgba(var(--gold-rgb),.18)',
                     }}
                   >
                     {r.flag} {r.label}
@@ -155,7 +155,7 @@ function Row({
     <div style={{
       minHeight: 52, padding: '0 16px',
       display: 'flex', alignItems: 'center', gap: 12,
-      borderBottom: last ? 0 : '1px solid rgba(232,160,32,.25)',
+      borderBottom: last ? 0 : '1px solid rgba(var(--gold-rgb),.25)',
       cursor: clickable ? 'pointer' : 'default',
     }}>
       <span style={{ fontSize: 18, width: 22, textAlign: 'center' }} aria-hidden>{icon}</span>
@@ -174,7 +174,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       style={{
         width: 40, height: 22, borderRadius: 999,
         background: on ? 'var(--gold)' : '#2A1E14',
-        border: `1px solid ${on ? 'var(--gold-dark)' : 'rgba(232,160,32,.4)'}`,
+        border: `1px solid ${on ? 'var(--gold-dark)' : 'rgba(var(--gold-rgb),.4)'}`,
         position: 'relative', cursor: 'pointer',
         transition: 'background .15s', flexShrink: 0,
         padding: 0,

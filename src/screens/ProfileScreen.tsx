@@ -48,7 +48,7 @@ export function ProfileScreen({ onBack, onRewards }: { onBack: () => void; onRew
             fontWeight: 900, fontSize: 24,
             color: 'var(--gold)', letterSpacing: '0.04em', textTransform: 'uppercase',
             margin: '8px 0 0', textAlign: 'center',
-            textShadow: '0 0 14px rgba(232,160,32,.35)',
+            textShadow: '0 0 14px rgba(var(--gold-rgb),.35)',
           }}>
             @{profile.username}
           </h2>
@@ -112,7 +112,7 @@ function Stat({ value, label, small }: { value: string | number; label: string; 
       background: 'var(--card)', borderRadius: 12,
       padding: small ? '8px 10px' : '10px 14px',
       display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2,
-      border: '1px solid rgba(232,160,32,.18)',
+      border: '1px solid rgba(var(--gold-rgb),.18)',
     }}>
       <span style={{ fontWeight: 900, fontSize: small ? 18 : 24, color: 'var(--gold)', letterSpacing: '0.02em', lineHeight: 1 }}>
         {typeof value === 'number' ? value.toLocaleString() : value}

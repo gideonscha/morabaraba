@@ -21,7 +21,7 @@ export function RewardsScreen({ onBack }: { onBack: () => void }) {
             fontWeight: 900, fontSize: 28, color: 'var(--gold)',
             letterSpacing: '0.06em', textTransform: 'uppercase',
             textAlign: 'center', margin: '4px 0 0',
-            textShadow: '0 0 14px rgba(232,160,32,.4)',
+            textShadow: '0 0 14px rgba(var(--gold-rgb),.4)',
           }}>
             Rewards
           </h2>
@@ -33,11 +33,11 @@ export function RewardsScreen({ onBack }: { onBack: () => void }) {
             background: 'var(--card)', border: '1.5px dashed var(--gold)',
             borderRadius: 16, padding: '16px 18px',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-            boxShadow: '0 0 20px rgba(232,160,32,.12)',
+            boxShadow: '0 0 20px rgba(var(--gold-rgb),.12)',
           }}>
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--gold-bright)"
                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-                 style={{ filter: 'drop-shadow(0 0 8px rgba(232,160,32,.5))' }}>
+                 style={{ filter: 'drop-shadow(0 0 8px rgba(var(--gold-rgb),.5))' }}>
               <path d="M6 2h12M6 22h12M6 2v4c0 3 3 4 6 6 3-2 6-3 6-6V2M6 22v-4c0-3 3-4 6-6 3 2 6 3 6 6v4"/>
             </svg>
             <h3 style={{
@@ -62,7 +62,7 @@ export function RewardsScreen({ onBack }: { onBack: () => void }) {
             background: 'var(--card)', border: '1.5px solid var(--gold)',
             borderRadius: 14, padding: '14px 18px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-            boxShadow: '0 0 18px rgba(232,160,32,.2)',
+            boxShadow: '0 0 18px rgba(var(--gold-rgb),.2)',
           }}>
             <span style={{ fontSize: 13.5, color: 'var(--cream)', lineHeight: 1.3 }}>
               Upgrade to <strong style={{ color: 'var(--gold-bright)', fontWeight: 900, letterSpacing: '0.04em' }}>GOLD</strong> for more rewards

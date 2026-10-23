@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useProfileStore } from '../store/profileStore';
 import { PhoneFrame, PatternStrip, PrimaryButton, AvatarPicker } from '../components/ui/Primitives';
 import { ensureAuthAndProfile, createRemoteProfile } from '../lib/profile';
+import { BRAND } from '../brand';
 
 interface Props {
   onDone: () => void;
@@ -63,10 +64,10 @@ export function OnboardingScreen({ onDone }: Props) {
            style={{ padding: '76px 24px 36px', flex: 1, alignItems: 'stretch', justifyContent: 'flex-start' }}>
         <div style={{ textAlign: 'center' }}>
           <h1 className="h-display" style={{ fontSize: 28, letterSpacing: '0.14em', textShadow: '0 2px 8px rgba(0,0,0,.4)' }}>
-            Welcome Warrior
+            {BRAND.onboarding.title}
           </h1>
           <p style={{ margin: '10px 0 0', color: 'var(--sand)', fontSize: 14, letterSpacing: '0.02em' }}>
-            Choose your name and avatar
+            {BRAND.onboarding.subtitle}
           </p>
         </div>
 
@@ -81,7 +82,7 @@ export function OnboardingScreen({ onDone }: Props) {
               onChange={(e) => setName(e.target.value)}
               maxLength={15}
               autoComplete="off"
-              placeholder="Enter your warrior name"
+              placeholder={BRAND.onboarding.placeholder}
             />
           </div>
 
@@ -96,7 +97,7 @@ export function OnboardingScreen({ onDone }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, paddingTop: 16 }}>
           <PatternStrip opacity={0.18} />
           <PrimaryButton onClick={handleSubmit} disabled={!canSubmit || busy}>
-            {busy ? 'Setting up…' : 'Begin Your Journey'}
+            {busy ? 'Setting up…' : BRAND.onboarding.cta}
           </PrimaryButton>
         </div>
       </div>

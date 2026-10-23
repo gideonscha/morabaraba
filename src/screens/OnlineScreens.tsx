@@ -54,7 +54,7 @@ function ModeCard({
         cursor: 'pointer',
         fontFamily: 'inherit',
         boxShadow: selected
-          ? 'inset 0 0 0 1px rgba(244,181,58,.4), inset 0 0 22px rgba(232,160,32,.25), 0 0 0 2px rgba(232,160,32,.18), 0 0 22px rgba(232,160,32,.4), 0 6px 14px rgba(0,0,0,.35)'
+          ? 'inset 0 0 0 1px rgba(var(--gold-bright-rgb),.4), inset 0 0 22px rgba(var(--gold-rgb),.25), 0 0 0 2px rgba(var(--gold-rgb),.18), 0 0 22px rgba(var(--gold-rgb),.4), 0 6px 14px rgba(0,0,0,.35)'
           : '0 2px 0 rgba(0,0,0,.2), 0 6px 14px rgba(0,0,0,.3)',
         display: 'grid', gridTemplateColumns: '48px 1fr', columnGap: 14, alignItems: 'center',
       }}
@@ -341,7 +341,7 @@ export function MatchmakingScreen({ roomId, asPlayer, code, onCancel, onReady }:
               <div style={{
                 fontWeight: 900, fontSize: 40, letterSpacing: '0.32em',
                 color: 'var(--gold)', lineHeight: 1, paddingLeft: '0.32em',
-                textShadow: '0 0 14px rgba(232,160,32,.4), 0 2px 6px rgba(0,0,0,.4)',
+                textShadow: '0 0 14px rgba(var(--gold-rgb),.4), 0 2px 6px rgba(0,0,0,.4)',
               }}>{codeOnly}</div>
               <div style={{ color: 'var(--sand)', fontSize: 12, fontStyle: 'italic', marginTop: 18 }}>
                 Share this code with a friend to play
@@ -425,8 +425,8 @@ function PulseLogo() {
       }} />
       <style>{`
         @keyframes mm-glow {
-          0%, 100% { filter: drop-shadow(0 0 4px rgba(232,160,32,.4)); transform: scale(1); }
-          50%      { filter: drop-shadow(0 0 18px rgba(244,181,58,.8)); transform: scale(1.04); }
+          0%, 100% { filter: drop-shadow(0 0 4px rgba(var(--gold-rgb),.4)); transform: scale(1); }
+          50%      { filter: drop-shadow(0 0 18px rgba(var(--gold-bright-rgb),.8)); transform: scale(1.04); }
         }
         @keyframes mm-ring {
           0%   { transform: scale(0.85); opacity: 0.55; }

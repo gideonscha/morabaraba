@@ -1,3 +1,4 @@
+import { BRAND } from '../brand';
 import { useEffect, useState } from 'react';
 import {
   PhoneFrame, TopBar, PatternStrip, TierBadge,
@@ -74,9 +75,9 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
               fontWeight: 900, fontSize: 28, color: 'var(--gold)',
               letterSpacing: '0.06em', textTransform: 'uppercase',
               margin: '4px 0 0',
-              textShadow: '0 0 14px rgba(232,160,32,.4)',
+              textShadow: '0 0 14px rgba(var(--gold-rgb),.4)',
             }}>
-              Leaderboard
+              {BRAND.leaderboardTitle}
             </h2>
             <p style={{ margin: '2px 0 0', fontSize: 12.5, color: 'var(--sand)', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
               {monthLabel}
@@ -90,10 +91,10 @@ export function LeaderboardScreen({ onBack, onPrizes }: { onBack: () => void; on
           {profile && (
             <div style={{
               width: 327, alignSelf: 'center', boxSizing: 'border-box',
-              background: 'rgba(232,160,32,.1)', border: '1.5px solid var(--gold)',
+              background: 'rgba(var(--gold-rgb),.1)', border: '1.5px solid var(--gold)',
               borderRadius: 12, padding: '10px 16px',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              boxShadow: '0 0 16px rgba(232,160,32,.2)',
+              boxShadow: '0 0 16px rgba(var(--gold-rgb),.2)',
             }}>
               <span style={{ fontSize: 12.5, color: 'var(--cream)', fontWeight: 700, letterSpacing: '0.04em' }}>
                 Your Rank: <strong style={{ color: 'var(--gold-bright)', fontSize: 16 }}>{ownRank ? `#${ownRank}` : '—'}</strong>
@@ -155,19 +156,19 @@ function LeaderRow({ row, self }: { row: Row; self?: boolean }) {
       alignItems: 'center', gap: 10, padding: '0 14px 0 8px',
       position: 'relative', overflow: 'hidden',
       border: self ? '1.5px solid var(--gold)' : '1px solid transparent',
-      boxShadow: self ? '0 0 18px rgba(232,160,32,.3)' : undefined,
+      boxShadow: self ? '0 0 18px rgba(var(--gold-rgb),.3)' : undefined,
     }}>
-      <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: ribbon, boxShadow: rank === 1 ? '2px 0 8px rgba(232,160,32,.4)' : undefined }} />
+      <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: ribbon, boxShadow: rank === 1 ? '2px 0 8px rgba(var(--gold-rgb),.4)' : undefined }} />
       <span style={{
         fontWeight: 900, fontSize: rank > 99 ? 14 : 20,
         color: isTop ? 'var(--gold)' : 'var(--sand)',
         textAlign: 'center',
       }}>
-        {rank}
+        {rank === 1 && BRAND.crownLanguage ? '👑' : rank}
       </span>
       <span style={{
         width: 36, height: 36, borderRadius: '50%',
-        background: 'radial-gradient(circle at 35% 30%, #6B3E18 0%, #2A1A0E 80%)',
+        background: 'radial-gradient(circle at 35% 30%, var(--avatar-1) 0%, var(--avatar-2) 80%)',
         border: '1.5px solid var(--gold)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: 'var(--gold-bright)', fontWeight: 900, fontSize: 13,

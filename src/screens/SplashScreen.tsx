@@ -1,4 +1,5 @@
 import { PhoneFrame } from '../components/ui/Primitives';
+import { BRAND } from '../brand';
 
 export function SplashScreen() {
   return (
@@ -12,16 +13,16 @@ export function SplashScreen() {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'splash-rise 900ms cubic-bezier(.2,.7,.2,1) both' }}>
           <img
-            src="/logo-morabaraba.png"
-            alt="Morabaraba"
-            width={300}
-            style={{ width: 300, height: 'auto', display: 'block' }}
+            src={BRAND.logo}
+            alt={BRAND.name}
+            width={BRAND.logoWidthSplash}
+            style={{ width: BRAND.logoWidthSplash, height: 'auto', display: 'block' }}
           />
           <div style={{
             marginTop: 14, fontStyle: 'italic', fontWeight: 400, fontSize: 16,
             color: 'var(--cream)', letterSpacing: '0.02em', opacity: 0.92,
           }}>
-            The Ancient Game of Africa
+            {BRAND.splashTagline}
           </div>
         </div>
 
@@ -45,7 +46,7 @@ export function SplashScreen() {
                 'linear-gradient(45deg, rgba(0,0,0,.18) 25%, transparent 25%)',
               backgroundSize: '10px 10px',
               backgroundPosition: '0 0, 0 5px, 5px -5px, -5px 0',
-              boxShadow: '0 0 8px rgba(232,160,32,.6)',
+              boxShadow: '0 0 8px rgba(var(--gold-rgb),.6)',
               animation: 'loader-fill 2000ms ease-out forwards',
             }} />
           </div>
@@ -71,8 +72,8 @@ export function SplashScreen() {
         @keyframes loader-fill { 0% { width: 0%; } 100% { width: 100%; } }
         .logo-disc-pulse { animation: logo-disc-pulse 4.5s ease-in-out infinite; }
         @keyframes logo-disc-pulse {
-          0%, 100% { filter: drop-shadow(0 0 0 rgba(232,160,32,0)); }
-          50%      { filter: drop-shadow(0 0 22px rgba(232,160,32,.45)); }
+          0%, 100% { filter: drop-shadow(0 0 0 rgba(var(--gold-rgb),0)); }
+          50%      { filter: drop-shadow(0 0 22px rgba(var(--gold-rgb),.45)); }
         }
       `}</style>
     </PhoneFrame>

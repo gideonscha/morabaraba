@@ -13,3 +13,4 @@ dist-ssr
 coverage
 .vercel
 *.tsbuildinfo
+dist-kraalboss

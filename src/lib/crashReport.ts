@@ -7,6 +7,7 @@
 import { supabase, SUPABASE_ENABLED } from './supabase';
 import { useGameStore } from '../store/gameStore';
 import { useProfileStore } from '../store/profileStore';
+import { BRAND } from '../brand';
 
 declare const __APP_COMMIT__: string;
 
@@ -16,6 +17,7 @@ export function reportClientError(error: Error, componentStack: string | null): 
     const g = useGameStore.getState();
     const profile = useProfileStore.getState().profile;
     const context = {
+      brand: BRAND.id,
       route_path: typeof location !== 'undefined' ? location.pathname : null,
       mode: g.mode,
       phase: g.phase,

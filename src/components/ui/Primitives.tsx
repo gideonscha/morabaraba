@@ -233,7 +233,7 @@ export function AvatarPicker({
                 justifyContent: 'center',
                 color: selected ? 'var(--gold-bright)' : 'var(--gold)',
                 boxShadow: selected
-                  ? 'inset 0 1px 0 rgba(255,255,255,.18), 0 0 0 3px rgba(232,160,32,.95), 0 0 18px 4px rgba(232,160,32,.55), 0 4px 8px rgba(0,0,0,.45)'
+                  ? 'inset 0 1px 0 rgba(255,255,255,.18), 0 0 0 3px rgba(var(--gold-rgb),.95), 0 0 18px 4px rgba(var(--gold-rgb),.55), 0 4px 8px rgba(0,0,0,.45)'
                   : 'inset 0 1px 0 rgba(255,255,255,.18), 0 4px 8px rgba(0,0,0,.45)',
                 transition: 'box-shadow .15s ease, border-color .15s ease, transform .15s ease',
                 position: 'relative',
@@ -285,7 +285,7 @@ export function AvatarDisplay({
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'radial-gradient(circle at 35% 30%, #6B3E18 0%, #2A1A0E 80%)',
+        background: 'radial-gradient(circle at 35% 30%, var(--avatar-1) 0%, var(--avatar-2) 80%)',
         border: '2px solid var(--gold)',
         display: 'inline-flex',
         alignItems: 'center',
@@ -295,7 +295,7 @@ export function AvatarDisplay({
         fontWeight: 900,
         fontSize: size * 0.45,
         boxShadow: size >= 80
-          ? '0 0 24px rgba(232,160,32,.3), inset 0 -4px 12px rgba(0,0,0,.4)'
+          ? '0 0 24px rgba(var(--gold-rgb),.3), inset 0 -4px 12px rgba(0,0,0,.4)'
           : 'inset 0 -2px 6px rgba(0,0,0,.4)',
       }}
       aria-hidden

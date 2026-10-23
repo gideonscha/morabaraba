@@ -79,7 +79,7 @@ export function KraalScreen({ onBack }: { onBack: () => void }) {
             <h2 style={{
               fontWeight: 900, fontSize: 26, color: 'var(--gold)',
               letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0,
-              textShadow: '0 0 14px rgba(232,160,32,.4)',
+              textShadow: '0 0 14px rgba(var(--gold-rgb),.4)',
             }}>
               Tend Your Herd
             </h2>
@@ -230,7 +230,7 @@ export function KraalScreen({ onBack }: { onBack: () => void }) {
                   <div key={m.days} style={{
                     flex: 1, maxWidth: 76, textAlign: 'center',
                     padding: '8px 2px',
-                    background: current ? 'rgba(232,160,32,.14)' : 'rgba(0,0,0,.2)',
+                    background: current ? 'rgba(var(--gold-rgb),.14)' : 'rgba(0,0,0,.2)',
                     border: `1px solid ${reached ? 'var(--gold)' : 'rgba(167,165,156,.3)'}`,
                     borderRadius: 10,
                     opacity: reached ? 1 : 0.65,
@@ -266,7 +266,7 @@ export function KraalScreen({ onBack }: { onBack: () => void }) {
                 width: 300, background: 'var(--card)',
                 border: '1.5px solid var(--gold)', borderRadius: 14,
                 padding: '14px 18px', textAlign: 'center',
-                boxShadow: '0 0 24px rgba(232,160,32,.25)',
+                boxShadow: '0 0 24px rgba(var(--gold-rgb),.25)',
               }}>
                 <div style={{ fontSize: 26, lineHeight: 1.1 }}>
                   {e.type === 'calf' ? '🐄' : e.type === 'kraal' ? '🏡' : e.type === 'rare' ? '✨' : e.type === 'bull' ? '🐂' : e.type === 'moment' ? '🌙' : '🌾'}
@@ -294,7 +294,7 @@ const cardStyle: React.CSSProperties = {
   background: 'var(--card)', border: '1.5px solid var(--gold)',
   borderRadius: 16, padding: '14px 18px',
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-  boxShadow: '0 0 18px rgba(232,160,32,.14)',
+  boxShadow: '0 0 18px rgba(var(--gold-rgb),.14)',
 };
 
 const cardTitleStyle: React.CSSProperties = {

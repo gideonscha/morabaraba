@@ -25,6 +25,78 @@
   --wood-2:     #A0722A;
   --radius-card: 8px;
   --radius-btn:  12px;
+
+  /* RGB triplets for rgba() glows */
+  --gold-rgb:        232,160,32;
+  --gold-bright-rgb: 244,181,58;
+  --font-display: 'Poppins', sans-serif;
+  --display-weight: 900;
+  --display-tracking: 0.08em;
+
+  /* Board + pieces (defaults = heritage wood board) */
+  --board-1:        #C9913A;
+  --board-2:        #A0722A;
+  --board-line:     #5C3A1E;
+  --board-socket:   #5C3A1E;
+  --board-deco:     #5C3A1E;
+  --board-deco-opacity: 0.2;
+  --board-tap-hover: rgba(74,46,24,0.4);
+  --tok-p2-0: #ffffff;
+  --tok-p2-1: #f5f0e8;
+  --tok-p2-2: #d8d0c0;
+  --tok-p2-stroke: #9a8f78;
+  --prompt-bg: #1F1612;
+  --phase-bg: rgba(166,73,42,0.96);
+  --phase-label: #E8C892;
+  --sand-rgb: 212,169,106;
+  --avatar-1: var(--avatar-1);
+  --avatar-2: var(--avatar-2);
+}
+
+/* ============================================================
+   KRAAL BOSS (MTN) — black + Kraal Yellow, urban/esports.
+   Activated by <html data-brand="kraalboss"> (set from VITE_BRAND).
+   Palette per Jacqui's visual direction, 23 Oct 2026.
+   ============================================================ */
+:root[data-brand="kraalboss"] {
+  --bg-top:     #080808;
+  --bg-bot:     #0E0E0E;
+  --card:       #171717;
+  --gold:       #FFD400;   /* Kraal Yellow */
+  --gold-dark:  #F5A800;   /* Boss Gold */
+  --gold-bright:#FFEA00;   /* Electric Yellow */
+  --sand:       #BDBDBD;   /* muted functional text */
+  --cream:      #FFFFFF;
+  --char:       #171717;
+  --char-dark:  #080808;
+  --bronze:     #8B5E3C;
+  --wood-1:     #121212;
+  --wood-2:     #080808;
+  --radius-card: 6px;
+  --radius-btn:  8px;
+  --gold-rgb:        255,212,0;
+  --gold-bright-rgb: 255,234,0;
+  --font-display: 'Bebas Neue', 'Poppins', sans-serif;
+  --display-weight: 400;
+  --display-tracking: 0.06em;
+
+  --board-1:        #141414;
+  --board-2:        #050505;
+  --board-line:     #FFD400;
+  --board-socket:   #F5A800;
+  --board-deco:     #FFD400;
+  --board-deco-opacity: 0.09;
+  --board-tap-hover: rgba(255,212,0,0.12);
+  --tok-p2-0: #FFF3B0;
+  --tok-p2-1: #FFD400;
+  --tok-p2-2: #B07A00;
+  --tok-p2-stroke: #7A5300;
+  --prompt-bg: #000000;
+  --phase-bg: rgba(20,20,20,0.97);
+  --phase-label: #BDBDBD;
+  --sand-rgb: 189,189,189;
+  --avatar-1: #2E2E2E;
+  --avatar-2: #0F0F0F;
 }
 
 @font-face {
@@ -157,7 +229,7 @@ html, body, #root {
     filter: grayscale(.2);
   }
   .btn-primary {
-    background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, #C7881A 100%);
+    background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dark) 100%);
     color: var(--char-dark);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.35),
@@ -187,10 +259,10 @@ html, body, #root {
 
   /* ----- Display type ----- */
   .h-display {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 900;
+    font-family: var(--font-display);
+    font-weight: var(--display-weight);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--display-tracking);
     color: var(--gold);
     line-height: 1;
     margin: 0;
@@ -230,7 +302,7 @@ html, body, #root {
   .text-input:focus {
     border-color: var(--gold-bright);
     background: rgba(0,0,0,.28);
-    box-shadow: 0 0 0 3px rgba(232,160,32,.18), 0 0 14px rgba(232,160,32,.25);
+    box-shadow: 0 0 0 3px rgba(var(--gold-rgb),.18), 0 0 14px rgba(var(--gold-rgb),.25);
   }
   .field-label {
     display: block;
@@ -261,7 +333,7 @@ html, body, #root {
   .tier-free    { background: var(--char); color: var(--sand); border-color: var(--sand); }
   .tier-bronze  { background: linear-gradient(180deg, #C2864F 0%, #8B5E3C 60%, #5C3A1E 100%); color: var(--cream); border-color: #5C3A1E; }
   .tier-silver  { background: linear-gradient(180deg, var(--silver-lt), var(--silver)); color: var(--char-dark); border-color: #8a8a8a; }
-  .tier-gold    { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, var(--gold-dark) 100%); color: var(--char-dark); border-color: var(--gold-dark); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 8px rgba(232,160,32,.55); }
+  .tier-gold    { background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, var(--gold-dark) 100%); color: var(--char-dark); border-color: var(--gold-dark); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 0 8px rgba(var(--gold-rgb),.55); }
   .tier-platinum{ background: linear-gradient(180deg, #8475BA, var(--platinum)); color: var(--cream); border-color: #4a3f74; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 6px rgba(107,91,158,.55); }
 
   /* ----- Coin icon ----- */
@@ -287,7 +359,7 @@ html, body, #root {
     width: 28px; height: 28px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #FFD466 0%, #E8A020 55%, #8E6116 100%);
-    box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 0 10px rgba(232,160,32,.5);
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,.35), 0 0 10px rgba(var(--gold-rgb),.5);
     position: relative;
     flex: 0 0 auto;
     display: inline-block;
@@ -334,7 +406,7 @@ html, body, #root {
     border: 0;
     padding: 0;
   }
-  .back-arrow:hover { background: rgba(232,160,32,.12); }
+  .back-arrow:hover { background: rgba(var(--gold-rgb),.12); }
 
   /* ----- Coin bar (large) ----- */
   .coin-bar-large {
@@ -387,7 +459,7 @@ html, body, #root {
     font-size: 12px;
     letter-spacing: 0.24em;
     text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(232,160,32,.4);
+    text-shadow: 0 0 8px rgba(var(--gold-rgb),.4);
     display: inline-flex;
     align-items: center;
   }
@@ -402,7 +474,7 @@ html, body, #root {
   /* ----- Action prompt ----- */
   .action-prompt {
     min-height: 48px;
-    background: #1F1612;
+    background: var(--prompt-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -420,7 +492,7 @@ html, body, #root {
     color: var(--gold);
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(232,160,32,.55), 0 1px 2px rgba(0,0,0,.6);
+    text-shadow: 0 0 12px rgba(var(--gold-rgb),.55), 0 1px 2px rgba(0,0,0,.6);
   }
   .action-prompt .em {
     color: var(--gold-bright);
@@ -533,7 +605,7 @@ html, body, #root {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-top: 10px solid var(--gold);
-    filter: drop-shadow(0 0 8px rgba(232,160,32,.7));
+    filter: drop-shadow(0 0 8px rgba(var(--gold-rgb),.7));
     pointer-events: none;
   }
 
@@ -546,7 +618,7 @@ html, body, #root {
     filter: drop-shadow(0 6px 18px rgba(0,0,0,.5));
   }
   .game-board .node-tap { fill: transparent; cursor: pointer; }
-  .game-board .node-tap:hover { fill: rgba(74,46,24,0.4); }
+  .game-board .node-tap:hover { fill: var(--board-tap-hover); }
   .game-board .pulse {
     transform-origin: center;
     transform-box: fill-box;
@@ -560,7 +632,7 @@ html, body, #root {
     stroke: var(--gold-bright);
     stroke-width: 2.5;
     fill: none;
-    filter: drop-shadow(0 0 8px rgba(244,181,58,.9));
+    filter: drop-shadow(0 0 8px rgba(var(--gold-bright-rgb),.9));
     animation: sel-pulse 1.6s ease-in-out infinite;
   }
   @keyframes sel-pulse { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
@@ -570,11 +642,11 @@ html, body, #root {
   .movable-ring {
     stroke: var(--gold-bright);
     stroke-width: 3.5;
-    fill: rgba(244,181,58,.22);
+    fill: rgba(var(--gold-bright-rgb),.22);
     pointer-events: none;
     transform-origin: center;
     transform-box: fill-box;
-    filter: drop-shadow(0 0 7px rgba(244,181,58,.95));
+    filter: drop-shadow(0 0 7px rgba(var(--gold-bright-rgb),.95));
     animation: movable-breathe 1.4s ease-in-out infinite;
   }
   @keyframes movable-breathe {
@@ -596,17 +668,17 @@ html, body, #root {
     stroke-width: 5;
     stroke-linecap: round;
     fill: none;
-    filter: drop-shadow(0 0 8px rgba(244,181,58,.9));
+    filter: drop-shadow(0 0 8px rgba(var(--gold-bright-rgb),.9));
     animation: mill-line-pulse 1.3s ease-in-out infinite;
   }
   .mill-endcap {
     fill: var(--gold-bright);
-    filter: drop-shadow(0 0 6px rgba(244,181,58,.9));
+    filter: drop-shadow(0 0 6px rgba(var(--gold-bright-rgb),.9));
     animation: mill-line-pulse 1.3s ease-in-out infinite;
   }
   @keyframes mill-line-pulse {
-    0%, 100% { opacity: 0.65; stroke-width: 4; filter: drop-shadow(0 0 5px rgba(244,181,58,.65)); }
-    50%      { opacity: 1;    stroke-width: 6; filter: drop-shadow(0 0 18px rgba(244,181,58,1)); }
+    0%, 100% { opacity: 0.65; stroke-width: 4; filter: drop-shadow(0 0 5px rgba(var(--gold-bright-rgb),.65)); }
+    50%      { opacity: 1;    stroke-width: 6; filter: drop-shadow(0 0 18px rgba(var(--gold-bright-rgb),1)); }
   }
   .removable-ring {
     stroke: var(--red);
@@ -628,28 +700,28 @@ html, body, #root {
     position: absolute;
     inset: 0;
     z-index: 100;
-    background: rgba(166,73,42,0.96);
+    background: var(--phase-bg);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 12px;
     border: 3px solid var(--gold-bright);
-    box-shadow: inset 0 0 32px rgba(244,181,58,.25), 0 0 24px rgba(0,0,0,.4);
+    box-shadow: inset 0 0 32px rgba(var(--gold-bright-rgb),.25), 0 0 24px rgba(0,0,0,.4);
     animation: phase-fade-in 280ms ease-out both;
   }
   .phase-transition .pt-label {
     font: 700 14px/1 'Poppins', sans-serif;
     letter-spacing: .22em;
     text-transform: uppercase;
-    color: #E8C892;
+    color: var(--phase-label);
   }
   .phase-transition .pt-name {
     font: 900 48px/1 'Poppins', sans-serif;
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--gold-bright);
-    text-shadow: 0 0 18px rgba(244,181,58,.7), 0 2px 0 rgba(0,0,0,.3);
+    text-shadow: 0 0 18px rgba(var(--gold-bright-rgb),.7), 0 2px 0 rgba(0,0,0,.3);
   }
   @keyframes phase-fade-in {
     from { opacity: 0; transform: scale(0.94); }
@@ -769,3 +841,42 @@ html, body, #root {
     100% { transform: translate3d(0, 920px, 0) rotate(720deg); opacity: 1; }
   }
 }
+
+/* ---- Kraal Boss component overrides ---- */
+:root[data-brand="kraalboss"] .phone {
+  box-shadow: 0 0 0 8px #000, 0 0 0 10px #262626, 0 30px 80px rgba(0,0,0,.8), 0 0 60px rgba(255,212,0,.08);
+}
+:root[data-brand="kraalboss"] .btn {
+  letter-spacing: 0.12em;
+  border-width: 2px;
+}
+:root[data-brand="kraalboss"] .btn-primary {
+  background: linear-gradient(180deg, #FFEA00 0%, #FFD400 60%, #F5A800 100%);
+  color: #080808;
+  border-color: #080808;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 0 #8A6300, 0 8px 18px rgba(0,0,0,.6), 0 0 18px rgba(255,212,0,.18);
+}
+:root[data-brand="kraalboss"] .btn-secondary {
+  background: #0E0E0E;
+  border-color: #FFD400;
+  color: #FFFFFF;
+  box-shadow: 0 3px 0 #000, 0 8px 18px rgba(0,0,0,.6);
+}
+:root[data-brand="kraalboss"] .h-display { text-shadow: 0 0 18px rgba(255,212,0,.25); }
+:root[data-brand="kraalboss"] .pattern-strip {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='12' viewBox='0 0 32 12'><g fill='none' stroke='%23FFD400' stroke-width='1.2'><path d='M0 6 L4 2 L8 6 L4 10 Z'/><path d='M8 6 L12 2 L16 6 L12 10 Z'/><path d='M16 6 L20 2 L24 6 L20 10 Z'/><path d='M24 6 L28 2 L32 6 L28 10 Z'/><path d='M2 0 L6 0 L4 2 Z M10 0 L14 0 L12 2 Z M18 0 L22 0 L20 2 Z M26 0 L30 0 L28 2 Z' fill='%23FFD400'/><path d='M2 12 L6 12 L4 10 Z M10 12 L14 12 L12 10 Z M18 12 L22 12 L20 10 Z M26 12 L30 12 L28 10 Z' fill='%23FFD400'/></g></svg>");
+  opacity: 0.22;
+}
+:root[data-brand="kraalboss"] .home-topbar { background: #0E0E0E; border-bottom: 1px solid rgba(255,212,0,.35); }
+:root[data-brand="kraalboss"] .text-input { background: #0E0E0E; border-color: rgba(255,212,0,.6); }
+:root[data-brand="kraalboss"] .text-input::placeholder { color: rgba(189,189,189,.6); }
+:root[data-brand="kraalboss"] .tier-free { background: #0E0E0E; color: #BDBDBD; border-color: #3A3A3A; }
+:root[data-brand="kraalboss"] .game-phase.placing { background: #FFD400; color: #080808; border-color: #FFD400; }
+:root[data-brand="kraalboss"] .player-token.light {
+  background: radial-gradient(circle at 30% 28%, #FFF3B0 0%, #FFD400 65%, #B07A00 100%);
+  border: 1px solid #7A5300;
+}
+:root[data-brand="kraalboss"] .captured .pip.light { background: #FFD400; border: 1px solid #7A5300; }
+:root[data-brand="kraalboss"] .hand-pip.light { background: #FFD400; box-shadow: inset 0 0 0 0.5px #7A5300; }
+:root[data-brand="kraalboss"] .coach-hint { background: #171717; border-color: #FFD400; }
+:root[data-brand="kraalboss"] .phase-transition { border: 1px solid rgba(255,212,0,.45); }

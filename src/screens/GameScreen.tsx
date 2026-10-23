@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { audio } from '../lib/audio';
 import { Board } from '../components/Board';
+import { BRAND } from '../brand';
 import { useGameStore } from '../store/gameStore';
 import { useProfileStore } from '../store/profileStore';
 import {
@@ -293,7 +294,7 @@ function ThinkingDots() {
         display: 'inline-flex',
         gap: 4,
         pointerEvents: 'none',
-        filter: 'drop-shadow(0 0 6px rgba(232,160,32,.5))',
+        filter: 'drop-shadow(0 0 6px rgba(var(--gold-rgb),.5))',
       }}
     >
       <i className="think-dot think-d1" />
@@ -362,7 +363,7 @@ function PlayerMeta({ name, tier, phase, piecesOnBoard, piecesToPlace, captured,
           fontFamily: 'Poppins, sans-serif',
           fontStyle: 'italic',
           fontSize: 11,
-          color: '#D4A96A',
+          color: 'var(--sand)',
           letterSpacing: '0.02em',
         }}>
           thinking…
@@ -409,12 +410,13 @@ function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, o
     ? coinReward(mode as 'ai_easy' | 'ai_medium' | 'ai_hard' | 'local' | 'online')
     : isDraw && isLocalOrAi ? drawCoinReward() : 0;
 
-  const title = isDraw ? 'Honourable Draw' : isWin ? 'Victory' : 'Defeat';
-  const tagline = isDraw ? 'A balanced battle'
-    : isWin ? 'Well played, warrior' : 'Better luck next time, warrior';
+  const go = BRAND.gameOver;
+  const title = isDraw ? go.drawTitle : isWin ? go.winTitle : go.loseTitle;
+  const tagline = isDraw ? go.drawTagline : isWin ? go.winTagline : go.loseTagline;
+  const crown = BRAND.crownLanguage && isWin;
 
   const titleStyle: React.CSSProperties = isWin
-    ? { fontSize: 48, color: 'var(--gold)', textShadow: '0 0 22px rgba(232,160,32,.65), 0 4px 8px rgba(0,0,0,.5)' }
+    ? { fontSize: 48, color: 'var(--gold)', textShadow: '0 0 22px rgba(var(--gold-rgb),.65), 0 4px 8px rgba(0,0,0,.5)' }
     : isLose
     ? { fontSize: 48, color: '#C8C8C8', textShadow: '0 0 16px rgba(220,220,220,.3), 0 4px 8px rgba(0,0,0,.5)' }
     : { fontSize: 36, color: 'var(--sand)', textShadow: '0 4px 8px rgba(0,0,0,.5)' };
@@ -435,6 +437,7 @@ function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, o
         padding: '88px 24px 24px',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14,
       }}>
+        {crown && <div className="go-title-anim" style={{ fontSize: 44, lineHeight: 1, marginBottom: -6, filter: 'drop-shadow(0 0 14px rgba(var(--gold-rgb),.7))' }} aria-hidden>👑</div>}
         <h1 className="h-display go-title-anim" style={{ ...titleStyle, margin: 0 }}>{title}</h1>
         <p
           className="fade-up-tag"
@@ -458,7 +461,7 @@ function GameOverOverlay({ winner, isDraw, humanPlayer, mode, coins, onReplay, o
 }
 
 function ConfettiLayer() {
-  const palette = ['#E8A020', '#F4B53A', '#FFD466', '#F5EFE4'];
+  const palette = BRAND.confetti;
   const pieces = Array.from({ length: 70 }, (_, i) => ({
     left: `${Math.random() * 100}%`,
     bg: palette[i % palette.length],
@@ -512,7 +515,7 @@ function CoinAward({ reward, balance }: { reward: number; balance: number }) {
         background: 'var(--card)', border: '1.5px solid var(--gold)',
         borderRadius: 16, padding: '12px 18px',
         display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4,
-        boxShadow: '0 0 24px rgba(232,160,32,.18), 0 8px 16px rgba(0,0,0,.3)',
+        boxShadow: '0 0 24px rgba(var(--gold-rgb),.18), 0 8px 16px rgba(0,0,0,.3)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900, fontSize: 22, color: 'var(--gold-bright)', letterSpacing: '0.04em' }}>
