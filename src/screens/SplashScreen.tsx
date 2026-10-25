@@ -47,7 +47,7 @@ export function SplashScreen() {
               backgroundSize: '10px 10px',
               backgroundPosition: '0 0, 0 5px, 5px -5px, -5px 0',
               boxShadow: '0 0 8px rgba(var(--gold-rgb),.6)',
-              animation: 'loader-fill 2000ms ease-out forwards',
+              animation: 'loader-fill 3600ms ease-out forwards',
             }} />
           </div>
           <div style={{
