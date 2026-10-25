@@ -17,7 +17,14 @@ export function OnboardingScreen({ onDone }: Props) {
 
   // Mirrors the server rule (profiles_username_check: 3–15 characters).
   const cleanLen = name.trim().length;
-  const canSubmit = cleanLen >= 3 && cleanLen <= 15 && avatarId > 0;
+  const nameOk = cleanLen >= 3 && cleanLen <= 15;
+  const canSubmit = nameOk && avatarId > 0;
+  // Live guidance so a disabled button never feels like a dead end.
+  const hint = cleanLen === 0 ? 'At least 3 characters'
+    : cleanLen < 3 ? `${3 - cleanLen} more character${3 - cleanLen === 1 ? '' : 's'} needed`
+    : !nameOk ? 'Maximum 15 characters'
+    : avatarId === 0 ? 'Now choose an avatar below'
+    : null;
 
   const handleSubmit = async () => {
     if (!canSubmit || busy) return;
@@ -83,7 +90,15 @@ export function OnboardingScreen({ onDone }: Props) {
               maxLength={15}
               autoComplete="off"
               placeholder={BRAND.onboarding.placeholder}
+              aria-describedby="warrior-name-hint"
             />
+            <div id="warrior-name-hint" aria-live="polite" style={{
+              marginTop: 6, minHeight: 16, fontSize: 12, letterSpacing: '0.02em',
+              color: cleanLen > 0 && cleanLen < 3 ? 'var(--gold)' : 'var(--sand)',
+              fontWeight: cleanLen > 0 && cleanLen < 3 ? 700 : 500,
+            }}>
+              {hint ?? ' '}
+            </div>
           </div>
 
           <div>

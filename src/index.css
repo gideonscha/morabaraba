@@ -224,9 +224,11 @@ html, body, #root {
   .btn:hover:not(:disabled) { filter: brightness(1.05); }
   .btn:active:not(:disabled) { transform: translateY(1px); filter: brightness(.95); }
   .btn:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
-    filter: grayscale(.2);
+    filter: grayscale(.6);
+    box-shadow: none;
+    transform: none;
   }
   .btn-primary {
     background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 55%, var(--gold-dark) 100%);
