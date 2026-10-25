@@ -63,11 +63,14 @@ export default function App() {
 
   useEffect(() => { init(); loadRemoteConfig(); }, [init]);
 
+  // Splash hold. First-time players get the full brand moment (logo +
+  // loader filling, which is animated over 2s); returning players a
+  // shorter one. 700ms was gone before anyone registered it.
   useEffect(() => {
     if (!hydrated) return;
     const t = setTimeout(() => {
       setRoute(profile ? 'home' : 'onboarding');
-    }, 700);
+    }, profile ? 1400 : 2300);
     return () => clearTimeout(t);
   }, [hydrated, profile]);
 
