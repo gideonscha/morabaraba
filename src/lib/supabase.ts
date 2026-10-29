@@ -24,6 +24,7 @@ export interface DBProfile {
   streak: number;
   sound_enabled?: boolean;
   music_enabled?: boolean;
+  brand?: 'legends' | 'kraalboss';
 }
 
 export interface DBRoom {

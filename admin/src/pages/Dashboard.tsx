@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { BRANDS } from '../lib/brands';
 
 interface Stats {
   players: number;
@@ -8,6 +9,7 @@ interface Stats {
   coinsIssuedMonth: number;
   txToday: number;
   topMonthly: { username: string; monthly_points: number; rank: number }[];
+  byBrand: { brand: string; players: number; subscribers_active: number; paidRand: number }[];
 }
 
 export function Dashboard() {
@@ -22,7 +24,7 @@ export function Dashboard() {
         todayStart.setHours(0, 0, 0, 0);
         const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
 
-        const [profilesAll, txToday, txMonth, board] = await Promise.all([
+        const [profilesAll, txToday, txMonth, board, counts, airtime] = await Promise.all([
           supabase.from('profiles').select('id', { count: 'exact', head: true }),
           supabase.from('coin_transactions')
             .select('amount')
@@ -34,7 +36,17 @@ export function Dashboard() {
             .select('username, monthly_points, rank')
             .order('rank', { ascending: true })
             .limit(5),
+          supabase.rpc('admin_brand_counts'),
+          supabase.rpc('admin_airtime_summary'),
         ]);
+        type CountRow = { brand: string; players: number; subscribers_active: number };
+        type SumRow = { brand: string; status: string; rand: number };
+        const byBrand = BRANDS.map((b) => {
+          const c = ((counts.data ?? []) as CountRow[]).find((r) => r.brand === b.id);
+          const paid = ((airtime.data ?? []) as SumRow[]).filter((r) => r.brand === b.id && r.status === 'paid')
+            .reduce((s, r) => s + Number(r.rand), 0);
+          return { brand: b.id, players: c?.players ?? 0, subscribers_active: c?.subscribers_active ?? 0, paidRand: paid };
+        });
 
         const sum = (rows: { amount: number }[] | null) =>
           (rows ?? []).filter((r) => r.amount > 0).reduce((s, r) => s + r.amount, 0);
@@ -53,6 +65,7 @@ export function Dashboard() {
           coinsIssuedMonth: sum(txMonth.data),
           txToday: (txToday.data ?? []).length,
           topMonthly: (board.data ?? []) as Stats['topMonthly'],
+          byBrand,
         });
       } catch (e) {
         if (!cancelled) setErr(e instanceof Error ? e.message : String(e));
@@ -74,6 +87,25 @@ export function Dashboard() {
         <div className="card"><div className="num">{stats.coinsIssuedMonth.toLocaleString()}</div><div className="lbl">Coins issued this month</div></div>
         <div className="card"><div className="num">{stats.txToday.toLocaleString()}</div><div className="lbl">Ledger events today</div></div>
       </div>
+
+      <h2>By operator</h2>
+      <table>
+        <thead><tr><th>Instance</th><th>Operator</th><th className="num">Players</th><th className="num">Active subscribers</th><th className="num">Airtime paid</th></tr></thead>
+        <tbody>
+          {stats.byBrand.map((b) => {
+            const meta = BRANDS.find((x) => x.id === b.brand)!;
+            return (
+              <tr key={b.brand}>
+                <td>{meta.label}</td>
+                <td><span className="badge">{meta.operator}</span></td>
+                <td className="num">{b.players.toLocaleString()}</td>
+                <td className="num">{b.subscribers_active.toLocaleString()}</td>
+                <td className="num">R{b.paidRand.toLocaleString()}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <h2>Monthly leaderboard — top 5</h2>
       <table>

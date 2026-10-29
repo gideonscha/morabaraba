@@ -45,18 +45,18 @@ const LEADERBOARD = [
 ];
 
 const DRAWS = [
-  { id: 'd01', kind: 'daily',  period_key: '2026-08-19', prize_rand: 50,   status: 'drawn', seed: '3f2c9a1e-77b2-4c1d-9e6a-2b8f4d0c5a11', total_entries: 143, total_participants: 38, winner_entries: 9,  drawn_at: '2026-08-20T08:05:00+02:00', profiles: { username: 'NalediZulu' } },
-  { id: 'd02', kind: 'daily',  period_key: '2026-08-18', prize_rand: 50,   status: 'drawn', seed: '9a41d6b0-1f3e-4f77-8c2d-6e0b9a3f7c22', total_entries: 129, total_participants: 35, winner_entries: 4,  drawn_at: '2026-08-19T08:02:00+02:00', profiles: { username: 'Sipho88' } },
-  { id: 'd03', kind: 'weekly', period_key: '2026-W33',   prize_rand: 300,  status: 'drawn', seed: 'c7e2f8d4-5a19-4b3c-a1d8-0f6e2c9b4d33', total_entries: 812, total_participants: 74, winner_entries: 31, drawn_at: '2026-08-17T09:00:00+02:00', profiles: { username: 'Ayanda_M' } },
-  { id: 'd04', kind: 'daily',  period_key: '2026-08-17', prize_rand: 50,   status: 'drawn', seed: '5b0d3e9f-8c24-4a6b-b7e1-4d2a8f0c6e44', total_entries: 118, total_participants: 33, winner_entries: 12, drawn_at: '2026-08-18T08:01:00+02:00', profiles: { username: 'ThaboM' } },
-  { id: 'd05', kind: 'grand',  period_key: '2026-07',    prize_rand: 1000, status: 'drawn', seed: 'e1f4a7c2-3d58-4e9b-8a0c-7b5d1e3f9a55', total_entries: 3184, total_participants: 96, winner_entries: 122, drawn_at: '2026-08-01T09:15:00+02:00', profiles: { username: 'Lerato_K' } },
+  { id: 'd01', brand: 'legends', kind: 'daily',  period_key: '2026-08-19', prize_rand: 50,   status: 'drawn', seed: '3f2c9a1e-77b2-4c1d-9e6a-2b8f4d0c5a11', total_entries: 143, total_participants: 38, winner_entries: 9,  drawn_at: '2026-08-20T08:05:00+02:00', profiles: { username: 'NalediZulu' } },
+  { id: 'd02', brand: 'legends', kind: 'daily',  period_key: '2026-08-18', prize_rand: 50,   status: 'drawn', seed: '9a41d6b0-1f3e-4f77-8c2d-6e0b9a3f7c22', total_entries: 129, total_participants: 35, winner_entries: 4,  drawn_at: '2026-08-19T08:02:00+02:00', profiles: { username: 'Sipho88' } },
+  { id: 'd03', brand: 'legends', kind: 'weekly', period_key: '2026-W33',   prize_rand: 300,  status: 'drawn', seed: 'c7e2f8d4-5a19-4b3c-a1d8-0f6e2c9b4d33', total_entries: 812, total_participants: 74, winner_entries: 31, drawn_at: '2026-08-17T09:00:00+02:00', profiles: { username: 'Ayanda_M' } },
+  { id: 'd04', brand: 'kraalboss', kind: 'daily',  period_key: '2026-08-17', prize_rand: 50,   status: 'drawn', seed: '5b0d3e9f-8c24-4a6b-b7e1-4d2a8f0c6e44', total_entries: 118, total_participants: 33, winner_entries: 12, drawn_at: '2026-08-18T08:01:00+02:00', profiles: { username: 'ThaboM' } },
+  { id: 'd05', brand: 'legends', kind: 'grand',  period_key: '2026-07',    prize_rand: 1000, status: 'drawn', seed: 'e1f4a7c2-3d58-4e9b-8a0c-7b5d1e3f9a55', total_entries: 3184, total_participants: 96, winner_entries: 122, drawn_at: '2026-08-01T09:15:00+02:00', profiles: { username: 'Lerato_K' } },
 ];
 
 const PAYOUTS = [
-  { id: 'y01', draw_id: 'd01', amount_rand: 50,   method: 'airtime', status: 'pending', note: null, created_at: '2026-08-20T08:05:00+02:00', updated_at: '2026-08-20T08:05:00+02:00', profiles: { username: 'NalediZulu' }, draws: { kind: 'daily', period_key: '2026-08-19' } },
-  { id: 'y02', draw_id: 'd02', amount_rand: 50,   method: 'airtime', status: 'paid',    note: 'Airtime sent via portal, ref WP-88213', created_at: '2026-08-19T08:02:00+02:00', updated_at: '2026-08-19T10:12:00+02:00', profiles: { username: 'Sipho88' }, draws: { kind: 'daily', period_key: '2026-08-18' } },
-  { id: 'y03', draw_id: 'd03', amount_rand: 300,  method: 'airtime', status: 'paid',    note: 'Airtime sent, ref WP-88104', created_at: '2026-08-17T09:00:00+02:00', updated_at: '2026-08-17T11:40:00+02:00', profiles: { username: 'Ayanda_M' }, draws: { kind: 'weekly', period_key: '2026-W33' } },
-  { id: 'y04', draw_id: 'd05', amount_rand: 1000, method: 'airtime', status: 'paid',    note: 'Grand prize — paid + winner congratulated by SMS', created_at: '2026-08-01T09:15:00+02:00', updated_at: '2026-08-01T12:05:00+02:00', profiles: { username: 'Lerato_K' }, draws: { kind: 'grand', period_key: '2026-07' } },
+  { id: 'y01', brand: 'legends', draw_id: 'd01', amount_rand: 50,   method: 'airtime', status: 'pending', note: null, created_at: '2026-08-20T08:05:00+02:00', updated_at: '2026-08-20T08:05:00+02:00', profiles: { username: 'NalediZulu' }, draws: { kind: 'daily', period_key: '2026-08-19' } },
+  { id: 'y02', brand: 'legends', draw_id: 'd02', amount_rand: 50,   method: 'airtime', status: 'paid',    note: 'Airtime sent via portal, ref WP-88213', created_at: '2026-08-19T08:02:00+02:00', updated_at: '2026-08-19T10:12:00+02:00', profiles: { username: 'Sipho88' }, draws: { kind: 'daily', period_key: '2026-08-18' } },
+  { id: 'y03', brand: 'legends', draw_id: 'd03', amount_rand: 300,  method: 'airtime', status: 'paid',    note: 'Airtime sent, ref WP-88104', created_at: '2026-08-17T09:00:00+02:00', updated_at: '2026-08-17T11:40:00+02:00', profiles: { username: 'Ayanda_M' }, draws: { kind: 'weekly', period_key: '2026-W33' } },
+  { id: 'y04', brand: 'kraalboss', draw_id: 'd05', amount_rand: 1000, method: 'airtime', status: 'paid',    note: 'Grand prize — paid + winner congratulated by SMS', created_at: '2026-08-01T09:15:00+02:00', updated_at: '2026-08-01T12:05:00+02:00', profiles: { username: 'Lerato_K' }, draws: { kind: 'grand', period_key: '2026-07' } },
 ];
 
 const CONFIG = [
@@ -111,9 +111,10 @@ class DemoQuery {
           : LEDGER;
         break;
       case 'monthly_leaderboard': rows = LEADERBOARD; break;
-      case 'draws': rows = DRAWS; break;
+      case 'draws': rows = this.eqCol === 'brand' ? DRAWS.filter((r) => r.brand === this.eqVal) : DRAWS; break;
       case 'payouts':
-        rows = this.eqCol === 'status' ? PAYOUTS.filter((r) => r.status === this.eqVal) : PAYOUTS;
+        rows = this.eqCol === 'status' ? PAYOUTS.filter((r) => r.status === this.eqVal)
+          : this.eqCol === 'brand' ? PAYOUTS.filter((r) => r.brand === this.eqVal) : PAYOUTS;
         break;
       case 'app_config': rows = CONFIG; break;
       case 'audit_log': rows = AUDIT; break;
@@ -151,6 +152,15 @@ function rpcResult(fn: string, args: Record<string, unknown> | undefined): Resul
       }, error: null,
     };
     case 'admin_mark_payout': return { data: null, error: null };
+    case 'admin_airtime_summary': return { data: [
+      { brand: 'legends', status: 'paid', month: '2026-10', payouts: 9, rand: 1150 },
+      { brand: 'legends', status: 'pending', month: '2026-10', payouts: 1, rand: 50 },
+      { brand: 'kraalboss', status: 'paid', month: '2026-10', payouts: 3, rand: 400 },
+    ], error: null };
+    case 'admin_brand_counts': return { data: [
+      { brand: 'legends', players: 96, subscribers_active: 41 },
+      { brand: 'kraalboss', players: 32, subscribers_active: 12 },
+    ], error: null };
     default: return { data: null, error: null };
   }
 }

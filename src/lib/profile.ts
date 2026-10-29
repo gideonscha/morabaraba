@@ -1,5 +1,6 @@
 import { supabase, SUPABASE_ENABLED, type DBProfile } from './supabase';
 import { getConfig } from './remoteConfig';
+import { BRAND } from '../brand';
 
 const LOCAL_KEY = 'morabaraba.localProfile';
 
@@ -104,7 +105,7 @@ export async function createRemoteProfile(
   if (!SUPABASE_ENABLED || !supabase) return { profile: null, error: 'unavailable' };
   const { data, error } = await supabase
     .from('profiles')
-    .upsert({ id: userId, username: p.username, avatar_id: p.avatar_id, region: p.region }, { onConflict: 'id' })
+    .upsert({ id: userId, username: p.username, avatar_id: p.avatar_id, region: p.region, brand: BRAND.id }, { onConflict: 'id' })
     .select('*')
     .single();
   if (error) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { periods } from '../lib/periods';
+import { BRANDS, type BrandId } from '../lib/brands';
 
 type Kind = 'daily' | 'weekly' | 'grand';
 
@@ -15,6 +16,7 @@ interface DrawRow {
   total_participants: number;
   winner_entries: number | null;
   drawn_at: string;
+  brand: BrandId;
   profiles: { username: string } | null;
 }
 
@@ -26,6 +28,7 @@ const KINDS: { kind: Kind; icon: string; label: string }[] = [
 
 export function Draws() {
   const p = periods();
+  const [brand, setBrand] = useState<BrandId>('legends');
   const [pools, setPools] = useState<Record<Kind, { total: number; players: number } | null>>({
     daily: null, weekly: null, grand: null,
   });
@@ -38,7 +41,7 @@ export function Draws() {
 
   const loadPools = () => {
     (['daily', 'weekly', 'grand'] as Kind[]).forEach((k) => {
-      supabase.rpc('admin_pool_stats', { p_kind: k, p_period: p[k].open }).then(({ data }) => {
+      supabase.rpc('admin_pool_stats', { p_kind: k, p_period: p[k].open, p_brand: brand }).then(({ data }) => {
         const row = Array.isArray(data) ? data[0] : data;
         if (row) setPools((prev) => ({ ...prev, [k]: { total: Number(row.total_entries), players: row.participants } }));
       });
@@ -48,6 +51,7 @@ export function Draws() {
   const loadHistory = () => {
     supabase.from('draws')
       .select('*, profiles:winner_profile_id (username)')
+      .eq('brand', brand)
       .order('drawn_at', { ascending: false })
       .limit(30)
       .then(({ data, error }) => {
@@ -56,14 +60,15 @@ export function Draws() {
       });
   };
 
-  useEffect(() => { loadPools(); loadHistory(); }, []);
+  useEffect(() => { setPools({ daily: null, weekly: null, grand: null }); loadPools(); loadHistory(); }, [brand]);
 
   const run = async (k: Kind) => {
     const period = periodDraft[k];
     if (!period) return;
-    if (!window.confirm(`Run the ${k.toUpperCase()} draw for period ${period}? This selects a winner and cannot be re-run.`)) return;
+    const bl = BRANDS.find((b) => b.id === brand)!;
+    if (!window.confirm(`Run the ${bl.label} (${bl.operator}) ${k.toUpperCase()} draw for period ${period}? This selects a winner and cannot be re-run.`)) return;
     setBusy(k); setMsg((m) => ({ ...m, [k]: undefined }));
-    const { data, error } = await supabase.rpc('execute_draw', { p_kind: k, p_period: period });
+    const { data, error } = await supabase.rpc('execute_draw', { p_kind: k, p_period: period, p_brand: brand });
     if (error) {
       setMsg((m) => ({ ...m, [k]: { ok: false, text: error.message } }));
     } else {
@@ -82,6 +87,16 @@ export function Draws() {
   return (
     <div>
       <h1>Draws</h1>
+      <div className="row" style={{ marginBottom: 14 }}>
+        {BRANDS.map((b) => (
+          <button key={b.id} className={`btn ${brand === b.id ? '' : 'ghost'}`} onClick={() => setBrand(b.id)}>
+            {b.label} · {b.operator}
+          </button>
+        ))}
+      </div>
+      <p className="muted" style={{ marginTop: -6 }}>
+        Each instance has its own pools, draws and winners. Players are tagged by the game they signed up in.
+      </p>
 
       <h2>Open pools (live entries)</h2>
       <div className="cards">
