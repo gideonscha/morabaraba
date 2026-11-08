@@ -39,6 +39,13 @@ export interface Brand {
   leaderboardTitle: string;
   /** Crown the #1 row and use "Boss" language for winners. */
   crownLanguage: boolean;
+  /**
+   * Subscribers only: a player is admitted only once Worldplay has sent
+   * a subscribe notification for their number (Jacqui, 8 Nov 2026).
+   */
+  accessGate: boolean;
+  /** Where to send non-subscribers; empty until the operator supplies it. */
+  subscribeUrl: string;
   gameOver: {
     winTitle: string; winTagline: string;
     loseTitle: string; loseTagline: string;
@@ -72,6 +79,8 @@ const LEGENDS: Brand = {
   },
   leaderboardTitle: 'Leaderboard',
   crownLanguage: false,
+  accessGate: false,
+  subscribeUrl: '',
   gameOver: {
     winTitle: 'Victory', winTagline: 'Well played, warrior',
     loseTitle: 'Defeat', loseTagline: 'Better luck next time, warrior',
@@ -105,6 +114,8 @@ const KRAALBOSS: Brand = {
   },
   leaderboardTitle: 'Boss Board',
   crownLanguage: true,
+  accessGate: true,
+  subscribeUrl: '',
   gameOver: {
     winTitle: "You're the Boss", winTagline: 'You own the board.',
     loseTitle: 'Dethroned', loseTagline: 'The board belongs to someone else — for now.',

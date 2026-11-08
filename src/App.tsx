@@ -5,6 +5,9 @@ import { useAudioSettings } from './store/audioStore';
 import { useOnlineSync } from './hooks/useOnlineSync';
 import { loadRemoteConfig } from './lib/remoteConfig';
 import { captureSubscriberArrival, reportArrival } from './lib/subscriber';
+import { BRAND } from './brand';
+import { resolveAccess, type AccessRecord } from './lib/access';
+import { LockedScreen } from './screens/LockedScreen';
 import { audio } from './lib/audio';
 import { SplashScreen } from './screens/SplashScreen';
 import { OnboardingScreen } from './screens/OnboardingScreen';
@@ -32,7 +35,8 @@ type Route =
   | 'settings'
   | 'tutorial'
   | 'online'
-  | 'matchmaking';
+  | 'matchmaking'
+  | 'locked';
 
 export default function App() {
   const init = useProfileStore((s) => s.init);
@@ -63,16 +67,39 @@ export default function App() {
 
   useEffect(() => { init(); loadRemoteConfig(); }, [init]);
 
+  // Subscriber gate (gated brands only): resolved during the splash so
+  // the hold doubles as the check. Admitted → home/onboarding as usual;
+  // otherwise the locked screen.
+  const [access, setAccess] = useState<AccessRecord | null>(null);
+  const [accessResolved, setAccessResolved] = useState(!BRAND.accessGate);
+  useEffect(() => {
+    if (!BRAND.accessGate || !hydrated) return;
+    let cancelled = false;
+    resolveAccess(arrival?.msisdn, arrival?.status === 'confirmed').then((rec) => {
+      if (cancelled) return;
+      setAccess(rec);
+      setAccessResolved(true);
+    });
+    return () => { cancelled = true; };
+  }, [hydrated, arrival]);
+
+  const retryAccess = async () => {
+    const rec = await resolveAccess(arrival?.msisdn, true);
+    setAccess(rec);
+    if (rec.status === 'granted') setRoute(profile ? 'home' : 'onboarding');
+  };
+
   // Splash hold (client-requested 4s). First-time players get the full
   // brand moment with the loader filling just before the transition;
   // returning players a shorter hold so every open isn't a wait.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !accessResolved) return;
     const t = setTimeout(() => {
+      if (BRAND.accessGate && access?.status !== 'granted') { setRoute('locked'); return; }
       setRoute(profile ? 'home' : 'onboarding');
     }, profile ? 2500 : 4000);
     return () => clearTimeout(t);
-  }, [hydrated, profile]);
+  }, [hydrated, profile, accessResolved, access]);
 
   // Online sync (no-op when not in online game)
   useOnlineSync({
@@ -119,6 +146,7 @@ export default function App() {
   useEffect(() => () => { audio.stopMusic(); }, []);
 
   if (route === 'splash') return <SplashScreen />;
+  if (route === 'locked') return <LockedScreen access={access ?? { msisdn: '', status: 'unknown', reason: null, checkedAt: '' }} onRetry={retryAccess} />;
   if (route === 'onboarding') return <OnboardingScreen onDone={() => setRoute('home')} />;
 
   const home = () => { setRoom(null); setRoute('home'); };
