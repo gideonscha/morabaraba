@@ -101,16 +101,33 @@ Deno.serve(async (req: Request) => {
     updated_at: nowIso,
   };
 
+  // One subscriber can be on several bundle services (Bundle_Games_D,
+  // Bundle_My_W, …). Track each (number, service) pair, then derive the
+  // number's overall status: active if ANY service is active.
+  const service = p.client ?? "unknown";
+  async function setService(status: "active" | "unsubscribed", when: string | null, extra: Record<string, unknown> = {}) {
+    if (!msisdn) return;
+    await supabase.from("wbi_subscriber_services").upsert({
+      msisdn, service, operator: p.operator ?? null, status,
+      ...(status === "active" ? { subscribed_at: when ?? nowIso, unsubscribed_at: null } : { unsubscribed_at: when ?? nowIso }),
+      updated_at: nowIso,
+    }, { onConflict: "msisdn,service" });
+    const { count } = await supabase.from("wbi_subscriber_services")
+      .select("service", { count: "exact", head: true }).eq("msisdn", msisdn).eq("status", "active");
+    const anyActive = (count ?? 0) > 0;
+    const { data: existing } = await supabase.from("wbi_subscribers").select("subscribed_at").eq("msisdn", msisdn).maybeSingle();
+    await supabase.from("wbi_subscribers").upsert({
+      ...base,
+      status: anyActive ? "active" : "unsubscribed",
+      subscribed_at: anyActive ? (existing?.subscribed_at ?? when ?? nowIso) : existing?.subscribed_at ?? null,
+      unsubscribed_at: anyActive ? null : (when ?? nowIso),
+      ...extra,
+    }, { onConflict: "msisdn" });
+  }
+
   switch (mt.toLowerCase()) {
     case "tnsubscribe": {
-      if (msisdn) {
-        await supabase.from("wbi_subscribers").upsert({
-          ...base,
-          status: "active",
-          subscribed_at: parseWbiTime(p.subdate) ?? nowIso,
-          unsubscribed_at: null,
-        }, { onConflict: "msisdn" });
-      }
+      await setService("active", parseWbiTime(p.subdate));
       break;
     }
     case "soiresult": {
@@ -118,15 +135,8 @@ Deno.serve(async (req: Request) => {
       const ok = statusId === 0 || statusId === 41;
       const op = (p.op ?? "").toUpperCase();
       if (msisdn && ok) {
-        if (op === "TERMINATE") {
-          await supabase.from("wbi_subscribers").upsert({
-            ...base, status: "unsubscribed", unsubscribed_at: nowIso, unsubscribe_source: "DOI",
-          }, { onConflict: "msisdn" });
-        } else {
-          await supabase.from("wbi_subscribers").upsert({
-            ...base, status: "active", subscribed_at: parseWbiTime(p.subdate) ?? nowIso, unsubscribed_at: null,
-          }, { onConflict: "msisdn" });
-        }
+        if (op === "TERMINATE") await setService("unsubscribed", null, { unsubscribe_source: "DOI" });
+        else await setService("active", parseWbiTime(p.subdate));
       }
       break;
     }
@@ -146,14 +156,9 @@ Deno.serve(async (req: Request) => {
       break;
     }
     case "tnunsubscribe": {
-      if (msisdn) {
-        await supabase.from("wbi_subscribers").upsert({
-          ...base,
-          status: "unsubscribed",
-          unsubscribed_at: parseWbiTime(p.statustime) ?? nowIso,
-          unsubscribe_source: p.source ?? null,
-        }, { onConflict: "msisdn" });
-      }
+      // Revokes THIS service only; the number stays active while any
+      // other bundle service is still active.
+      await setService("unsubscribed", parseWbiTime(p.statustime), { unsubscribe_source: p.source ?? null });
       break;
     }
     case "rechargeresult": {
