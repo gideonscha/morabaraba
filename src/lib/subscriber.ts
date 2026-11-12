@@ -134,6 +134,12 @@ export async function reportArrival(arrival: SubscriberArrival, profileId?: stri
         channel: arrival.channel,
         profile_id: profileId ?? null,
         at: arrival.at,
+        // Raw query parameters (keys lower-cased, values truncated) so a
+        // hand-off that arrives without a usable number can be diagnosed
+        // server-side — e.g. a bundle landing that omits `tn`.
+        raw: Object.fromEntries(
+          Object.entries(arrival.params).slice(0, 24).map(([k, v]) => [k.slice(0, 32), String(v).slice(0, 120)]),
+        ),
       }),
     });
     if (res.ok) {

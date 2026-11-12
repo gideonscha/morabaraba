@@ -141,17 +141,25 @@ Deno.serve(async (req: Request) => {
       break;
     }
     case "sdresult": {
-      // Billing outcome — record it without touching an existing status.
+      // Billing outcome. A successful bill for a service proves that
+      // service is active (the bundle may bill before, or instead of,
+      // sending tnSubscribe), so it also sets the (number, service) row.
+      // A failed bill records the attempt without changing status.
       if (msisdn) {
-        const { data: existing } = await supabase
-          .from("wbi_subscribers").select("status").eq("msisdn", msisdn).maybeSingle();
-        await supabase.from("wbi_subscribers").upsert({
-          ...base,
-          status: existing?.status ?? (statusId === 0 ? "active" : "pending"),
+        const billing = {
           last_bill_at: parseWbiTime(p.statustime) ?? nowIso,
           last_bill_status: statusId,
           last_bill_amount_cents: amount,
-        }, { onConflict: "msisdn" });
+        };
+        if (statusId === 0) {
+          await setService("active", parseWbiTime(p.statustime), billing);
+        } else {
+          const { data: existing } = await supabase
+            .from("wbi_subscribers").select("status").eq("msisdn", msisdn).maybeSingle();
+          await supabase.from("wbi_subscribers").upsert({
+            ...base, status: existing?.status ?? "pending", ...billing,
+          }, { onConflict: "msisdn" });
+        }
       }
       break;
     }

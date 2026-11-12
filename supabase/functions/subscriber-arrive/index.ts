@@ -52,6 +52,13 @@ Deno.serve(async (req: Request) => {
   const startDate = sd && /^\d{4}-\d{2}-\d{2}$/.test(sd) ? `${sd}T00:00:00+02:00` : null;
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
   const nowIso = new Date().toISOString();
+  // Raw hand-off parameters as the device saw them (bounded, strings only).
+  const rawParams: Record<string, string> = {};
+  if (b.raw && typeof b.raw === "object") {
+    for (const [k, v] of Object.entries(b.raw as Record<string, unknown>).slice(0, 24)) {
+      if (typeof v === "string") rawParams[k.slice(0, 32)] = v.slice(0, 120);
+    }
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -78,6 +85,7 @@ Deno.serve(async (req: Request) => {
       cl: service, ex: str(b.ex, 64), channel: str(b.channel, 32),
       profile_id: claimedProfile, profile_exists: claimedProfile ? Boolean(profileId) : null,
       client_at: str(b.at, 40),
+      raw: rawParams,
     },
     source_ip: ip || null,
   });
